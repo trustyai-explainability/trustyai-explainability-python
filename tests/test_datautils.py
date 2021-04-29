@@ -9,7 +9,12 @@ sys.path.insert(0, myPath + "/../")
 import trustyai
 
 trustyai.init()
-from trustyai import DataUtils, Type
+
+from trustyai.utils import DataUtils
+from trustyai.model import PerturbationContext
+from java.util import Random
+
+jrandom = Random()
 
 
 def test_GetMean():
@@ -60,5 +65,18 @@ def test_DoublesToFeatures():
     for f in features:
         assert f is not None
         assert f.getName() is not None
-        assert f.getType() == Type.NUMBER
         assert f.getValue() is not None
+
+
+def test_ExponentialSmoothingKernel():
+    x = 0.218
+    k = DataUtils.exponentialSmoothingKernel(x, 2)
+    assert k == approx(0.994, 1e-3)
+
+
+def test_PerturbFeaturesEmpty():
+    features = []
+    perturbationContext = PerturbationContext(jrandom, 0)
+    newFeatures = DataUtils.perturbFeatures(features, perturbationContext)
+    assert newFeatures is not None
+    assert len(features) == newFeatures.size()
