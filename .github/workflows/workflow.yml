@@ -28,4 +28,4 @@ jobs:
           pytest
       - name: Style
         run: |
-          black --check $(find src -type f -name "trustyai.py")
+          black --check $(find . -type f -name "trustyai.py")
