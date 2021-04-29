@@ -1,3 +1,5 @@
+# pylint: disable = invalid-name, import-error
+"""DataUtils module"""
 from org.kie.kogito.explainability.utils import DataUtils as du
 from java.util import ArrayList
 
@@ -12,5 +14,6 @@ exponentialSmoothingKernel = du.exponentialSmoothingKernel
 
 
 def perturbFeatures(originalFeatures, perturbationContext):
+    """Perform perturbations on a fixed number of features in the given input."""
     jlist = ArrayList(originalFeatures)
     return du.perturbFeatures(jlist, perturbationContext)

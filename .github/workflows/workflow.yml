@@ -22,10 +22,10 @@ jobs:
           pip install -r requirements-dev.txt
       - name: Lint
         run: |
-          pylint $(find . -type f -name "trustyai.py")
+          pylint $(find trustyai -type f -name "*.py")
       - name: Test with pytest
         run: |
           pytest
       - name: Style
         run: |
-          black --check $(find . -type f -name "trustyai.py")
+          black --check $(find trustyai -type f -name "*.py")
