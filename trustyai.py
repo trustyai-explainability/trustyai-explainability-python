@@ -13,5 +13,7 @@ def init(
     jpype.startJVM(classpath=[path])
 
     from org.kie.kogito.explainability.utils import DataUtils
+    from org.kie.kogito.explainability.model import Type
 
     setattr(sys.modules[__name__], "DataUtils", DataUtils)
+    setattr(sys.modules[__name__], "Type", Type)

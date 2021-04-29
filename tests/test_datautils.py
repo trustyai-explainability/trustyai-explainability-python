@@ -9,7 +9,7 @@ sys.path.insert(0, myPath + "/../")
 import trustyai
 
 trustyai.init()
-from trustyai import DataUtils
+from trustyai import DataUtils, Type
 
 
 def test_GetMean():
@@ -36,3 +36,29 @@ def test_EuclideanDistance():
     y = [2, 3]
     distance = DataUtils.euclideanDistance(x, y)
     assert 2.236 == approx(distance, 1e-3)
+
+
+def test_HammingDistanceDouble():
+    x = [2, 1]
+    y = [2, 3]
+    distance = DataUtils.hammingDistance(x, y)
+    assert distance == approx(1, 1e-1)
+
+
+def test_HammingDistanceString():
+    x = "test1"
+    y = "test2"
+    distance = DataUtils.hammingDistance(x, y)
+    assert distance == approx(1, 1e-1)
+
+
+def test_DoublesToFeatures():
+    inputs = [1 if i % 2 == 0 else 0 for i in range(10)]
+    features = DataUtils.doublesToFeatures(inputs)
+    assert features is not None
+    assert len(features) == 10
+    for f in features:
+        assert f is not None
+        assert f.getName() is not None
+        assert f.getType() == Type.NUMBER
+        assert f.getValue() is not None
