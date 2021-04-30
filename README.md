@@ -20,7 +20,7 @@ pip install -r requirements-dev.txt
 
 ## Getting started
 
-To initialise, import the module and specify the localtion of the `explainability-core` JAR.
+To initialise, import the module and specify the location of the `explainability-core` JAR.
 For instance,
 
 ```python
@@ -28,6 +28,9 @@ import trustyai
 
 trustyai.init(path="/foo/bar/explainability-core-2.0.0-SNAPSHOT.jar")
 ```
+
+In order to get all the project's dependencies, the script `deps.sh` can be run and dependencies will
+be stored locally under `./dep`.
 
 This needs to be the very first call, before any other call to TrustyAI methods. After this, we can call all other methods, as shown in the examples.
 
