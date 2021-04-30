@@ -11,7 +11,7 @@ import trustyai
 trustyai.init()
 
 from trustyai.utils import DataUtils
-from trustyai.model import PerturbationContext
+from trustyai.model import PerturbationContext, Feature, FeatureFactory
 from java.util import Random
 
 jrandom = Random()
@@ -80,3 +80,18 @@ def test_PerturbFeaturesEmpty():
     newFeatures = DataUtils.perturbFeatures(features, perturbationContext)
     assert newFeatures is not None
     assert len(features) == newFeatures.size()
+
+
+def testRandomDistributionGeneration():
+    dataDistribution = DataUtils.generateRandomDataDistribution(10, 10, jrandom)
+    assert dataDistribution is not None
+    assert dataDistribution.asFeatureDistributions() is not None
+    for featureDistribution in dataDistribution.asFeatureDistributions():
+        assert featureDistribution is not None
+
+
+def testLinearizedNumericFeatures():
+    f = FeatureFactory.newNumericalFeature("f-num", 1.0)
+    features = [f]
+    linearizedFeatures = DataUtils.getLinearizedFeatures(features)
+    assert len(features) == linearizedFeatures.size()
