@@ -6,7 +6,7 @@ import jpype.imports
 
 
 def init(
-    path="./explainability-core-2.0.0-SNAPSHOT.jar",  # pylint: disable = line-too-long
+    path="./dep/org/kie/kogito/explainability-core/1.5.0.Final/*",  # pylint: disable = line-too-long
 ):
     """Initialise Java binding"""
     # Launch the JVM
