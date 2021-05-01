@@ -2,6 +2,7 @@ import sys, os
 import pytest
 from pytest import approx
 import math
+import random
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../")
@@ -95,3 +96,23 @@ def testLinearizedNumericFeatures():
     features = [f]
     linearizedFeatures = DataUtils.getLinearizedFeatures(features)
     assert len(features) == linearizedFeatures.size()
+
+
+def testSampleWithReplacement():
+    emptyValues = []
+    emptySamples = DataUtils.sampleWithReplacement(emptyValues, 1, jrandom)
+    assert emptySamples is not None
+    assert emptySamples.size() == 0
+
+    values = DataUtils.generateData(0, 1, 100, jrandom)
+    sampleSize = 10
+    samples = DataUtils.sampleWithReplacement(values, sampleSize, jrandom)
+    assert samples is not None
+    assert samples.size() == sampleSize
+    assert samples[random.randint(0, sampleSize)] in values
+
+    largerSampleSize = 300
+    largerSamples = DataUtils.sampleWithReplacement(values, largerSampleSize, jrandom)
+    assert largerSamples is not None
+    assert largerSampleSize == largerSamples.size()
+    assert largerSamples[random.randint(0, largerSampleSize)] in largerSamples
