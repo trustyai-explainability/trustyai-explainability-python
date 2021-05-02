@@ -34,6 +34,32 @@ be stored locally under `./dep`.
 
 This needs to be the very first call, before any other call to TrustyAI methods. After this, we can call all other methods, as shown in the examples.
 
+### Writing your model in Python
+
+To code a model in Python you need to write it a function with takes a Python list of `PredictionInput` and
+returns a (Python) list of `PredictionOutput`. 
+
+This function will then be passed as an argument to the Python `PredictionProvider`
+which will take care of wrapping it in a Java `CompletableFuture` for you.
+For instance,
+
+```python
+from trustyai.model import PredictionProvider
+
+inputs = [predictionInput1, predictionInput2]
+
+def myModelFunction(inputs):
+    # do something with the inputs
+    output = [predictionOutput1, predictionOutput2]
+    return output
+
+model = PredictionProvider(myModelFunction)
+
+prediction = model.predictAsync(someInput).get()
+```
+
+You can see the `sumSkipModel` in the [LIME tests](./tests/test_limeexplainer.py).
+
 ## Examples
 
 You can look at the [tests](./tests) for working examples.
