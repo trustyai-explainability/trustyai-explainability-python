@@ -19,9 +19,14 @@ from trustyai.model import (
     PredictionInput,
     Prediction,
     FeatureFactory,
+    PredictionProvider,
+    Output,
+    PredictionOutput,
+    Type,
+    Value,
 )
 from java.util import Random, ArrayList, List
-from trustyai.utils import TestUtils, Config
+from trustyai.utils import TestUtils, Config, toJList
 from org.kie.kogito.explainability.local import (
     LocalExplanationException,
 )
@@ -60,19 +65,29 @@ def testNonEmptyInput():
         .withSamples(10)
     )
     limeExplainer = LimeExplainer(limeConfig)
-    features = ArrayList()
-    for i in range(4):
-        features.add(FeatureFactory.newNumericalFeature(f"f-num{i}", i))
-    input = PredictionInput(features)
-    model = TestUtils.getSumSkipModel(0)
-    output = (
-        model.predictAsync(List.of(input))
-        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
-        .get(0)
+    features = toJList(
+        [FeatureFactory.newNumericalFeature(f"f-num{i}", i) for i in range(4)]
     )
-    prediction = Prediction(input, output)
+    _input = PredictionInput(features)
+
+    def sumSkipModel(inputs):
+        predictionOutputs = ArrayList()
+        for predictionInput in inputs:
+            features = predictionInput.getFeatures()
+            result = 0.0
+            for i in range(features.size()):
+                if i != 0:
+                    result += features.get(i).getValue().asNumber()
+            o = [Output(f"sum-but0", Type.NUMBER, Value(result), 1.0)]
+            predictionOutput = PredictionOutput(toJList(o))
+            predictionOutputs.add(predictionOutput)
+        return predictionOutputs
+
+    model = PredictionProvider(sumSkipModel)
+    output = model.predictAsync([_input]).get().get(0)
+    prediction = Prediction(_input, output)
     saliencyMap = limeExplainer.explainAsync(prediction, model).get(
         Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()
     )
-
+    print(saliencyMap)
     assert saliencyMap is not None

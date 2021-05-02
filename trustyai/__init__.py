@@ -16,5 +16,10 @@ def init(
     # Launch the JVM
     try:
         jpype.startJVM(classpath=path)
+
+        from java.lang import Thread
+
+        if not Thread.isAttached:
+            jpype.attachThreadToJVM()
     except OSError:
         print("JVM already started")
