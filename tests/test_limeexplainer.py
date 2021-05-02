@@ -21,7 +21,7 @@ from trustyai.model import (
     FeatureFactory,
 )
 from java.util import Random, ArrayList, List
-from trustyai.utils import TestUtils, Config
+from trustyai.utils import TestUtils, Config, toJList
 from org.kie.kogito.explainability.local import (
     LocalExplanationException,
 )
@@ -60,9 +60,9 @@ def testNonEmptyInput():
         .withSamples(10)
     )
     limeExplainer = LimeExplainer(limeConfig)
-    features = ArrayList()
-    for i in range(4):
-        features.add(FeatureFactory.newNumericalFeature(f"f-num{i}", i))
+    features = toJList(
+        [FeatureFactory.newNumericalFeature(f"f-num{i}", i) for i in range(4)]
+    )
     input = PredictionInput(features)
     model = TestUtils.getSumSkipModel(0)
     output = (
