@@ -46,8 +46,6 @@ For instance,
 ```python
 from trustyai.model import PredictionProvider
 
-inputs = [predictionInput1, predictionInput2]
-
 def myModelFunction(inputs):
     # do something with the inputs
     output = [predictionOutput1, predictionOutput2]
@@ -55,7 +53,9 @@ def myModelFunction(inputs):
 
 model = PredictionProvider(myModelFunction)
 
-prediction = model.predictAsync(someInput).get()
+inputs = [predictionInput1, predictionInput2]
+
+prediction = model.predictAsync(inputs).get()
 ```
 
 You can see the `sumSkipModel` in the [LIME tests](./tests/test_limeexplainer.py).
