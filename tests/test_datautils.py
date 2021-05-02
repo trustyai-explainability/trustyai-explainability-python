@@ -109,10 +109,10 @@ def testSampleWithReplacement():
     samples = DataUtils.sampleWithReplacement(values, sampleSize, jrandom)
     assert samples is not None
     assert samples.size() == sampleSize
-    assert samples[random.randint(0, sampleSize)] in values
+    assert samples[random.randint(0, sampleSize - 1)] in values
 
     largerSampleSize = 300
     largerSamples = DataUtils.sampleWithReplacement(values, largerSampleSize, jrandom)
     assert largerSamples is not None
     assert largerSampleSize == largerSamples.size()
-    assert largerSamples[random.randint(0, largerSampleSize)] in largerSamples
+    assert largerSamples[random.randint(0, largerSampleSize - 1)] in largerSamples
