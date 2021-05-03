@@ -1,3 +1,5 @@
 black
+pandas
+scikit-learn
 pylint
 pytest
