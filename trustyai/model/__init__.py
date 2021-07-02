@@ -1,12 +1,18 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name
 """General model classes"""
+from typing import List
+import uuid
+from java.util import UUID
+from trustyai.utils import toJList
 from java.util.concurrent import CompletableFuture, ForkJoinPool
-from jpype import JImplements, JOverride, JProxy
+from jpype import JImplements, JOverride, JProxy, _jcustomizer
 from org.kie.kogito.explainability.model import (
+    CounterfactualPrediction as _CounterfactualPrediction,
     PerturbationContext as _PerturbationContext,
     Feature as _Feature,
     FeatureFactory as _FeatureFactory,
     Output as _Output,
+    PredictionFeatureDomain as _PredictionFeatureDomain,
     PredictionInput as _PredictionInput,
     PredictionOutput as _PredictionOutput,
     Prediction as _Prediction,
@@ -14,15 +20,27 @@ from org.kie.kogito.explainability.model import (
     Type as _Type,
 )
 
+CounterfactualPrediction = _CounterfactualPrediction
 PerturbationContext = _PerturbationContext
 Feature = _Feature
 FeatureFactory = _FeatureFactory
 Output = _Output
+PredictionFeatureDomain = _PredictionFeatureDomain
+Prediction = _Prediction
 PredictionInput = _PredictionInput
 PredictionOutput = _PredictionOutput
-Prediction = _Prediction
 Value = _Value
 Type = _Type
+
+
+@_jcustomizer.JConversion("java.util.List", exact=List)
+def _JSequenceConvert(_, obj):
+    return toJList(obj)
+
+
+@_jcustomizer.JConversion("java.util.UUID", instanceof=uuid.UUID)
+def _JSequenceConvert(_, obj):
+    return UUID.fromString(str(obj))
 
 
 class InnerSupplier:
