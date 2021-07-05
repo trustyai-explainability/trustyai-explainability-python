@@ -62,3 +62,7 @@ You can see the `sumSkipModel` in the [LIME tests](./tests/test_limeexplainer.py
 ## Examples
 
 You can look at the [tests](./tests) for working examples.
+
+There are also Jupyter notebooks available:
+
+- [Counterfactual explanations](notebooks/Counterfactuals.ipynb)
