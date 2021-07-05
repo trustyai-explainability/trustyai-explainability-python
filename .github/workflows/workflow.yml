@@ -34,7 +34,7 @@ jobs:
           ./deps.sh
       - name: Lint
         run: |
-          pylint $(find trustyai -type f -name "*.py")
+          pylint --ignore-imports=yes $(find trustyai -type f -name "*.py")
       - name: Test with pytest
         run: |
           pytest

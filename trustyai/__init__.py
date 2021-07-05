@@ -1,4 +1,4 @@
-# pylint: disable = import-error, import-outside-toplevel, dangerous-default-value
+# pylint: disable = import-error, import-outside-toplevel, dangerous-default-value, invalid-name, R0801
 """Main TrustyAI Python bindings"""
 from typing import List
 import uuid
