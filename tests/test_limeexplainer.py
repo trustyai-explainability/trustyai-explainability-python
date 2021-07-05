@@ -1,34 +1,34 @@
-import sys, os
+# pylint: disable=import-error, wrong-import-position, wrong-import-order, duplicate-code
+"""LIME explainer test suite"""
+import sys
+import os
 import pytest
+from common import mock_feature
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../")
 
 import trustyai
 
-trustyai.init(path=[
-    "./dep/org/kie/kogito/explainability-core/1.5.0.Final/*",
-    "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-    "./dep/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar"
-])
+trustyai.init(
+    path=[
+        "./dep/org/kie/kogito/explainability-core/1.5.0.Final/*",
+        "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
+        "./dep/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar",
+    ]
+)
 
 DEFAULT_NO_OF_PERTURBATIONS = 1
 
 from trustyai.local.lime import LimeConfig, LimeExplainer
+from trustyai.utils import TestUtils, Config
 from trustyai.model import (
     PerturbationContext,
     PredictionInput,
-    Prediction,
     FeatureFactory,
-    PredictionProvider,
-    Output,
-    PredictionOutput,
     SimplePrediction,
-    Type,
-    Value,
 )
-from java.util import Random, ArrayList, List
-from trustyai.utils import TestUtils, Config
+from java.util import Random
 from org.kie.kogito.explainability.local import (
     LocalExplanationException,
 )
@@ -37,94 +37,82 @@ jrandom = Random()
 jrandom.setSeed(0)
 
 
-def sumSkipModel(inputs):
-    """SumSkip test model"""
-    predictionOutputs = ArrayList()
-    for predictionInput in inputs:
-        features = predictionInput.getFeatures()
-        result = 0.0
-        for i in range(features.size()):
-            if i != 0:
-                result += features.get(i).getValue().asNumber()
-        o = [Output(f"sum-but0", Type.NUMBER, Value(result), 1.0)]
-        prediction_output = PredictionOutput(o)
-        predictionOutputs.add(prediction_output)
-    return predictionOutputs
-
-
-def mockFeature(d):
-    return FeatureFactory.newNumericalFeature("f-num", d)
-
-
-def testEmptyPrediction():
-    limeConfig = (
+def test_empty_prediction():
+    """Check if the explanation returned is not null"""
+    lime_config = (
         LimeConfig()
-            .withPerturbationContext(
+        .withPerturbationContext(
             PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
         )
-            .withSamples(10)
+        .withSamples(10)
     )
-    limeExplainer = LimeExplainer(limeConfig)
-    input = PredictionInput([])
+    lime_explainer = LimeExplainer(lime_config)
+    input_ = PredictionInput([])
     model = TestUtils.getSumSkipModel(0)
     output = (
-        model.predictAsync([input])
-            .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
-            .get(0)
+        model.predictAsync([input_])
+        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
+        .get(0)
     )
-    prediction = SimplePrediction(input, output)
+    prediction = SimplePrediction(input_, output)
     with pytest.raises(LocalExplanationException):
-        limeExplainer.explainAsync(prediction, model)
+        lime_explainer.explainAsync(prediction, model)
 
 
-def testNonEmptyInput():
-    limeConfig = (
+def test_non_empty_input():
+    """Test for non-empty input"""
+    lime_config = (
         LimeConfig()
-            .withPerturbationContext(
+        .withPerturbationContext(
             PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
         )
-            .withSamples(10)
+        .withSamples(10)
     )
-    limeExplainer = LimeExplainer(limeConfig)
+    lime_explainer = LimeExplainer(lime_config)
     features = [FeatureFactory.newNumericalFeature(f"f-num{i}", i) for i in range(4)]
 
     _input = PredictionInput(features)
 
-    model = PredictionProvider(sumSkipModel)
+    model = TestUtils.getSumSkipModel(0)
     output = model.predictAsync([_input]).get().get(0)
     prediction = SimplePrediction(_input, output)
-    saliencyMap = limeExplainer.explainAsync(prediction, model).get(
-        Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()
-    )
-    assert saliencyMap is not None
+    saliency_map = lime_explainer.explainAsync(prediction, model).get()
+    assert saliency_map is not None
 
 
-def testSparseBalance():
-    for nf in range(1, 4):
+def test_sparse_balance():  # pylint: disable=too-many-locals
+    """Test sparse balance"""
+    for n_features in range(1, 4):
         no_of_samples = 100
-        lime_config_no_penalty = LimeConfig() \
-            .withPerturbationContext(PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)) \
-            .withSamples(no_of_samples) \
+        lime_config_no_penalty = (
+            LimeConfig()
+            .withPerturbationContext(
+                PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
+            )
+            .withSamples(no_of_samples)
             .withPenalizeBalanceSparse(False)
+        )
         lime_explainer_no_penalty = LimeExplainer(lime_config_no_penalty)
 
-        features = [mockFeature(i) for i in range(nf)]
+        features = [mock_feature(i) for i in range(n_features)]
 
-        input = PredictionInput(features)
-        model = PredictionProvider(sumSkipModel)
-        output = model.predictAsync([input]).get().get(0)
-        prediction = SimplePrediction(input, output)
+        input_ = PredictionInput(features)
+        model = TestUtils.getSumSkipModel(0)
+        output = model.predictAsync([input_]).get().get(0)
+        prediction = SimplePrediction(input_, output)
 
-        saliency_map_no_penalty = lime_explainer_no_penalty.explainAsync(prediction, model).get()
+        saliency_map_no_penalty = lime_explainer_no_penalty.explainAsync(
+            prediction, model
+        ).get()
 
         assert saliency_map_no_penalty is not None
 
         decision_name = "sum-but0"
         saliency_no_penalty = saliency_map_no_penalty.get(decision_name)
 
-        lime_config = LimeConfig() \
-            .withSamples(no_of_samples) \
-            .withPenalizeBalanceSparse(True)
+        lime_config = (
+            LimeConfig().withSamples(no_of_samples).withPenalizeBalanceSparse(True)
+        )
         lime_explainer = LimeExplainer(lime_config)
 
         saliency_map = lime_explainer.explainAsync(prediction, model).get()
@@ -134,31 +122,33 @@ def testSparseBalance():
 
         for i in range(len(features)):
             score = saliency.getPerFeatureImportance().get(i).getScore()
-            score_no_penalty = saliency_no_penalty.getPerFeatureImportance().get(i).getScore()
+            score_no_penalty = (
+                saliency_no_penalty.getPerFeatureImportance().get(i).getScore()
+            )
             assert abs(score) <= abs(score_no_penalty)
 
 
-def testNormalizedWeights():
-    limeConfig = LimeConfig() \
-        .withNormalizeWeights(True) \
-        .withPerturbationContext(PerturbationContext(jrandom, 2)) \
+def test_normalized_weights():
+    """Test normalized weights"""
+    lime_config = (
+        LimeConfig()
+        .withNormalizeWeights(True)
+        .withPerturbationContext(PerturbationContext(jrandom, 2))
         .withSamples(10)
-    limeExplainer = LimeExplainer(limeConfig)
-    nf = 4
-    features = ArrayList()
-    for i in range(nf):
-        features.add(mockFeature(i))
+    )
+    lime_explainer = LimeExplainer(lime_config)
+    n_features = 4
+    features = [mock_feature(i) for i in range(n_features)]
+    input_ = PredictionInput(features)
+    model = TestUtils.getSumSkipModel(0)
+    output = model.predictAsync([input_]).get().get(0)
+    prediction = SimplePrediction(input_, output)
 
-    input = PredictionInput(features)
-    model = PredictionProvider(sumSkipModel)
-    output = model.predictAsync([input]).get().get(0)
-    prediction = SimplePrediction(input, output)
+    saliency_map = lime_explainer.explainAsync(prediction, model).get()
+    assert saliency_map is not None
 
-    saliencyMap = limeExplainer.explainAsync(prediction, model).get()
-    assert saliencyMap is not None
-
-    decisionName = "sum-but0"
-    saliency = saliencyMap.get(decisionName)
-    perFeatureImportance = saliency.getPerFeatureImportance()
-    for featureImportance in perFeatureImportance:
-        assert -1.0 < featureImportance.getScore() < 1.0
+    decision_name = "sum-but0"
+    saliency = saliency_map.get(decision_name)
+    per_feature_importance = saliency.getPerFeatureImportance()
+    for feature_importance in per_feature_importance:
+        assert -1.0 < feature_importance.getScore() < 1.0

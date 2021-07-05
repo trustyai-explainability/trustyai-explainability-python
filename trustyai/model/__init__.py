@@ -1,9 +1,8 @@
-# pylint: disable = import-error, too-few-public-methods, invalid-name
+# pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code
 """General model classes"""
 from typing import List
 import uuid
 from java.util import UUID
-from trustyai.utils import toJList
 from java.util.concurrent import CompletableFuture, ForkJoinPool
 from jpype import JImplements, JOverride, JProxy, _jcustomizer
 from org.kie.kogito.explainability.model import (
@@ -21,6 +20,7 @@ from org.kie.kogito.explainability.model import (
     Value as _Value,
     Type as _Type,
 )
+from trustyai.utils import toJList
 
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain

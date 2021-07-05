@@ -1,5 +1,4 @@
 [![Tests](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml/badge.svg)](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml)
-
 # python-trustyai
 
 Python bindings to [TrustyAI](https://kogito.kie.org/trustyai/)'s explainability library.
