@@ -1,8 +1,10 @@
 # pylint: disable = import-error, import-outside-toplevel, dangerous-default-value
 """Main TrustyAI Python bindings"""
-import sys
+from typing import List
+import uuid
 import jpype
 import jpype.imports
+from jpype import _jcustomizer
 
 
 def init(
@@ -21,5 +23,17 @@ def init(
 
         if not Thread.isAttached:
             jpype.attachThreadToJVM()
+
+        from trustyai.utils import toJList
+        from java.util import UUID
+
+        @_jcustomizer.JConversion("java.util.List", exact=List)
+        def _JSequenceConvert(_, obj):
+            return toJList(obj)
+
+        @_jcustomizer.JConversion("java.util.UUID", instanceof=uuid.UUID)
+        def _JSequenceConvert(_, obj):
+            return UUID.fromString(str(obj))
+
     except OSError:
         print("JVM already started")
