@@ -32,17 +32,6 @@ PredictionOutput = _PredictionOutput
 Value = _Value
 Type = _Type
 
-
-@_jcustomizer.JConversion("java.util.List", exact=List)
-def _JSequenceConvert(_, obj):
-    return toJList(obj)
-
-
-@_jcustomizer.JConversion("java.util.UUID", instanceof=uuid.UUID)
-def _JSequenceConvert(_, obj):
-    return UUID.fromString(str(obj))
-
-
 class InnerSupplier:
     """Wraps the Python predict function in a Java Supplier"""
 
