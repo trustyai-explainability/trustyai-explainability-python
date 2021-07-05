@@ -16,6 +16,7 @@ from org.kie.kogito.explainability.model import (
     PredictionInput as _PredictionInput,
     PredictionOutput as _PredictionOutput,
     Prediction as _Prediction,
+    SimplePrediction as _SimplePrediction,
     Value as _Value,
     Type as _Type,
 )
@@ -29,8 +30,10 @@ PredictionFeatureDomain = _PredictionFeatureDomain
 Prediction = _Prediction
 PredictionInput = _PredictionInput
 PredictionOutput = _PredictionOutput
+SimplePrediction = _SimplePrediction
 Value = _Value
 Type = _Type
+
 
 class InnerSupplier:
     """Wraps the Python predict function in a Java Supplier"""
