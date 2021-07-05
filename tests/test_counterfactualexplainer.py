@@ -21,6 +21,7 @@ from trustyai.local.counterfactual import CounterfactualExplainer, Counterfactua
 from trustyai.model.domain import NumericalFeatureDomain
 from trustyai.model import (
     CounterfactualPrediction,
+    DataDomain,
     PredictionFeatureDomain,
     PredictionInput,
     FeatureFactory,
@@ -31,7 +32,7 @@ from trustyai.model import (
 )
 from java.util import Random
 from java.lang import Long
-from trustyai.utils import TestUtils
+from trustyai.utils import TestUtils, Config
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 
 jrandom = Random()
@@ -57,15 +58,37 @@ def sumSkipModel(inputs):
     return prediction_outputs
 
 
+def runCounterfactualSearch(goal,
+                            constraints,
+                            dataDomain,
+                            features,
+                            model):
+    terminationConfig = TerminationConfig().withScoreCalculationCountLimit(Long.valueOf(10_000))
+    solverConfig = CounterfactualConfigurationFactory \
+        .builder().withTerminationConfig(terminationConfig).build()
+
+    explainer = CounterfactualExplainer \
+        .builder() \
+        .withSolverConfig(solverConfig) \
+        .build()
+    input = PredictionInput(features)
+    output = PredictionOutput(goal)
+    domain = PredictionFeatureDomain(dataDomain.getFeatureDomains())
+    prediction = CounterfactualPrediction(input, output, domain, constraints, None, uuid.uuid4())
+    return explainer.explainAsync(prediction, model) \
+        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
+
+
 def testNonEmptyInput():
     """Checks whether the returned CF entities are not null"""
     termination_config = TerminationConfig().withScoreCalculationCountLimit(Long.valueOf(1000))
     solver_config = CounterfactualConfigurationFactory.builder().withTerminationConfig(termination_config).build()
+    n_features = 10
     explainer = CounterfactualExplainer.builder().withSolverConfig(solver_config).build()
-    goal = [Output(f"f-num{i + 1}", Type.NUMBER, Value(10.0), 0.0) for i in range(9)]
-    features = [FeatureFactory.newNumericalFeature(f"f-num{i}", i * 2.0) for i in range(10)]
-    constraints = [False] * 10
-    feature_boundaries = [NumericalFeatureDomain.create(0.0, 1000.0)] * 10
+    goal = [Output(f"f-num{i + 1}", Type.NUMBER, Value(10.0), 0.0) for i in range(n_features - 1)]
+    features = [FeatureFactory.newNumericalFeature(f"f-num{i}", i * 2.0) for i in range(n_features)]
+    constraints = [False] * n_features
+    feature_boundaries = [NumericalFeatureDomain.create(0.0, 1000.0)] * n_features
 
     model = TestUtils.getSumSkipModel(0)
     _input = PredictionInput(features)
@@ -78,3 +101,33 @@ def testNonEmptyInput():
     for entity in counterfactual_result.getEntities():
         print(entity)
         assert entity is not None
+
+
+def testCounterfactualMatch():
+    goal = [Output("inside", Type.BOOLEAN, Value(True), 0.0)]
+
+    features = [FeatureFactory.newNumericalFeature(f"f-num{i+1}", 10.0) for i in range(4)]
+    constraints = [False] * 4
+    feature_boundaries = [NumericalFeatureDomain.create(0.0, 1000.0)] * 4
+
+    data_domain = DataDomain(feature_boundaries)
+
+    center = 500.0
+    epsilon = 10.0
+
+    result = \
+        runCounterfactualSearch(goal,
+                                constraints,
+                                data_domain, features,
+                                TestUtils.getSumThresholdModel(center, epsilon))
+
+    total_sum = 0
+    for entity in result.getEntities():
+        total_sum += entity.asFeature().getValue().asNumber()
+        print(entity)
+
+    print(result.getOutput().get(0).getOutputs())
+
+    assert total_sum <= center + epsilon
+    assert total_sum >= center - epsilon
+    assert result.isValid()
