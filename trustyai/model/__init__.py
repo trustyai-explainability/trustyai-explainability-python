@@ -1,8 +1,6 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code
 """General model classes"""
 from typing import List
-import uuid
-from java.util import UUID
 from java.util.concurrent import CompletableFuture, ForkJoinPool
 from jpype import JImplements, JOverride, JProxy, _jcustomizer
 from org.kie.kogito.explainability.model import (
@@ -40,11 +38,11 @@ Type = _Type
 class InnerSupplier:
     """Wraps the Python predict function in a Java Supplier"""
 
-    def __init__(self, _inputs, predict_fun):
+    def __init__(self, _inputs: List[PredictionInput], predict_fun):
         self.inputs = _inputs
         self.predict_fun = predict_fun
 
-    def get(self):
+    def get(self) -> List[PredictionOutput]:
         """The Supplier interface get method"""
         return self.predict_fun(self.inputs)
 
@@ -57,7 +55,7 @@ class PredictionProvider:
         self.predict_fun = predict_fun
 
     @JOverride
-    def predictAsync(self, inputs):
+    def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
         """Python implementation of the predictAsync interface method"""
         supplier = InnerSupplier(inputs, self.predict_fun)
         proxy = JProxy("java.util.function.Supplier", inst=supplier)
