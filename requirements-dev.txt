@@ -1,7 +1,9 @@
 black
+joblib
 pandas
 scikit-learn
 pylint
 pytest
 setuptools
 wheel
+xgboost
