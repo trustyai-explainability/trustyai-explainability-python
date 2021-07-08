@@ -5,6 +5,8 @@ Python bindings to [TrustyAI](https://kogito.kie.org/trustyai/)'s explainability
 
 ## Setup
 
+### Local
+
 The minimum dependencies can be installed with
 
 ```shell
@@ -16,6 +18,18 @@ If running the examples or developing, also install the development dependencies
 ```shell
 pip install -r requirements-dev.txt
 ```
+
+### Docker
+
+Alternatively create a container image and run it using
+
+```shell
+$ docker build -f Dockerfile -t ruivieira/python-trustyai:latest .
+$ docker run --rm -it -p 8888:8888 ruivieira/python-trustyai:latest
+```
+
+The Jupyter server will be available at `localhost:8888`.
+
 
 ## Getting started
 

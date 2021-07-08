@@ -1,5 +1,6 @@
-black
+black==21.6b0
 joblib
+jupyter
 pandas
 scikit-learn
 pylint
