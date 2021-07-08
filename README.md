@@ -1,4 +1,4 @@
-[![Tests](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml/badge.svg)](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml)
+[![Tests](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml/badge.svg)](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ruivieira/python-trustyai/main)
 # python-trustyai
 
 Python bindings to [TrustyAI](https://kogito.kie.org/trustyai/)'s explainability library.
@@ -30,6 +30,11 @@ $ docker run --rm -it -p 8888:8888 ruivieira/python-trustyai:latest
 
 The Jupyter server will be available at `localhost:8888`.
 
+### Binder
+
+You can also run the example Jupyter notebooks using `mybinder.org`:
+
+- https://mybinder.org/v2/gh/ruivieira/python-trustyai/main
 
 ## Getting started
 
@@ -79,4 +84,4 @@ You can look at the [tests](./tests) for working examples.
 
 There are also Jupyter notebooks available:
 
-- [Counterfactual explanations](notebooks/Counterfactuals.ipynb)
+- [Counterfactual explanations](examples/Counterfactuals.ipynb)
