@@ -1,0 +1,12 @@
+*.log
+__pycache__
+.pytest_cache
+.pynb_checkpoints
+.Rproj.user
+.vscode
+.idea
+.mypy_cache
+build
+dist
+trustyai.egg-info
+*.pyc
