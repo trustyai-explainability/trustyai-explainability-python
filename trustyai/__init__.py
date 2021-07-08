@@ -8,6 +8,7 @@ from jpype import _jcustomizer
 
 
 def init(
+    *args,
     path=[
         "./dep/org/kie/kogito/explainability-core/1.5.0.Final/*",
         "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
@@ -17,7 +18,7 @@ def init(
     """Initialise Java binding"""
     # Launch the JVM
     try:
-        jpype.startJVM(classpath=path)
+        jpype.startJVM(*args, classpath=path)
 
         from java.lang import Thread
 
