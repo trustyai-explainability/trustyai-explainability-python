@@ -1,7 +1,9 @@
-FROM openjdk:11.0.11-jdk
+FROM python:3.9.6-slim-buster
 
+# work-around on Debian JDK install bug
+RUN mkdir -p /usr/share/man/man1
 RUN apt-get update
-RUN apt-get install -y python3-pip cmake maven
+RUN apt-get install -y cmake openjdk-11-jdk-headless maven build-essential wget
 
 COPY . .
 RUN pip3 install --no-cache-dir -r requirements.txt && \
