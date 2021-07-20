@@ -3,7 +3,6 @@
 import sys
 import os
 import pytest
-from common import mock_feature
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../")
@@ -12,16 +11,21 @@ import trustyai
 
 trustyai.init(
     path=[
-        "./dep/org/kie/kogito/explainability-core/1.5.0.Final/*",
+        "./dep/org/kie/kogito/explainability-core/1.8.0.Final/*",
         "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-        "./dep/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar",
+        "./dep/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
+        "./dep/org/optaplanner/optaplanner-core/8.8.0.Final/optaplanner-core-8.8.0.Final.jar",
+        "./dep/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
+        "./dep/org/kie/kie-api/7.55.0.Final/kie-api-7.55.0.Final.jar",
+        "./dep/io/micrometer/micrometer-core/1.6.6/micrometer-core-1.6.6.jar",
     ]
 )
 
 DEFAULT_NO_OF_PERTURBATIONS = 1
 
-from trustyai.local.lime import LimeConfig, LimeExplainer
-from trustyai.utils import TestUtils, Config
+from common import mock_feature
+from trustyai.explainers import LimeConfig, LimeExplainer
+from trustyai.utils import TestUtils
 from trustyai.model import (
     PerturbationContext,
     PredictionInput,
@@ -39,36 +43,34 @@ jrandom.setSeed(0)
 
 def test_empty_prediction():
     """Check if the explanation returned is not null"""
-    lime_config = (
+    config = (
         LimeConfig()
         .withPerturbationContext(
             PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
         )
         .withSamples(10)
     )
-    lime_explainer = LimeExplainer(lime_config)
+    lime_explainer = LimeExplainer(config)
     input_ = PredictionInput([])
     model = TestUtils.getSumSkipModel(0)
     output = (
-        model.predictAsync([input_])
-        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
-        .get(0)
+        model.predictAsync([input_]).get().get(0)
     )
     prediction = SimplePrediction(input_, output)
     with pytest.raises(LocalExplanationException):
-        lime_explainer.explainAsync(prediction, model)
+        lime_explainer.explain(prediction, model)
 
 
 def test_non_empty_input():
     """Test for non-empty input"""
-    lime_config = (
+    config = (
         LimeConfig()
         .withPerturbationContext(
             PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
         )
         .withSamples(10)
     )
-    lime_explainer = LimeExplainer(lime_config)
+    lime_explainer = LimeExplainer(config)
     features = [FeatureFactory.newNumericalFeature(f"f-num{i}", i) for i in range(4)]
 
     _input = PredictionInput(features)
@@ -76,7 +78,7 @@ def test_non_empty_input():
     model = TestUtils.getSumSkipModel(0)
     output = model.predictAsync([_input]).get().get(0)
     prediction = SimplePrediction(_input, output)
-    saliency_map = lime_explainer.explainAsync(prediction, model).get()
+    saliency_map = lime_explainer.explain(prediction, model)
     assert saliency_map is not None
 
 
@@ -84,7 +86,7 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
     """Test sparse balance"""
     for n_features in range(1, 4):
         no_of_samples = 100
-        lime_config_no_penalty = (
+        config_no_penalty = (
             LimeConfig()
             .withPerturbationContext(
                 PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
@@ -92,7 +94,7 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
             .withSamples(no_of_samples)
             .withPenalizeBalanceSparse(False)
         )
-        lime_explainer_no_penalty = LimeExplainer(lime_config_no_penalty)
+        lime_explainer_no_penalty = LimeExplainer(config_no_penalty)
 
         features = [mock_feature(i) for i in range(n_features)]
 
@@ -101,21 +103,21 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
         output = model.predictAsync([input_]).get().get(0)
         prediction = SimplePrediction(input_, output)
 
-        saliency_map_no_penalty = lime_explainer_no_penalty.explainAsync(
+        saliency_map_no_penalty = lime_explainer_no_penalty.explain(
             prediction, model
-        ).get()
+        )
 
         assert saliency_map_no_penalty is not None
 
         decision_name = "sum-but0"
         saliency_no_penalty = saliency_map_no_penalty.get(decision_name)
 
-        lime_config = (
+        config = (
             LimeConfig().withSamples(no_of_samples).withPenalizeBalanceSparse(True)
         )
-        lime_explainer = LimeExplainer(lime_config)
+        lime_explainer = LimeExplainer(config)
 
-        saliency_map = lime_explainer.explainAsync(prediction, model).get()
+        saliency_map = lime_explainer.explain(prediction, model)
         assert saliency_map is not None
 
         saliency = saliency_map.get(decision_name)
@@ -130,13 +132,13 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
 
 def test_normalized_weights():
     """Test normalized weights"""
-    lime_config = (
+    config = (
         LimeConfig()
         .withNormalizeWeights(True)
         .withPerturbationContext(PerturbationContext(jrandom, 2))
         .withSamples(10)
     )
-    lime_explainer = LimeExplainer(lime_config)
+    lime_explainer = LimeExplainer(config)
     n_features = 4
     features = [mock_feature(i) for i in range(n_features)]
     input_ = PredictionInput(features)
@@ -144,7 +146,7 @@ def test_normalized_weights():
     output = model.predictAsync([input_]).get().get(0)
     prediction = SimplePrediction(input_, output)
 
-    saliency_map = lime_explainer.explainAsync(prediction, model).get()
+    saliency_map = lime_explainer.explain(prediction, model)
     assert saliency_map is not None
 
     decision_name = "sum-but0"
