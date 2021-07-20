@@ -21,7 +21,7 @@ trustyai.init(
     ]
 )
 
-from trustyai.local.counterfactual import (
+from trustyai.explainers import (
     CounterfactualExplainer,
     CounterfactualConfigurationFactory,
 )
@@ -58,18 +58,15 @@ def run_counterfactual_search(goal, constraints, data_domain, features, model):
         .build()
     )
 
-    explainer = (
-        CounterfactualExplainer.builder().withSolverConfig(solver_config).build()
-    )
+    explainer = CounterfactualExplainer(solver_config)
+
     input_ = PredictionInput(features)
     output = PredictionOutput(goal)
     domain = PredictionFeatureDomain(data_domain.getFeatureDomains())
     prediction = CounterfactualPrediction(
         input_, output, domain, constraints, None, uuid.uuid4()
     )
-    return explainer.explainAsync(prediction, model).get(
-        Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()
-    )
+    return explainer.explain(prediction, model)
 
 
 def test_non_empty_input():
@@ -83,9 +80,8 @@ def test_non_empty_input():
         .build()
     )
     n_features = 10
-    explainer = (
-        CounterfactualExplainer.builder().withSolverConfig(solver_config).build()
-    )
+    explainer = CounterfactualExplainer(solver_config)
+
     goal = [
         Output(f"f-num{i + 1}", Type.NUMBER, Value(10.0), 0.0)
         for i in range(n_features - 1)
@@ -109,7 +105,7 @@ def test_non_empty_input():
         uuid.uuid4(),
     )
 
-    counterfactual_result = explainer.explainAsync(prediction, model).get()
+    counterfactual_result = explainer.explain(prediction, model)
     for entity in counterfactual_result.getEntities():
         print(entity)
         assert entity is not None
