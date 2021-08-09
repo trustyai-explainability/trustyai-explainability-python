@@ -5,6 +5,14 @@ Python bindings to [TrustyAI](https://kogito.kie.org/trustyai/)'s explainability
 
 ## Setup
 
+### PyPi
+
+Install from PyPi with
+
+```shell
+pip install trustyai
+```
+
 ### Local
 
 The minimum dependencies can be installed with
