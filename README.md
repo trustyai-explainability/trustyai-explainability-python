@@ -1,4 +1,4 @@
-[![Tests](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml/badge.svg)](https://github.com/ruivieira/python-trustyai/actions/workflows/workflow.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ruivieira/python-trustyai/main)
+[![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trustyai-python/examples/main)
 # python-trustyai
 
 Python bindings to [TrustyAI](https://kogito.kie.org/trustyai/)'s explainability library.
@@ -42,7 +42,7 @@ The Jupyter server will be available at `localhost:8888`.
 
 You can also run the example Jupyter notebooks using `mybinder.org`:
 
-- https://mybinder.org/v2/gh/ruivieira/python-trustyai/main
+- https://mybinder.org/v2/gh/trustyai-python/examples/main
 
 ## Getting started
 
@@ -90,6 +90,4 @@ You can see the `sumSkipModel` in the [LIME tests](./tests/test_limeexplainer.py
 
 You can look at the [tests](./tests) for working examples.
 
-There are also Jupyter notebooks available:
-
-- [Counterfactual explanations](examples/Counterfactuals.ipynb)
+There are also [Jupyter notebooks available](https://github.com/trustyai-python/examples).
