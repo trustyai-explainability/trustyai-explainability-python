@@ -3,28 +3,27 @@
 from typing import Dict
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
-    CounterfactualConfigurationFactory as _CounterfactualConfigurationFactory,
     CounterfactualResult,
+    SolverConfigBuilder as _SolverConfigBuilder,
+    CounterfactualConfig as _CounterfactualConfig,
 )
 from org.kie.kogito.explainability.local.lime import (
     LimeConfig as _LimeConfig,
     LimeExplainer as _LimeExplainer,
 )
-from org.optaplanner.core.config.solver import SolverConfig
+
 from org.kie.kogito.explainability.model import Prediction, PredictionProvider, Saliency
 
-
-CounterfactualConfigurationFactory = _CounterfactualConfigurationFactory
+SolverConfigBuilder = _SolverConfigBuilder
+CounterfactualConfig = _CounterfactualConfig
 LimeConfig = _LimeConfig
 
 
 class CounterfactualExplainer:
     """Wrapper for TrustyAI's counterfactual explainer"""
 
-    def __init__(self, config: SolverConfig) -> None:
-        self._explainer = (
-            _CounterfactualExplainer.builder().withSolverConfig(config).build()
-        )
+    def __init__(self, config: CounterfactualConfig) -> None:
+        self._explainer = _CounterfactualExplainer(config)
 
     def explain(
         self, prediction: Prediction, model: PredictionProvider

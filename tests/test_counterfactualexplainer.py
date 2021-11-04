@@ -11,21 +11,22 @@ import trustyai
 
 trustyai.init(
     path=[
-        "./dep/org/kie/kogito/explainability-core/1.8.0.Final/*",
+        "./dep/org/kie/kogito/explainability-core/1.12.0.Final/*",
         "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
         "./dep/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
-        "./dep/org/optaplanner/optaplanner-core/8.8.0.Final/optaplanner-core-8.8.0.Final.jar",
+        "./dep/org/optaplanner/optaplanner-core/8.12.0.Final/optaplanner-core-8.12.0.Final.jar",
         "./dep/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-        "./dep/org/kie/kie-api/7.55.0.Final/kie-api-7.55.0.Final.jar",
-        "./dep/io/micrometer/micrometer-core/1.6.6/micrometer-core-1.6.6.jar",
+        "./dep/org/kie/kie-api/7.59.0.Final/kie-api-7.59.0.Final.jar",
+        "./dep/io/micrometer/micrometer-core/1.7.4/micrometer-core-1.7.4.jar",
     ]
 )
 
 from trustyai.explainers import (
     CounterfactualExplainer,
-    CounterfactualConfigurationFactory,
+    SolverConfigBuilder,
+    CounterfactualConfig,
 )
-from trustyai.utils import TestUtils, Config
+from trustyai.utils import TestUtils, toJList
 from trustyai.model.domain import NumericalFeatureDomain
 from trustyai.model import (
     CounterfactualPrediction,
@@ -52,19 +53,15 @@ def run_counterfactual_search(goal, constraints, data_domain, features, model):
     termination_config = TerminationConfig().withScoreCalculationCountLimit(
         Long.valueOf(10_000)
     )
-    solver_config = (
-        CounterfactualConfigurationFactory.builder()
-        .withTerminationConfig(termination_config)
-        .build()
-    )
-
-    explainer = CounterfactualExplainer(solver_config)
+    solver_config = SolverConfigBuilder.builder().withTerminationConfig(termination_config).build()
+    cf_config = CounterfactualConfig().withSolverConfig(solver_config)
+    explainer = CounterfactualExplainer(cf_config)
 
     input_ = PredictionInput(features)
     output = PredictionOutput(goal)
     domain = PredictionFeatureDomain(data_domain.getFeatureDomains())
     prediction = CounterfactualPrediction(
-        input_, output, domain, constraints, None, uuid.uuid4()
+        input_, output, domain, constraints, None, uuid.uuid4(), Long(60)
     )
     return explainer.explain(prediction, model)
 
@@ -74,18 +71,12 @@ def test_non_empty_input():
     termination_config = TerminationConfig().withScoreCalculationCountLimit(
         Long.valueOf(1000)
     )
-    solver_config = (
-        CounterfactualConfigurationFactory.builder()
-        .withTerminationConfig(termination_config)
-        .build()
-    )
+    solver_config = SolverConfigBuilder.builder().withTerminationConfig(termination_config).build()
+    cf_config = CounterfactualConfig().withSolverConfig(solver_config)
     n_features = 10
-    explainer = CounterfactualExplainer(solver_config)
+    explainer = CounterfactualExplainer(cf_config)
 
-    goal = [
-        Output(f"f-num{i + 1}", Type.NUMBER, Value(10.0), 0.0)
-        for i in range(n_features - 1)
-    ]
+    goal = [Output(f"f-num1", Type.NUMBER, Value(10.0), 0.0)]
     features = [
         FeatureFactory.newNumericalFeature(f"f-num{i}", i * 2.0)
         for i in range(n_features)
@@ -94,15 +85,15 @@ def test_non_empty_input():
     feature_boundaries = [NumericalFeatureDomain.create(0.0, 1000.0)] * n_features
 
     model = TestUtils.getSumSkipModel(0)
-    _input = PredictionInput(features)
-    output = PredictionOutput(goal)
+
     prediction = CounterfactualPrediction(
-        _input,
-        output,
+        PredictionInput(features),
+        PredictionOutput(goal),
         PredictionFeatureDomain(feature_boundaries),
         constraints,
         None,
         uuid.uuid4(),
+        Long(60)
     )
 
     counterfactual_result = explainer.explain(prediction, model)
