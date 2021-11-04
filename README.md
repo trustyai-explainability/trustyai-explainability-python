@@ -1,4 +1,4 @@
-[![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trustyai-python/examples/main)
+![TrustyAI](https://img.shields.io/badge/TrustyAI-1.12-green) [![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml)
 # python-trustyai
 
 Python bindings to [TrustyAI](https://kogito.kie.org/trustyai/)'s explainability library.
