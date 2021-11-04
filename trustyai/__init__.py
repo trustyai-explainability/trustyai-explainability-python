@@ -6,15 +6,15 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer
 
+TRUSTY_VERSION = "1.12.0.Final"
+CORE_DEPS = [
+    f"./dep/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
+    "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
+    "./dep/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
+]
 
-def init(
-    *args,
-    path=[
-        "./dep/org/kie/kogito/explainability-core/1.5.0.Final/*",
-        "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-        "./dep/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar",
-    ],  # pylint: disable = line-too-long
-):
+
+def init(*args, path=CORE_DEPS):
     """Initialise Java binding"""
     # Launch the JVM
     try:

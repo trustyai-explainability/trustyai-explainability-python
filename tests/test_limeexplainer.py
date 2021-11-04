@@ -10,11 +10,7 @@ sys.path.insert(0, myPath + "/../")
 import trustyai
 
 trustyai.init(
-    path=[
-        "./dep/org/kie/kogito/explainability-core/1.8.0.Final/*",
-        "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-        "./dep/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
-        "./dep/org/optaplanner/optaplanner-core/8.8.0.Final/optaplanner-core-8.8.0.Final.jar",
+    path=trustyai.CORE_DEPS + [
         "./dep/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
         "./dep/org/kie/kie-api/7.55.0.Final/kie-api-7.55.0.Final.jar",
         "./dep/io/micrometer/micrometer-core/1.6.6/micrometer-core-1.6.6.jar",
