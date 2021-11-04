@@ -46,9 +46,17 @@ You can also run the example Jupyter notebooks using `mybinder.org`:
 
 ## Getting started
 
-To initialise, import the module and specify the location of the `explainability-core` JAR.
+To initialise, import the module and initialise it.
 For instance,
 
+```python
+import trustyai
+
+trustyai.init()
+```
+
+If the dependencies are not in the default `dep` sub-directory, or
+you want to use a custom classpath you can specify it with:
 ```python
 import trustyai
 
