@@ -4,7 +4,7 @@ from typing import List
 import uuid
 import jpype
 import jpype.imports
-from jpype import _jcustomizer
+from jpype import _jcustomizer, _jclass
 
 TRUSTY_VERSION = "1.12.0.Final"
 CORE_DEPS = [
@@ -25,15 +25,14 @@ def init(*args, path=CORE_DEPS):
         if not Thread.isAttached:
             jpype.attachThreadToJVM()
 
-        from trustyai.utils import toJList
         from java.util import UUID
 
         @_jcustomizer.JConversion("java.util.List", exact=List)
-        def _JSequenceConvert(_, obj):
-            return toJList(obj)
+        def _JListConvert(_, py_list: List):
+            return _jclass.JClass('java.util.Arrays').asList(py_list)
 
         @_jcustomizer.JConversion("java.util.UUID", instanceof=uuid.UUID)
-        def _JSequenceConvert(_, obj):
+        def _JUUIDConvert(_, obj):
             return UUID.fromString(str(obj))
 
     except OSError:
