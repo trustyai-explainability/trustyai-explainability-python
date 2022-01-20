@@ -29,7 +29,7 @@ def init(*args, path=CORE_DEPS):
 
         @_jcustomizer.JConversion("java.util.List", exact=List)
         def _JListConvert(_, py_list: List):
-            return _jclass.JClass('java.util.Arrays').asList(py_list)
+            return _jclass.JClass("java.util.Arrays").asList(py_list)
 
         @_jcustomizer.JConversion("java.util.UUID", instanceof=uuid.UUID)
         def _JUUIDConvert(_, obj):
