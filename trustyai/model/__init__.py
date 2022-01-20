@@ -65,14 +65,21 @@ class PredictionProvider:
 
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
 class _JOutput:
+    """Java Output implicit methods"""
+
+    # pylint: disable=no-member
     def __str__(self):
-        return f"Output(name={self.getName()}, type={self.getType()}, value={self.getValue()}, score={self.getScore()})"
+        return (
+            f"Output(name={self.getName()}, type={self.getType()}, "
+            f"value={self.getValue()}, score={self.getScore()})"
+        )
 
     def __repr__(self):
         return self.__str__()
 
 
 def output(name, dtype, value=None, score=1.0):
+    """Helper method returning a Java Output"""
     if dtype == "text":
         _type = Type.TEXT
     elif dtype == "number":
