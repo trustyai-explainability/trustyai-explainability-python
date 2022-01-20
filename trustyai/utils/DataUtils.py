@@ -1,7 +1,6 @@
 # pylint: disable = invalid-name, import-error
 """DataUtils module"""
 from org.kie.kogito.explainability.utils import DataUtils as du
-from java.util import ArrayList
 
 getMean = du.getMean
 getStdDev = du.getStdDev
@@ -20,18 +19,15 @@ def generateData(mean, stdDeviation, size, jrandom):
 
 def perturbFeatures(originalFeatures, perturbationContext):
     """Perform perturbations on a fixed number of features in the given input."""
-    jlist = ArrayList(originalFeatures)
-    return du.perturbFeatures(jlist, perturbationContext)
+    return du.perturbFeatures(originalFeatures, perturbationContext)
 
 
 def getLinearizedFeatures(originalFeatures):
     """Transform a list of eventually composite / nested features into a
     flat list of non composite / non nested features."""
-    jlist = ArrayList(originalFeatures)
-    return du.getLinearizedFeatures(jlist)
+    return du.getLinearizedFeatures(originalFeatures)
 
 
 def sampleWithReplacement(values, sampleSize, jrandom):
     """Sample (with replacement) from a list of values."""
-    jlist = ArrayList(values)
-    return du.sampleWithReplacement(jlist, sampleSize, jrandom)
+    return du.sampleWithReplacement(values, sampleSize, jrandom)
