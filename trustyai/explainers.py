@@ -1,6 +1,7 @@
 """Explainers module"""
 # pylint: disable = import-error, too-few-public-methods
 from typing import Dict
+
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult,
@@ -26,7 +27,7 @@ class CounterfactualExplainer:
         self._explainer = _CounterfactualExplainer(config)
 
     def explain(
-        self, prediction: Prediction, model: PredictionProvider
+            self, prediction: Prediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()

@@ -1,21 +1,9 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, duplicate-code
 """LIME explainer test suite"""
-import sys
-import os
+
+from common import *
+
 import pytest
-
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../")
-
-import trustyai
-
-trustyai.init(
-    path=trustyai.CORE_DEPS + [
-        "./dep/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-        "./dep/org/kie/kie-api/7.55.0.Final/kie-api-7.55.0.Final.jar",
-        "./dep/io/micrometer/micrometer-core/1.6.6/micrometer-core-1.6.6.jar",
-    ]
-)
 
 DEFAULT_NO_OF_PERTURBATIONS = 1
 
@@ -41,10 +29,10 @@ def test_empty_prediction():
     """Check if the explanation returned is not null"""
     config = (
         LimeConfig()
-        .withPerturbationContext(
+            .withPerturbationContext(
             PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
         )
-        .withSamples(10)
+            .withSamples(10)
     )
     lime_explainer = LimeExplainer(config)
     input_ = PredictionInput([])
@@ -61,10 +49,10 @@ def test_non_empty_input():
     """Test for non-empty input"""
     config = (
         LimeConfig()
-        .withPerturbationContext(
+            .withPerturbationContext(
             PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
         )
-        .withSamples(10)
+            .withSamples(10)
     )
     lime_explainer = LimeExplainer(config)
     features = [FeatureFactory.newNumericalFeature(f"f-num{i}", i) for i in range(4)]
@@ -84,11 +72,11 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
         no_of_samples = 100
         config_no_penalty = (
             LimeConfig()
-            .withPerturbationContext(
+                .withPerturbationContext(
                 PerturbationContext(jrandom, DEFAULT_NO_OF_PERTURBATIONS)
             )
-            .withSamples(no_of_samples)
-            .withPenalizeBalanceSparse(False)
+                .withSamples(no_of_samples)
+                .withPenalizeBalanceSparse(False)
         )
         lime_explainer_no_penalty = LimeExplainer(config_no_penalty)
 
@@ -130,9 +118,9 @@ def test_normalized_weights():
     """Test normalized weights"""
     config = (
         LimeConfig()
-        .withNormalizeWeights(True)
-        .withPerturbationContext(PerturbationContext(jrandom, 2))
-        .withSamples(10)
+            .withNormalizeWeights(True)
+            .withPerturbationContext(PerturbationContext(jrandom, 2))
+            .withSamples(10)
     )
     lime_explainer = LimeExplainer(config)
     n_features = 4

@@ -1,16 +1,8 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, invalid-name
 """Implicit conversion test suite"""
-import sys
-import os
+from common import *
 
 from jpype import _jclass
-
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../")
-
-import trustyai
-
-trustyai.init()
 
 
 def test_list_python_to_java():

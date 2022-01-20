@@ -1,29 +1,16 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, R0801
 """Test suite for counterfactual explanations"""
-import os
-import sys
+
+from common import *
+
 import uuid
-
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../")
-
-import trustyai
-
-trustyai.init(
-    path=trustyai.CORE_DEPS + [
-        "./dep/org/optaplanner/optaplanner-core/8.12.0.Final/optaplanner-core-8.12.0.Final.jar",
-        "./dep/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-        "./dep/org/kie/kie-api/7.59.0.Final/kie-api-7.59.0.Final.jar",
-        "./dep/io/micrometer/micrometer-core/1.7.4/micrometer-core-1.7.4.jar",
-    ]
-)
 
 from trustyai.explainers import (
     CounterfactualExplainer,
     SolverConfigBuilder,
     CounterfactualConfig,
 )
-from trustyai.utils import TestUtils, toJList
+from trustyai.utils import TestUtils
 from trustyai.model.domain import NumericalFeatureDomain
 from trustyai.model import (
     CounterfactualPrediction,
@@ -104,7 +91,7 @@ def test_counterfactual_match():
     goal = [Output("inside", Type.BOOLEAN, Value(True), 0.0)]
 
     features = [
-        FeatureFactory.newNumericalFeature(f"f-num{i+1}", 10.0) for i in range(4)
+        FeatureFactory.newNumericalFeature(f"f-num{i + 1}", 10.0) for i in range(4)
     ]
     constraints = [False] * 4
     feature_boundaries = [NumericalFeatureDomain.create(0.0, 1000.0)] * 4
