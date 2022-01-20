@@ -5,11 +5,7 @@ from common import *
 
 import uuid
 
-from trustyai.explainers import (
-    CounterfactualExplainer,
-    SolverConfigBuilder,
-    CounterfactualConfig,
-)
+from trustyai.explainers import CounterfactualExplainer
 from trustyai.utils import TestUtils
 from trustyai.model.domain import NumericalFeatureDomain
 from trustyai.model import (
@@ -26,20 +22,18 @@ from trustyai.model import (
 from java.util import Random
 from java.lang import Long
 
-from org.optaplanner.core.config.solver.termination import TerminationConfig
-
 jrandom = Random()
 jrandom.setSeed(0)
 
 
-def run_counterfactual_search(goal, constraints, data_domain, features, model):
+def run_counterfactual_search(goal,
+                              constraints,
+                              data_domain,
+                              features,
+                              model,
+                              steps=10_000):
     """Creates a CF explainer and returns a result"""
-    termination_config = TerminationConfig().withScoreCalculationCountLimit(
-        Long.valueOf(10_000)
-    )
-    solver_config = SolverConfigBuilder.builder().withTerminationConfig(termination_config).build()
-    cf_config = CounterfactualConfig().withSolverConfig(solver_config)
-    explainer = CounterfactualExplainer(cf_config)
+    explainer = CounterfactualExplainer(steps=steps)
 
     input_ = PredictionInput(features)
     output = PredictionOutput(goal)
@@ -52,13 +46,8 @@ def run_counterfactual_search(goal, constraints, data_domain, features, model):
 
 def test_non_empty_input():
     """Checks whether the returned CF entities are not null"""
-    termination_config = TerminationConfig().withScoreCalculationCountLimit(
-        Long.valueOf(1000)
-    )
-    solver_config = SolverConfigBuilder.builder().withTerminationConfig(termination_config).build()
-    cf_config = CounterfactualConfig().withSolverConfig(solver_config)
     n_features = 10
-    explainer = CounterfactualExplainer(cf_config)
+    explainer = CounterfactualExplainer(steps=1000)
 
     goal = [Output(f"f-num1", Type.NUMBER, Value(10.0), 0.0)]
     features = [
