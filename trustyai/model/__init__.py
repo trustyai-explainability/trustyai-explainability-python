@@ -3,7 +3,7 @@
 from typing import List
 
 from java.util.concurrent import CompletableFuture, ForkJoinPool
-from jpype import JImplements, JOverride, JProxy
+from jpype import JImplements, JOverride, JProxy, _jcustomizer
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDomain as _DataDomain,
@@ -61,3 +61,26 @@ class PredictionProvider:
         proxy = JProxy("java.util.function.Supplier", inst=supplier)
         future = CompletableFuture.supplyAsync(proxy, ForkJoinPool.commonPool())
         return future
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
+class _JOutput:
+    def __str__(self):
+        return f"Output(name={self.getName()}, type={self.getType()}, value={self.getValue()}, score={self.getScore()})"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+def output(name, dtype, value=None, score=1.0):
+    if dtype == "text":
+        _type = Type.TEXT
+    elif dtype == "number":
+        _type = Type.NUMBER
+    elif dtype == "bool":
+        _type = Type.BOOLEAN
+    elif dtype == "categorical":
+        _type = Type.CATEGORICAL
+    else:
+        _type = Type.UNDEFINED
+    return _Output(name, _type, Value(value), score)
