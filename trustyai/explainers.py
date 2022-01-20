@@ -14,6 +14,8 @@ from org.kie.kogito.explainability.local.lime import (
 )
 
 from org.kie.kogito.explainability.model import Prediction, PredictionProvider, Saliency
+from org.optaplanner.core.config.solver.termination import TerminationConfig
+from java.lang import Long
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -23,8 +25,18 @@ LimeConfig = _LimeConfig
 class CounterfactualExplainer:
     """Wrapper for TrustyAI's counterfactual explainer"""
 
-    def __init__(self, config: CounterfactualConfig) -> None:
-        self._explainer = _CounterfactualExplainer(config)
+    def __init__(self, steps=10_000) -> None:
+        self._termination_config = TerminationConfig().withScoreCalculationCountLimit(
+            Long.valueOf(steps)
+        )
+        self._solver_config = (
+            SolverConfigBuilder.builder()
+            .withTerminationConfig(self._termination_config)
+            .build()
+        )
+        self._cf_config = CounterfactualConfig().withSolverConfig(self._solver_config)
+
+        self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
         self, prediction: Prediction, model: PredictionProvider
