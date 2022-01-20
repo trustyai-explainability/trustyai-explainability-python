@@ -20,6 +20,7 @@ from trustyai.model import (
 )
 from trustyai.model.domain import NumericalFeatureDomain
 from trustyai.utils import TestUtils
+from org.kie.kogito.explainability.local.counterfactual import CounterfactualResult
 
 jrandom = Random()
 jrandom.setSeed(0)
@@ -30,7 +31,7 @@ def run_counterfactual_search(goal,
                               data_domain,
                               features,
                               model,
-                              steps=10_000):
+                              steps=10_000) -> CounterfactualResult:
     """Creates a CF explainer and returns a result"""
     explainer = CounterfactualExplainer(steps=steps)
 
@@ -69,7 +70,7 @@ def test_non_empty_input():
     )
 
     counterfactual_result = explainer.explain(prediction, model)
-    for entity in counterfactual_result.getEntities():
+    for entity in counterfactual_result.entities:
         print(entity)
         assert entity is not None
 
