@@ -17,7 +17,7 @@ from trustyai.model import (
     Output,
     PredictionOutput,
     Type,
-    Value,
+    Value, output,
 )
 from java.util import Random
 from java.lang import Long
@@ -49,7 +49,7 @@ def test_non_empty_input():
     n_features = 10
     explainer = CounterfactualExplainer(steps=1000)
 
-    goal = [Output(f"f-num1", Type.NUMBER, Value(10.0), 0.0)]
+    goal = [output(name="f-num1", dtype="number", value=10.0, score=0.0)]
     features = [
         FeatureFactory.newNumericalFeature(f"f-num{i}", i * 2.0)
         for i in range(n_features)
@@ -77,7 +77,7 @@ def test_non_empty_input():
 
 def test_counterfactual_match():
     """Test if there's a valid counterfactual"""
-    goal = [Output("inside", Type.BOOLEAN, Value(True), 0.0)]
+    goal = [output(name="inside", dtype="bool", value=True, score=0.0)]
 
     features = [
         FeatureFactory.newNumericalFeature(f"f-num{i + 1}", 10.0) for i in range(4)
