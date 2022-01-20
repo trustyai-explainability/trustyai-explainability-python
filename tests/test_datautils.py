@@ -1,16 +1,9 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, invalid-name
 """Data utils test suite"""
-import sys
-import os
+from common import *
+
 from pytest import approx
 import random
-
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../")
-
-import trustyai
-
-trustyai.init()
 
 from trustyai.utils import DataUtils
 from trustyai.model import PerturbationContext, FeatureFactory

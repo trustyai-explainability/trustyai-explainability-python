@@ -25,7 +25,6 @@ def init(*args, path=CORE_DEPS):
         if not Thread.isAttached:
             jpype.attachThreadToJVM()
 
-        from trustyai.utils import toJList
         from java.util import UUID
 
         @_jcustomizer.JConversion("java.util.List", exact=List)
