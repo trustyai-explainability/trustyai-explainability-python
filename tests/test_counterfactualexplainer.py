@@ -5,22 +5,21 @@ from common import *
 
 import uuid
 
+from java.lang import Long
+from java.util import Random
+
 from trustyai.explainers import CounterfactualExplainer
-from trustyai.utils import TestUtils
-from trustyai.model.domain import NumericalFeatureDomain
 from trustyai.model import (
     CounterfactualPrediction,
     DataDomain,
     PredictionFeatureDomain,
     PredictionInput,
     FeatureFactory,
-    Output,
     PredictionOutput,
-    Type,
-    Value, output,
+    output,
 )
-from java.util import Random
-from java.lang import Long
+from trustyai.model.domain import NumericalFeatureDomain
+from trustyai.utils import TestUtils
 
 jrandom = Random()
 jrandom.setSeed(0)
@@ -99,11 +98,12 @@ def test_counterfactual_match():
     )
 
     total_sum = 0
-    for entity in result.getEntities():
-        total_sum += entity.asFeature().getValue().asNumber()
+    for entity in result.entities:
+        total_sum += entity.as_feature().value.as_number()
         print(entity)
 
-    print(result.getOutput().get(0).getOutputs())
+    print("Counterfactual match:")
+    print(result.output[0].outputs)
 
     assert total_sum <= center + epsilon
     assert total_sum >= center - epsilon

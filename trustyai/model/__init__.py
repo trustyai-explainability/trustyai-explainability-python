@@ -64,18 +64,50 @@ class PredictionProvider:
 
 
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
+# pylint: disable=no-member
 class _JOutput:
     """Java Output implicit methods"""
 
-    # pylint: disable=no-member
+    @property
+    def name(self) -> str:
+        """Get output's name"""
+        return self.getName()
+
+    @property
+    def score(self) -> float:
+        """Get output's score"""
+        return self.getScore()
+
+    @property
+    def type(self):
+        """Get output's type"""
+        return self.getType()
+
+    @property
+    def value(self):
+        """Get output's value"""
+        return self.getValue()
+
     def __str__(self):
-        return (
-            f"Output(name={self.getName()}, type={self.getType()}, "
-            f"value={self.getValue()}, score={self.getScore()})"
-        )
+        return self.toString()
 
     def __repr__(self):
         return self.__str__()
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.PredictionOutput")
+# pylint: disable=no-member
+class _JPredictionOutput:
+    """Java PredictionOutput implicit methods"""
+
+    @property
+    def outputs(self):
+        """Get outputs"""
+        return self.getOutputs()
+
+    def by_name(self, name: str):
+        """Get output by name"""
+        return self.getByName(name)
 
 
 def output(name, dtype, value=None, score=1.0):
