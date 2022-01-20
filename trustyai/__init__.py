@@ -37,3 +37,71 @@ def init(*args, path=CORE_DEPS):
 
     except OSError:
         print("JVM already started")
+
+
+# implicit conversion
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.local.counterfactual.CounterfactualResult")
+# pylint: disable=no-member
+class _JCounterfactualResult:
+    """Java CounterfactualResult implicit methods"""
+
+    @property
+    def entities(self):
+        """Return entities"""
+        return self.getEntities()
+
+    @property
+    def output(self):
+        """Return PredictionOutput"""
+        return self.getOutput()
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.local.counterfactual.entities.DoubleEntity")
+# pylint: disable=no-member
+class _JDoubleEntity:
+    """Java DoubleEntity implicit methods"""
+
+    def as_feature(self):
+        """Return as feature"""
+        return self.asFeature()
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Feature")
+# pylint: disable=no-member
+class _JFeature:
+    """Java Feature implicit methods"""
+
+    @property
+    def name(self):
+        """Return name"""
+        return self.getName()
+
+    @property
+    def type(self):
+        """Return type"""
+        return self.getType()
+
+    @property
+    def value(self):
+        """Return value"""
+        return self.getValue()
+
+    def __str__(self):
+        return self.toString()
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Value")
+# pylint: disable=no-member
+class _JValue:
+    """Java Value implicit methods"""
+
+    def as_string(self) -> str:
+        """Return as string"""
+        return self.asString()
+
+    def as_number(self) -> float:
+        """Return as number"""
+        return self.asNumber()
+
+    def __str__(self):
+        return self.toString()
