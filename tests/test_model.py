@@ -3,9 +3,7 @@
 
 from common import *
 
-from trustyai.model import Model
-
-from org.kie.kogito.explainability.model import FeatureFactory
+from trustyai.model import Model, feature
 
 
 def foo():
@@ -23,7 +21,7 @@ def test_basic_model():
     model = Model(test_model)
 
     features = [
-        FeatureFactory.newNumericalFeature(f"f-num{i}", i * 2.0)
+        feature(name=f"f-num{i}", value=i * 2.0, dtype="number")
         for i in range(5)
     ]
 
