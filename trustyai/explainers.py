@@ -13,9 +13,15 @@ from org.kie.kogito.explainability.local.lime import (
     LimeExplainer as _LimeExplainer,
 )
 
-from org.kie.kogito.explainability.model import Prediction, PredictionProvider, Saliency
+from org.kie.kogito.explainability.model import (
+    Prediction,
+    PredictionProvider,
+    Saliency,
+    PerturbationContext,
+)
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
+from java.util import Random
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -45,11 +51,31 @@ class CounterfactualExplainer:
         return self._explainer.explainAsync(prediction, model).get()
 
 
+# pylint: disable=too-many-arguments
 class LimeExplainer:
     """Wrapper for TrustyAI's LIME explainer"""
 
-    def __init__(self, config: LimeConfig):
-        self._explainer = _LimeExplainer(config)
+    def __init__(
+        self,
+        perturbations=1,
+        seed=0,
+        samples=10,
+        penalise_sparse_balance=True,
+        normalise_weights=True,
+    ):
+        # build LIME configuration
+        self._jrandom = Random()
+        self._jrandom.setSeed(seed)
+
+        self._lime_config = (
+            LimeConfig()
+            .withNormalizeWeights(normalise_weights)
+            .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
+            .withSamples(samples)
+            .withPenalizeBalanceSparse(penalise_sparse_balance)
+        )
+
+        self._explainer = _LimeExplainer(self._lime_config)
 
     def explain(self, prediction, model: PredictionProvider) -> Dict[str, Saliency]:
         """Request for a LIME explanation given a prediction and a model"""

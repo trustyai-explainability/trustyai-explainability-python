@@ -7,7 +7,6 @@ from jpype import JImplements, JOverride, JProxy, _jcustomizer
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDomain as _DataDomain,
-    PerturbationContext as _PerturbationContext,
     Feature as _Feature,
     FeatureFactory as _FeatureFactory,
     Output as _Output,
@@ -25,7 +24,6 @@ from org.kie.kogito.explainability.local.counterfactual.entities import (
 
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain
-PerturbationContext = _PerturbationContext
 Feature = _Feature
 FeatureFactory = _FeatureFactory
 Output = _Output
