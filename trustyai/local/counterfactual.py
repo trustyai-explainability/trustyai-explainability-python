@@ -14,16 +14,15 @@ from org.kie.kogito.explainability.model import (
     PredictionOutput,
     SimplePrediction,
 )
-
-# pylint: disable=too-many-arguments
 from trustyai.model.domain import feature_domain
 
 
+# pylint: disable=too-many-arguments
 def counterfactual_prediction(
     input_features: List[Feature],
     outputs: List[Output],
-    constraints: List[bool],
     domains: List[Optional[Tuple]],
+    constraints: Optional[List[bool]] = None,
     data_distribution: Optional[DataDistribution] = None,
     uuid: Optional[_uuid.UUID] = None,
     timeout: Optional[float] = None,
@@ -33,6 +32,8 @@ def counterfactual_prediction(
         uuid = _uuid.uuid4()
     if timeout:
         timeout = Long(timeout)
+    if not constraints:
+        constraints = [False] * len(input_features)
 
     # build the feature domains from the Python tuples
     java_domains = _jclass.JClass("java.util.Arrays").asList(
