@@ -9,9 +9,7 @@ from common import mock_feature
 from trustyai.explainers import LimeExplainer
 from trustyai.local.counterfactual import simple_prediction
 from trustyai.utils import TestUtils
-from trustyai.model import (
-    FeatureFactory,
-)
+from trustyai.model import feature
 
 from org.kie.kogito.explainability.local import (
     LocalExplanationException,
@@ -36,7 +34,7 @@ def test_empty_prediction():
 def test_non_empty_input():
     """Test for non-empty input"""
     lime_explainer = LimeExplainer(seed=0, samples=10, perturbations=1)
-    features = [FeatureFactory.newNumericalFeature(f"f-num{i}", i) for i in range(4)]
+    features = [feature(name=f"f-num{i}", value=i, dtype="number") for i in range(4)]
 
     model = TestUtils.getSumSkipModel(0)
     outputs = model.predict([features])[0].outputs
