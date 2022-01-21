@@ -11,6 +11,7 @@ from org.kie.kogito.explainability.model import (
     PredictionFeatureDomain,
     PredictionInput,
     PredictionOutput,
+    SimplePrediction,
 )
 from org.kie.kogito.explainability.model.domain import FeatureDomain
 
@@ -39,3 +40,11 @@ def counterfactual_prediction(
         uuid,
         timeout,
     )
+
+
+def simple_prediction(
+    input_features: List[Feature],
+    outputs: List[Output],
+) -> SimplePrediction:
+    """Helper to build SimplePrediction"""
+    return SimplePrediction(PredictionInput(input_features), PredictionOutput(outputs))
