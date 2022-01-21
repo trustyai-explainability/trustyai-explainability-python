@@ -9,7 +9,6 @@ from trustyai.model import (
     FeatureFactory,
     output,
 )
-from trustyai.model.domain import NumericalFeatureDomain
 from trustyai.utils import TestUtils
 
 jrandom = Random()
@@ -27,7 +26,7 @@ def test_non_empty_input():
         for i in range(n_features)
     ]
     constraints = [False] * n_features
-    domains = [NumericalFeatureDomain.create(0.0, 1000.0)] * n_features
+    domains = [(0.0, 1000.0)] * n_features
 
     model = TestUtils.getSumSkipModel(0)
 
@@ -52,7 +51,7 @@ def test_counterfactual_match():
         FeatureFactory.newNumericalFeature(f"f-num{i + 1}", 10.0) for i in range(4)
     ]
     constraints = [False] * 4
-    domains = [NumericalFeatureDomain.create(0.0, 1000.0)] * 4
+    domains = [(0.0, 1000.0)] * 4
 
     center = 500.0
     epsilon = 10.0

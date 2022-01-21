@@ -1,8 +1,9 @@
 # pylint: disable=import-error
 """Counterfactual helper methods"""
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import uuid as _uuid
 from java.lang import Long
+from jpype import _jclass
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
     DataDistribution,
@@ -13,15 +14,16 @@ from org.kie.kogito.explainability.model import (
     PredictionOutput,
     SimplePrediction,
 )
-from org.kie.kogito.explainability.model.domain import FeatureDomain
-
 
 # pylint: disable=too-many-arguments
+from trustyai.model.domain import feature_domain
+
+
 def counterfactual_prediction(
     input_features: List[Feature],
     outputs: List[Output],
     constraints: List[bool],
-    domains: List[FeatureDomain],
+    domains: List[Optional[Tuple]],
     data_distribution: Optional[DataDistribution] = None,
     uuid: Optional[_uuid.UUID] = None,
     timeout: Optional[float] = None,
@@ -31,10 +33,16 @@ def counterfactual_prediction(
         uuid = _uuid.uuid4()
     if timeout:
         timeout = Long(timeout)
+
+    # build the feature domains from the Python tuples
+    java_domains = _jclass.JClass("java.util.Arrays").asList(
+        [feature_domain(domain) for domain in domains]
+    )
+
     return CounterfactualPrediction(
         PredictionInput(input_features),
         PredictionOutput(outputs),
-        PredictionFeatureDomain(domains),
+        PredictionFeatureDomain(java_domains),
         constraints,
         data_distribution,
         uuid,
