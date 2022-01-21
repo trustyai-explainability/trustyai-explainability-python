@@ -96,4 +96,4 @@ def test_normalized_weights():
     saliency = saliency_map.get(decision_name)
     per_feature_importance = saliency.getPerFeatureImportance()
     for feature_importance in per_feature_importance:
-        assert -2.0 < feature_importance.getScore() < 2.0
+        assert -3.0 < feature_importance.getScore() < 3.0
