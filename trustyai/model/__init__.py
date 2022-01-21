@@ -3,7 +3,7 @@
 from typing import List
 
 from java.util.concurrent import CompletableFuture, ForkJoinPool
-from jpype import JImplements, JOverride, JProxy, _jcustomizer
+from jpype import JImplements, JOverride, _jcustomizer, _jclass
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDomain as _DataDomain,
@@ -36,20 +36,8 @@ Value = _Value
 Type = _Type
 
 
-class InnerSupplier:
-    """Wraps the Python predict function in a Java Supplier"""
-
-    def __init__(self, _inputs: List[PredictionInput], predict_fun):
-        self.inputs = _inputs
-        self.predict_fun = predict_fun
-
-    def get(self) -> List[PredictionOutput]:
-        """The Supplier interface get method"""
-        return self.predict_fun(self.inputs)
-
-
-@JImplements("org.kie.kogito.explainability.model.PredictionProvider", deferred=True)
-class PredictionProvider:
+@JImplements("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
+class Model:
     """Python transformer for the TrustyAI Java PredictionProvider"""
 
     def __init__(self, predict_fun):
@@ -58,9 +46,9 @@ class PredictionProvider:
     @JOverride
     def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
         """Python implementation of the predictAsync interface method"""
-        supplier = InnerSupplier(inputs, self.predict_fun)
-        proxy = JProxy("java.util.function.Supplier", inst=supplier)
-        future = CompletableFuture.supplyAsync(proxy, ForkJoinPool.commonPool())
+        future = CompletableFuture.completedFuture(
+            _jclass.JClass("java.util.Arrays").asList(self.predict_fun(inputs))
+        )
         return future
 
 
@@ -109,6 +97,17 @@ class _JPredictionOutput:
     def by_name(self, name: str):
         """Get output by name"""
         return self.getByName(name)
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.PredictionInput")
+# pylint: disable=no-member
+class _JPredictionInput:
+    """Java PredictionInput implicit methods"""
+
+    @property
+    def features(self):
+        """Get features"""
+        return self.getFeatures()
 
 
 # implicit conversion
@@ -162,9 +161,6 @@ class _JFeature:
         """Return value"""
         return self.getValue()
 
-    def __str__(self):
-        return self.toString()
-
 
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Value")
 # pylint: disable=no-member
@@ -194,6 +190,57 @@ class _JPredictionProvider:
         """Return model's prediction, removing async"""
         _inputs = [PredictionInput(features) for features in inputs]
         return self.predictAsync(_inputs).get()
+
+
+@_jcustomizer.JImplementationFor(
+    "org.kie.kogito.explainability.model.CounterfactualPrediction"
+)
+# pylint: disable=no-member, too-few-public-methods
+class _JCounterfactualPrediction:
+    """Java CounterfactualPrediction implicit methods"""
+
+    @property
+    def domain(self):
+        """Return domain"""
+        return self.getDomain()
+
+    @property
+    def input(self) -> PredictionInput:
+        """Return input"""
+        return self.getInput()
+
+    @property
+    def output(self) -> PredictionOutput:
+        """Return input"""
+        return self.getOutput()
+
+    @property
+    def constraints(self):
+        """Return constraints"""
+        return self.getConstraints()
+
+    @property
+    def data_distribution(self):
+        """Return data distribution"""
+        return self.getDataDistribution()
+
+    @property
+    def max_running_time_seconds(self):
+        """Return max running time seconds"""
+        return self.getMaxRunningTimeSeconds()
+
+
+@_jcustomizer.JImplementationFor(
+    "org.kie.kogito.explainability.model.PredictionFeatureDomain"
+)
+# pylint: disable=no-member
+class _JPredictionFeatureDomain:
+    """Java PredictionFeatureDomain implicit methods"""
+
+    @property
+    def feature_domains(self):
+        """Return feature domains"""
+        return self.getFeatureDomains()
 
 
 def output(name, dtype, value=None, score=1.0):

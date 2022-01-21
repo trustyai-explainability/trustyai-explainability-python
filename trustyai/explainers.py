@@ -14,7 +14,7 @@ from org.kie.kogito.explainability.local.lime import (
 )
 
 from org.kie.kogito.explainability.model import (
-    Prediction,
+    CounterfactualPrediction,
     PredictionProvider,
     Saliency,
     PerturbationContext,
@@ -31,7 +31,7 @@ LimeConfig = _LimeConfig
 class CounterfactualExplainer:
     """Wrapper for TrustyAI's counterfactual explainer"""
 
-    def __init__(self, steps=10_000) -> None:
+    def __init__(self, steps=10_000):
         self._termination_config = TerminationConfig().withScoreCalculationCountLimit(
             Long.valueOf(steps)
         )
@@ -45,7 +45,7 @@ class CounterfactualExplainer:
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
-        self, prediction: Prediction, model: PredictionProvider
+        self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()

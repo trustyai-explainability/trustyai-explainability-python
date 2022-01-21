@@ -1,4 +1,5 @@
 ![TrustyAI](https://img.shields.io/badge/TrustyAI-1.12-green) [![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml)
+
 # python-trustyai
 
 Python bindings to [TrustyAI](https://kogito.kie.org/trustyai/)'s explainability library.
@@ -46,8 +47,7 @@ You can also run the example Jupyter notebooks using `mybinder.org`:
 
 ## Getting started
 
-To initialise, import the module and initialise it.
-For instance,
+To initialise, import the module and initialise it. For instance,
 
 ```python
 import trustyai
@@ -55,37 +55,40 @@ import trustyai
 trustyai.init()
 ```
 
-If the dependencies are not in the default `dep` sub-directory, or
-you want to use a custom classpath you can specify it with:
+If the dependencies are not in the default `dep` sub-directory, or you want to use a custom classpath you can specify it
+with:
+
 ```python
 import trustyai
 
 trustyai.init(path="/foo/bar/explainability-core-2.0.0-SNAPSHOT.jar")
 ```
 
-In order to get all the project's dependencies, the script `deps.sh` can be run and dependencies will
-be stored locally under `./dep`.
+In order to get all the project's dependencies, the script `deps.sh` can be run and dependencies will be stored locally
+under `./dep`.
 
-This needs to be the very first call, before any other call to TrustyAI methods. After this, we can call all other methods, as shown in the examples.
+This needs to be the very first call, before any other call to TrustyAI methods. After this, we can call all other
+methods, as shown in the examples.
 
 ### Writing your model in Python
 
-To code a model in Python you need to write it a function with takes a Python list of `PredictionInput` and
-returns a (Python) list of `PredictionOutput`. 
+To code a model in Python you need to write it a function with takes a Python list of `PredictionInput` and returns a (
+Python) list of `PredictionOutput`.
 
 This function will then be passed as an argument to the Python `PredictionProvider`
-which will take care of wrapping it in a Java `CompletableFuture` for you.
-For instance,
+which will take care of wrapping it in a Java `CompletableFuture` for you. For instance,
 
 ```python
-from trustyai.model import PredictionProvider
+from trustyai.model import Model
+
 
 def myModelFunction(inputs):
     # do something with the inputs
     output = [predictionOutput1, predictionOutput2]
     return output
 
-model = PredictionProvider(myModelFunction)
+
+model = Model(myModelFunction)
 
 inputs = [predictionInput1, predictionInput2]
 
