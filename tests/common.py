@@ -2,6 +2,7 @@
 """Common methods and models for tests"""
 import os
 import sys
+from typing import List
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../")
@@ -24,10 +25,8 @@ if not INITIALISED:
 
 from trustyai.model import (
     FeatureFactory,
-    Output,
     PredictionOutput,
-    Type,
-    Value,
+    output,
 )
 
 
@@ -36,16 +35,15 @@ def mock_feature(value):
     return FeatureFactory.newNumericalFeature("f-num", value)
 
 
-def sum_skip_model(inputs):
+from org.kie.kogito.explainability.model import PredictionInput, PredictionOutput
+
+
+def sum_skip_model(inputs: List[PredictionInput]) -> List[PredictionOutput]:
     """SumSkip test model"""
-    prediction_outputs = []
-    for prediction_input in inputs:
-        features = prediction_input.getFeatures()
-        result = 0.0
-        for i in range(features.size()):
-            if i != 0:
-                result += features.get(i).getValue().asNumber()
-        output = [Output("sum-but0", Type.NUMBER, Value(result), 1.0)]
-        prediction_output = PredictionOutput(output)
-        prediction_outputs.append(prediction_output)
-    return prediction_outputs
+    features = inputs[0].features
+    result = 0.0
+    for i in range(len(features)):
+        if i != 0:
+            result += features[i].value.as_number()
+    _output = [output(name="sum-but-0", dtype="number", value=result)]
+    return [PredictionOutput(_output)]
