@@ -6,7 +6,7 @@ from pytest import approx
 import random
 
 from trustyai.utils import DataUtils
-from trustyai.model import PerturbationContext, FeatureFactory
+from trustyai.model import FeatureFactory
 from java.util import Random
 
 jrandom = Random()
@@ -77,13 +77,13 @@ def test_exponential_smoothing_kernel():
     assert k == approx(0.994, 1e-3)
 
 
-def test_perturb_features_empty():
-    """Test perturb empty features"""
-    features = []
-    perturbationContext = PerturbationContext(jrandom, 0)
-    newFeatures = DataUtils.perturbFeatures(features, perturbationContext)
-    assert newFeatures is not None
-    assert len(features) == newFeatures.size()
+# def test_perturb_features_empty():
+#     """Test perturb empty features"""
+#     features = []
+#     perturbationContext = PerturbationContext(jrandom, 0)
+#     newFeatures = DataUtils.perturbFeatures(features, perturbationContext)
+#     assert newFeatures is not None
+#     assert len(features) == newFeatures.size()
 
 
 def test_random_distribution_generation():
