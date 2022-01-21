@@ -5,7 +5,9 @@ from common import *
 
 from jpype import _jclass
 
+from trustyai.model import feature
 from trustyai.model.domain import feature_domain
+from org.kie.kogito.explainability.model import Type
 
 
 def test_list_python_to_java():
@@ -52,3 +54,21 @@ def test_categorical_domain_tuple():
     jdomain = feature_domain(domain)
     assert jdomain.getCategories().size() == 3
     assert jdomain.getCategories().containsAll(domain)
+
+
+def test_feature_function():
+    """Test helper method to create features"""
+    f1 = feature(name="f-1", value=1.0, dtype="number")
+    assert f1.name == "f-1"
+    assert f1.value.as_number() == 1.0
+    assert f1.type == Type.NUMBER
+
+    f2 = feature(name="f-2", value=True, dtype="bool")
+    assert f2.name == "f-2"
+    assert f2.value.as_obj() == True
+    assert f2.type == Type.BOOLEAN
+
+    f3 = feature(name="f-3", value="foo", dtype="categorical")
+    assert f3.name == "f-3"
+    assert f3.value.as_string() == "foo"
+    assert f3.type == Type.CATEGORICAL

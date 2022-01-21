@@ -7,7 +7,7 @@ from jpype import JImplements, JOverride, _jcustomizer, _jclass
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDomain as _DataDomain,
-    Feature as _Feature,
+    Feature,
     FeatureFactory as _FeatureFactory,
     Output as _Output,
     PredictionFeatureDomain as _PredictionFeatureDomain,
@@ -24,7 +24,6 @@ from org.kie.kogito.explainability.local.counterfactual.entities import (
 
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain
-Feature = _Feature
 FeatureFactory = _FeatureFactory
 Output = _Output
 PredictionFeatureDomain = _PredictionFeatureDomain
@@ -175,6 +174,10 @@ class _JValue:
         """Return as number"""
         return self.asNumber()
 
+    def as_obj(self):
+        """Return as object"""
+        return self.getUnderlyingObject()
+
     def __str__(self):
         return self.toString()
 
@@ -243,7 +246,7 @@ class _JPredictionFeatureDomain:
         return self.getFeatureDomains()
 
 
-def output(name, dtype, value=None, score=1.0):
+def output(name, dtype, value=None, score=1.0) -> _Output:
     """Helper method returning a Java Output"""
     if dtype == "text":
         _type = Type.TEXT
@@ -256,3 +259,16 @@ def output(name, dtype, value=None, score=1.0):
     else:
         _type = Type.UNDEFINED
     return _Output(name, _type, Value(value), score)
+
+
+def feature(name: str, dtype: str, value=None) -> Feature:
+    """Helper method to build features"""
+    if dtype == "categorical":
+        _feature = FeatureFactory.newCategoricalFeature(name, value)
+    elif dtype == "number":
+        _feature = FeatureFactory.newNumericalFeature(name, value)
+    elif dtype == "bool":
+        _feature = FeatureFactory.newBooleanFeature(name, value)
+    else:
+        _feature = FeatureFactory.newObjectFeature(name, value)
+    return _feature
