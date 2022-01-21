@@ -19,6 +19,9 @@ from org.kie.kogito.explainability.model import (
     Value as _Value,
     Type as _Type,
 )
+from org.kie.kogito.explainability.local.counterfactual.entities import (
+    CounterfactualEntity,
+)
 
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain
@@ -108,6 +111,78 @@ class _JPredictionOutput:
     def by_name(self, name: str):
         """Get output by name"""
         return self.getByName(name)
+
+
+# implicit conversion
+@_jcustomizer.JImplementationFor(
+    "org.kie.kogito.explainability.local.counterfactual.CounterfactualResult"
+)
+# pylint: disable=no-member
+class _JCounterfactualResult:
+    """Java CounterfactualResult implicit methods"""
+
+    @property
+    def entities(self) -> List[CounterfactualEntity]:
+        """Return entities"""
+        return self.getEntities()
+
+    @property
+    def output(self):
+        """Return PredictionOutput"""
+        return self.getOutput()
+
+
+@_jcustomizer.JImplementationFor(
+    "org.kie.kogito.explainability.local.counterfactual.entities.CounterfactualEntity"
+)
+# pylint: disable=no-member, too-few-public-methods
+class _JCounterfactualEntity:
+    """Java DoubleEntity implicit methods"""
+
+    def as_feature(self) -> Feature:
+        """Return as feature"""
+        return self.asFeature()
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Feature")
+# pylint: disable=no-member
+class _JFeature:
+    """Java Feature implicit methods"""
+
+    @property
+    def name(self):
+        """Return name"""
+        return self.getName()
+
+    @property
+    def type(self):
+        """Return type"""
+        return self.getType()
+
+    @property
+    def value(self):
+        """Return value"""
+        return self.getValue()
+
+    def __str__(self):
+        return self.toString()
+
+
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Value")
+# pylint: disable=no-member
+class _JValue:
+    """Java Value implicit methods"""
+
+    def as_string(self) -> str:
+        """Return as string"""
+        return self.asString()
+
+    def as_number(self) -> float:
+        """Return as number"""
+        return self.asNumber()
+
+    def __str__(self):
+        return self.toString()
 
 
 def output(name, dtype, value=None, score=1.0):
