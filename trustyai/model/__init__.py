@@ -183,6 +183,19 @@ class _JValue:
         return self.toString()
 
 
+@_jcustomizer.JImplementationFor(
+    "org.kie.kogito.explainability.model.PredictionProvider"
+)
+# pylint: disable=no-member, too-few-public-methods
+class _JPredictionProvider:
+    """Java PredictionProvider implicit methods"""
+
+    def predict(self, inputs: List[List[Feature]]) -> List[PredictionOutput]:
+        """Return model's prediction, removing async"""
+        _inputs = [PredictionInput(features) for features in inputs]
+        return self.predictAsync(_inputs).get()
+
+
 def output(name, dtype, value=None, score=1.0):
     """Helper method returning a Java Output"""
     if dtype == "text":
