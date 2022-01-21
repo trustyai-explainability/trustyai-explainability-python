@@ -9,6 +9,7 @@ from java.lang import Long
 from java.util import Random
 
 from trustyai.explainers import CounterfactualExplainer
+from trustyai.local.counterfactual import counterfactual_prediction
 from trustyai.model import (
     CounterfactualPrediction,
     DataDomain,
@@ -36,10 +37,13 @@ def run_counterfactual_search(goal,
     explainer = CounterfactualExplainer(steps=steps)
 
     input_ = PredictionInput(features)
-    output = PredictionOutput(goal)
+    output_ = PredictionOutput(goal)
     domain = PredictionFeatureDomain(data_domain.getFeatureDomains())
-    prediction = CounterfactualPrediction(
-        input_, output, domain, constraints, None, uuid.uuid4(), Long(60)
+    prediction = counterfactual_prediction(
+        input_=input_,
+        output=output_,
+        domain=domain,
+        constraints=constraints
     )
     return explainer.explain(prediction, model)
 
@@ -59,14 +63,11 @@ def test_non_empty_input():
 
     model = TestUtils.getSumSkipModel(0)
 
-    prediction = CounterfactualPrediction(
-        PredictionInput(features),
-        PredictionOutput(goal),
-        PredictionFeatureDomain(feature_boundaries),
-        constraints,
-        None,
-        uuid.uuid4(),
-        Long(60)
+    prediction = counterfactual_prediction(
+        input_=PredictionInput(features),
+        output=PredictionOutput(goal),
+        domain=PredictionFeatureDomain(feature_boundaries),
+        constraints=constraints
     )
 
     counterfactual_result = explainer.explain(prediction, model)
