@@ -10,7 +10,7 @@ from trustyai.explainers import CounterfactualExplainer
 from trustyai.local.counterfactual import counterfactual_prediction
 from trustyai.model import (
     FeatureFactory,
-    output, Model,
+    output, Model, feature,
 )
 from trustyai.utils import TestUtils
 
@@ -25,7 +25,7 @@ def test_non_empty_input():
 
     goal = [output(name="f-num1", dtype="number", value=10.0, score=0.0)]
     features = [
-        FeatureFactory.newNumericalFeature(f"f-num{i}", i * 2.0)
+        feature(name=f"f-num{i}", value=i * 2.0, dtype="number")
         for i in range(n_features)
     ]
     domains = [(0.0, 1000.0)] * n_features
@@ -49,7 +49,7 @@ def test_counterfactual_match():
     goal = [output(name="inside", dtype="bool", value=True, score=0.0)]
 
     features = [
-        FeatureFactory.newNumericalFeature(f"f-num{i + 1}", 10.0) for i in range(4)
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number") for i in range(4)
     ]
     domains = [(0.0, 1000.0)] * 4
 
@@ -87,7 +87,7 @@ def test_counterfactual_match_python_model():
     n_features = 5
 
     features = [
-        FeatureFactory.newNumericalFeature(f"f-num{i + 1}", 10.0) for i in range(n_features)
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number") for i in range(n_features)
     ]
     domains = [(0.0, 1000.0)] * n_features
 
@@ -111,7 +111,7 @@ def test_default_constraints():
     n_features = 5
 
     features = [
-        FeatureFactory.newNumericalFeature(f"f-num{i + 1}", 10.0) for i in range(n_features)
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number") for i in range(n_features)
     ]
     domains = [(0.0, 1000.0)] * n_features
 
@@ -126,7 +126,7 @@ def test_default_constraints():
     n_features = 10
 
     features = [
-        FeatureFactory.newNumericalFeature(f"f-num{i + 1}", 10.0) for i in range(n_features)
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number") for i in range(n_features)
     ]
     domains = [(0.0, 1000.0)] * n_features
 
