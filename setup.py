@@ -7,7 +7,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="trustyai",
-    version="0.0.3",
+    version="0.0.4",
     description="Python bindings to the TrustyAI explainability library",
     long_description=long_description,
     long_description_content_type="text/markdown",
