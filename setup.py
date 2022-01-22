@@ -7,7 +7,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="trustyai",
-    version="0.0.4",
+    version="0.0.5",
     description="Python bindings to the TrustyAI explainability library",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -26,7 +26,7 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Software Development :: Libraries :: Java Libraries"
     ],
-    packages=['trustyai', 'trustyai.model', 'trustyai.utils'],
+    packages=['trustyai', 'trustyai.model', 'trustyai.utils', 'trustyai.local'],
     include_package_data=False,
     install_requires=['Jpype1'],
 )
