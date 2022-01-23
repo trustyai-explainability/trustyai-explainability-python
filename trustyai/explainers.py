@@ -37,15 +37,15 @@ class CounterfactualExplainer:
         )
         self._solver_config = (
             SolverConfigBuilder.builder()
-            .withTerminationConfig(self._termination_config)
-            .build()
+                .withTerminationConfig(self._termination_config)
+                .build()
         )
         self._cf_config = CounterfactualConfig().withSolverConfig(self._solver_config)
 
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
-        self, prediction: CounterfactualPrediction, model: PredictionProvider
+            self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()
@@ -56,12 +56,12 @@ class LimeExplainer:
     """Wrapper for TrustyAI's LIME explainer"""
 
     def __init__(
-        self,
-        perturbations=1,
-        seed=0,
-        samples=10,
-        penalise_sparse_balance=True,
-        normalise_weights=True,
+            self,
+            perturbations=1,
+            seed=0,
+            samples=10,
+            penalise_sparse_balance=True,
+            normalise_weights=True,
     ):
         # build LIME configuration
         self._jrandom = Random()
@@ -69,10 +69,10 @@ class LimeExplainer:
 
         self._lime_config = (
             LimeConfig()
-            .withNormalizeWeights(normalise_weights)
-            .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
-            .withSamples(samples)
-            .withPenalizeBalanceSparse(penalise_sparse_balance)
+                .withNormalizeWeights(normalise_weights)
+                .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
+                .withSamples(samples)
+                .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
@@ -80,3 +80,10 @@ class LimeExplainer:
     def explain(self, prediction, model: PredictionProvider) -> Dict[str, Saliency]:
         """Request for a LIME explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()
+
+
+class SHAPExplainer:
+    """Wrapper for TrustyAI's SHAP explainer"""
+
+    def __init__(self):
+        pass
