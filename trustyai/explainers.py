@@ -1,7 +1,8 @@
 """Explainers module"""
 # pylint: disable = import-error, too-few-public-methods
-from typing import Dict
+from typing import Dict, Optional, List
 
+from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult,
@@ -13,11 +14,18 @@ from org.kie.kogito.explainability.local.lime import (
     LimeExplainer as _LimeExplainer,
 )
 
+from org.kie.kogito.explainability.local.shap import (
+    ShapConfig as _ShapConfig,
+    ShapResults,
+    ShapKernelExplainer as _ShapKernelExplainer,
+)
+
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
     PredictionProvider,
     Saliency,
     PerturbationContext,
+    PredictionInput as _PredictionInput,
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
@@ -37,15 +45,15 @@ class CounterfactualExplainer:
         )
         self._solver_config = (
             SolverConfigBuilder.builder()
-                .withTerminationConfig(self._termination_config)
-                .build()
+            .withTerminationConfig(self._termination_config)
+            .build()
         )
         self._cf_config = CounterfactualConfig().withSolverConfig(self._solver_config)
 
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
-            self, prediction: CounterfactualPrediction, model: PredictionProvider
+        self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()
@@ -56,12 +64,12 @@ class LimeExplainer:
     """Wrapper for TrustyAI's LIME explainer"""
 
     def __init__(
-            self,
-            perturbations=1,
-            seed=0,
-            samples=10,
-            penalise_sparse_balance=True,
-            normalise_weights=True,
+        self,
+        perturbations=1,
+        seed=0,
+        samples=10,
+        penalise_sparse_balance=True,
+        normalise_weights=True,
     ):
         # build LIME configuration
         self._jrandom = Random()
@@ -69,10 +77,10 @@ class LimeExplainer:
 
         self._lime_config = (
             LimeConfig()
-                .withNormalizeWeights(normalise_weights)
-                .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
-                .withSamples(samples)
-                .withPenalizeBalanceSparse(penalise_sparse_balance)
+            .withNormalizeWeights(normalise_weights)
+            .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
+            .withSamples(samples)
+            .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
@@ -85,5 +93,29 @@ class LimeExplainer:
 class SHAPExplainer:
     """Wrapper for TrustyAI's SHAP explainer"""
 
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+        background: List[_PredictionInput],
+        samples=100,
+        seed=0,
+        perturbations=0,
+        link_type: Optional[_ShapConfig.LinkType] = None,
+    ):
+        if not link_type:
+            link_type = _ShapConfig.LinkType.IDENTITY
+        self._jrandom = Random()
+        self._jrandom.setSeed(seed)
+        perturbation_context = PerturbationContext(self._jrandom, perturbations)
+        self._config = (
+            _ShapConfig.builder()
+            .withLink(link_type)
+            .withPC(perturbation_context)
+            .withBackground(background)
+            .withNSamples(JInt(samples))
+            .build()
+        )
+        self._explainer = _ShapKernelExplainer(self._config)
+
+    def explain(self, prediction, model: PredictionProvider) -> List[ShapResults]:
+        """Request for a SHAP explanation given a prediction and a model"""
+        return self._explainer.explainAsync(prediction, model).get()
