@@ -5,7 +5,6 @@ from common import *
 
 import pytest
 
-from common import mock_feature
 from trustyai.explainers import LimeExplainer
 from trustyai.local.counterfactual import simple_prediction
 from trustyai.utils import TestUtils
