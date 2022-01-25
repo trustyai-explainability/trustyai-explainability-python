@@ -1,7 +1,8 @@
 """Explainers module"""
 # pylint: disable = import-error, too-few-public-methods
-from typing import Dict
+from typing import Dict, Optional, List
 
+from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult,
@@ -13,11 +14,18 @@ from org.kie.kogito.explainability.local.lime import (
     LimeExplainer as _LimeExplainer,
 )
 
+from org.kie.kogito.explainability.local.shap import (
+    ShapConfig as _ShapConfig,
+    ShapResults,
+    ShapKernelExplainer as _ShapKernelExplainer,
+)
+
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
     PredictionProvider,
     Saliency,
     PerturbationContext,
+    PredictionInput as _PredictionInput,
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
@@ -79,4 +87,35 @@ class LimeExplainer:
 
     def explain(self, prediction, model: PredictionProvider) -> Dict[str, Saliency]:
         """Request for a LIME explanation given a prediction and a model"""
+        return self._explainer.explainAsync(prediction, model).get()
+
+
+class SHAPExplainer:
+    """Wrapper for TrustyAI's SHAP explainer"""
+
+    def __init__(
+        self,
+        background: List[_PredictionInput],
+        samples=100,
+        seed=0,
+        perturbations=0,
+        link_type: Optional[_ShapConfig.LinkType] = None,
+    ):
+        if not link_type:
+            link_type = _ShapConfig.LinkType.IDENTITY
+        self._jrandom = Random()
+        self._jrandom.setSeed(seed)
+        perturbation_context = PerturbationContext(self._jrandom, perturbations)
+        self._config = (
+            _ShapConfig.builder()
+            .withLink(link_type)
+            .withPC(perturbation_context)
+            .withBackground(background)
+            .withNSamples(JInt(samples))
+            .build()
+        )
+        self._explainer = _ShapKernelExplainer(self._config)
+
+    def explain(self, prediction, model: PredictionProvider) -> List[ShapResults]:
+        """Request for a SHAP explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()
