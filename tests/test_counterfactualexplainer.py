@@ -7,9 +7,8 @@ from pytest import approx
 from java.util import Random
 
 from trustyai.explainers import CounterfactualExplainer
-from trustyai.local.counterfactual import counterfactual_prediction
 from trustyai.model import (
-    FeatureFactory,
+    counterfactual_prediction,
     output, Model, feature,
 )
 from trustyai.utils import TestUtils
