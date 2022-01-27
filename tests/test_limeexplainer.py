@@ -6,9 +6,8 @@ from common import *
 import pytest
 
 from trustyai.explainers import LimeExplainer
-from trustyai.local.counterfactual import simple_prediction
 from trustyai.utils import TestUtils
-from trustyai.model import feature
+from trustyai.model import feature, simple_prediction
 
 from org.kie.kogito.explainability.local import (
     LocalExplanationException,
