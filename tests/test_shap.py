@@ -6,8 +6,7 @@ from common import *
 import pytest
 
 from trustyai.explainers import SHAPExplainer
-from trustyai.local.counterfactual import simple_prediction
-from trustyai.model import feature, PredictionInput
+from trustyai.model import feature, PredictionInput, simple_prediction
 from trustyai.utils import TestUtils
 
 
