@@ -5,12 +5,16 @@ import uuid
 import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
+import site
+import os
 
 TRUSTY_VERSION = "1.12.0.Final"
+DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
+
 CORE_DEPS = [
-    f"./dep/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
-    "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-    "./dep/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
+    f"{DEFAULT_DEP_PATH}/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
+    f"{DEFAULT_DEP_PATH}/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
+    f"{DEFAULT_DEP_PATH}/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
 ]
 
 
