@@ -12,15 +12,7 @@ import trustyai
 INITIALISED = False
 
 if not INITIALISED:
-    trustyai.init(
-        path=trustyai.CORE_DEPS + [
-            "./dep/org/optaplanner/optaplanner-core/8.12.0.Final/optaplanner-core-8.12.0.Final.jar",
-            "./dep/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-            "./dep/org/kie/kie-api/7.59.0.Final/kie-api-7.59.0.Final.jar",
-            "./dep/io/micrometer/micrometer-core/1.7.4/micrometer-core-1.7.4.jar",
-        ]
-    )
-
+    trustyai.init()
     INITIALISED = True
 
 from trustyai.model import (
