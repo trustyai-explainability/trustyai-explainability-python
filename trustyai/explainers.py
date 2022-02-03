@@ -3,6 +3,8 @@
 from typing import Dict, Optional, List
 
 from jpype import JInt
+
+
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult,
@@ -23,10 +25,12 @@ from org.kie.kogito.explainability.local.shap import (
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
     PredictionProvider,
+    PredictionProviderArrow,
     Saliency,
     PerturbationContext,
     PredictionInput as _PredictionInput,
 )
+
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
@@ -58,6 +62,11 @@ class CounterfactualExplainer:
         """Request for a counterfactual explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()
 
+    def explainArrow(
+        self, prediction: CounterfactualPrediction, model: PredictionProviderArrow
+    ) -> CounterfactualResult:
+        """Request for a counterfactual explanation given a prediction and a model"""
+        return self._explainer.explainAsyncArrow(prediction, model).get()
 
 # pylint: disable=too-many-arguments
 class LimeExplainer:
@@ -78,8 +87,10 @@ class LimeExplainer:
         self._lime_config = (
             LimeConfig()
             .withNormalizeWeights(normalise_weights)
+            .withAdaptiveVariance(False)
             .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
             .withSamples(samples)
+            .withProximityFilter(False)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
 
@@ -88,6 +99,10 @@ class LimeExplainer:
     def explain(self, prediction, model: PredictionProvider) -> Dict[str, Saliency]:
         """Request for a LIME explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()
+
+    def explainArrow(self, prediction, model: PredictionProviderArrow) -> Dict[str, Saliency]:
+        """Request for a LIME explanation given a prediction and a model"""
+        return self._explainer.explainAsyncArrow(prediction, model).get()
 
 
 class SHAPExplainer:
@@ -99,6 +114,7 @@ class SHAPExplainer:
         samples=100,
         seed=0,
         perturbations=0,
+        return_buffer_size=256,
         link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         if not link_type:
@@ -112,9 +128,14 @@ class SHAPExplainer:
             .withPC(perturbation_context)
             .withBackground(background)
             .withNSamples(JInt(samples))
+            .withReturnBufferSize(return_buffer_size)
             .build()
         )
         self._explainer = _ShapKernelExplainer(self._config)
+
+    def explainArrow(self, prediction, model: PredictionProviderArrow) -> List[ShapResults]:
+        """Request for a SHAP explanation given a prediction and a model"""
+        return self._explainer.explainAsyncArrow(prediction, model).get()
 
     def explain(self, prediction, model: PredictionProvider) -> List[ShapResults]:
         """Request for a SHAP explanation given a prediction and a model"""

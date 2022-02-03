@@ -58,6 +58,8 @@ trustyai.init()
 If the dependencies are not in the default `dep` sub-directory, or you want to use a custom classpath you can specify it
 with:
 
+`cp target/explainability-core-* ../../../../python-experiments/trusty-ai-python-module/dep/org/kie/kogito/explainability-core/2.0.0/`
+
 ```python
 import trustyai
 

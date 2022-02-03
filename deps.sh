@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-TRUSTY_VERSION="1.12.0.Final"
+TRUSTY_VERSION="2.0.0-SNAPSHOT"
 
 mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:get \
     -DremoteRepositories=https://repository.sonatype.org/content/repositories/central  \

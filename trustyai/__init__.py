@@ -6,14 +6,26 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
-TRUSTY_VERSION = "1.12.0.Final"
+TRUSTY_VERSION = "2.0.0"
+
+#obviously these will need to be changed to the right places
 CORE_DEPS = [
-    f"./dep/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
-    "./dep/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-    "./dep/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
+    f"/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/explainability-core-2.0.0*",
+    "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/slf4j-api-1.7.30.jar",
+    "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/commons-lang3-3.12.0.jar",
+    "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/commons-math*",
+    #"/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/optaplanner-core*",
+    "dep/org/optaplanner/optaplanner-core/8.12.0.Final/optaplanner-core-8.12.0.Final.jar",
+    "dep/org/kie/kie-api/7.59.0.Final/kie-api-7.59.0.Final.jar",
+    "dep/io/micrometer/micrometer-core/1.7.4/micrometer-core-1.7.4.jar",
+    "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/arrow*",
+    "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/flatbuffers*",
+    "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/netty*",
+    "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target/lib/jackson*",
 ]
 
-
+print("== Dev Version ==")
+6
 def init(*args, path=CORE_DEPS):
     """Initialise Java binding"""
     # Launch the JVM

@@ -1,9 +1,13 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code
 """General model classes"""
+import time
 from typing import List
 
+import jpype
+import numpy as np
+
 from java.util.concurrent import CompletableFuture, ForkJoinPool
-from jpype import JImplements, JOverride, _jcustomizer, _jclass
+from jpype import JImplements, JOverride, _jcustomizer, _jclass, JArray, JByte, JLong
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDomain as _DataDomain,
@@ -18,10 +22,22 @@ from org.kie.kogito.explainability.model import (
     Value as _Value,
     Type as _Type,
 )
+
+from org.kie.kogito.explainability.utils import (
+    ArrowConverters as _ArrowConverters
+)
+
 from org.kie.kogito.explainability.local.counterfactual.entities import (
     CounterfactualEntity,
 )
+from org.apache.arrow.vector import (
+    VectorSchemaRoot as _VectorSchemaRoot
+)
 
+import pyarrow.jvm as pjvm
+import pyarrow as pa
+
+ArrowConverters = _ArrowConverters
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain
 FeatureFactory = _FeatureFactory
@@ -32,6 +48,7 @@ PredictionInput = _PredictionInput
 PredictionOutput = _PredictionOutput
 SimplePrediction = _SimplePrediction
 Value = _Value
+VectorSchemaRoot = _VectorSchemaRoot
 Type = _Type
 
 
@@ -49,6 +66,78 @@ class Model:
             _jclass.JClass("java.util.Arrays").asList(self.predict_fun(inputs))
         )
         return future
+
+@JImplements("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
+class Model:
+    """Python transformer for the TrustyAI Java PredictionProvider"""
+
+    def __init__(self, predict_fun):
+        self.predict_fun = predict_fun
+        self.predictcalls = 0
+        self.first_call = None
+
+    @JOverride
+    def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
+        """Python implementation of the predictAsync interface method"""
+        future = CompletableFuture.completedFuture(
+            _jclass.JClass("java.util.Arrays").asList(self.predict_fun(inputs))
+        )
+        return future
+
+@JImplements("org.kie.kogito.explainability.model.PredictionProviderArrow", deferred=False)
+class ArrowModel:
+    def __init__(self, predict_function):
+        self.predict_function = predict_function
+        self.col_names = None
+        self.predictcalls = 0
+        self.predicttime = 0
+        self.first_call = None
+
+    # def predict(self, address, capacity):
+    #     if self.predictcalls == 0:
+    #         self.first_call = time.time()
+    #
+    #     buffer = pa.foreign_buffer(address, capacity)
+    #     with pa.BufferReader(buffer) as reader:
+    #         bytearray = bytes(reader.read())
+    #     with pa.ipc.open_file(bytearray) as reader:
+    #         batch = reader.get_batch(0)
+    #     arr = batch.to_pandas().values
+    #     outputs = self.predict_function(arr)
+    #     if self.col_names is None:
+    #         self.col_names = [str(o) for o in range(outputs.shape[1])]
+    #     output_columns = [outputs[:,i] for i in range(len(self.col_names))]
+    #     record_batch = pa.record_batch(output_columns, self.col_names)
+    #     sink = pa.BufferOutputStream()
+    #     with pa.ipc.new_file(sink, record_batch.schema) as writer:
+    #         writer.write_batch(record_batch)
+    #     buffer = sink.getvalue()
+    #     self.predictcalls+=1
+    #     time_delta = time.time() - self.first_call
+    #     print("\r{:.2f}/s".format(self.predictcalls/time_delta), end="")
+    #     return JArray(JByte)(buffer.to_pybytes())
+    #
+    # @JOverride
+    # def predictAsync(self, address: JLong, capacity: JLong) -> CompletableFuture:
+    #     return CompletableFuture.completedFuture(self.predict(address, capacity))
+
+    def predict(self, bytearray):
+        with pa.ipc.open_file(bytearray) as reader:
+            batch = reader.get_batch(0)
+        arr = batch.to_pandas()
+        outputs = self.predict_function(arr)
+
+        record_batch = pa.RecordBatch.from_pandas(outputs)
+        sink = pa.BufferOutputStream()
+        with pa.ipc.new_file(sink, record_batch.schema) as writer:
+            writer.write_batch(record_batch)
+        buffer = sink.getvalue()
+        return jpype.JArray(JByte)(buffer)
+
+    @JOverride
+    def predictAsync(self, bytearray: JArray(JLong)) -> CompletableFuture:
+         return CompletableFuture.completedFuture(self.predict(bytearray))
+
 
 
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
