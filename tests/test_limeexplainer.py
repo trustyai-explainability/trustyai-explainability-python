@@ -54,7 +54,7 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
 
         saliency_map_no_penalty = lime_explainer_no_penalty.explain(
             prediction, model
-        )
+        ).map()
 
         assert saliency_map_no_penalty is not None
 
@@ -63,7 +63,7 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
 
         lime_explainer = LimeExplainer(samples=100, penalise_sparse_balance=True)
 
-        saliency_map = lime_explainer.explain(prediction, model)
+        saliency_map = lime_explainer.explain(prediction, model).map()
         assert saliency_map is not None
 
         saliency = saliency_map.get(decision_name)
@@ -85,7 +85,7 @@ def test_normalized_weights():
     outputs = model.predict([features])[0].outputs
     prediction = simple_prediction(input_features=features, outputs=outputs)
 
-    saliency_map = lime_explainer.explain(prediction, model)
+    saliency_map = lime_explainer.explain(prediction, model).map()
     assert saliency_map is not None
 
     decision_name = "sum-but0"

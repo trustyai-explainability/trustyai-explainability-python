@@ -46,15 +46,15 @@ class CounterfactualExplainer:
         )
         self._solver_config = (
             SolverConfigBuilder.builder()
-                .withTerminationConfig(self._termination_config)
-                .build()
+            .withTerminationConfig(self._termination_config)
+            .build()
         )
         self._cf_config = CounterfactualConfig().withSolverConfig(self._solver_config)
 
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
-            self, prediction: CounterfactualPrediction, model: PredictionProvider
+        self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()
@@ -69,22 +69,32 @@ class LimeExplanation:
     def show(self, decision: str) -> str:
         """Return saliencies for a decision"""
         result = f"Saliencies for '{decision}':\n"
-        for f in self._saliencies.get(decision).getPerFeatureImportance():
-            result += f'\t{f.getFeature().name}: {f.getScore()}\n'
+        for feature_importance in self._saliencies.get(
+            decision
+        ).getPerFeatureImportance():
+            result += f"\t{feature_importance.getFeature().name}: {feature_importance.getScore()}\n"
         return result
 
     def map(self):
+        """Return saliencies map"""
         return self._saliencies
 
     def plot(self, decision: str):
-        d = {}
-        for f in self._saliencies.get(decision).getPerFeatureImportance():
-            d[f.getFeature().name] = f.getScore()
+        """Plot saliencies"""
+        dictionary = {}
+        for feature_importance in self._saliencies.get(
+            decision
+        ).getPerFeatureImportance():
+            dictionary[
+                feature_importance.getFeature().name
+            ] = feature_importance.getScore()
 
-        colours = ['r' if i < 0 else 'g' for i in d.values()]
+        colours = ["r" if i < 0 else "g" for i in dictionary.values()]
         plt.title(f"LIME explanation for '{decision}'")
-        plt.barh(range(len(d)), d.values(), align='center', color=colours)
-        plt.yticks(range(len(d)), list(d.keys()))
+        plt.barh(
+            range(len(dictionary)), dictionary.values(), align="center", color=colours
+        )
+        plt.yticks(range(len(dictionary)), list(dictionary.keys()))
         plt.tight_layout()
 
 
@@ -93,12 +103,12 @@ class LimeExplainer:
     """Wrapper for TrustyAI's LIME explainer"""
 
     def __init__(
-            self,
-            perturbations=1,
-            seed=0,
-            samples=10,
-            penalise_sparse_balance=True,
-            normalise_weights=True,
+        self,
+        perturbations=1,
+        seed=0,
+        samples=10,
+        penalise_sparse_balance=True,
+        normalise_weights=True,
     ):
         # build LIME configuration
         self._jrandom = Random()
@@ -106,10 +116,10 @@ class LimeExplainer:
 
         self._lime_config = (
             LimeConfig()
-                .withNormalizeWeights(normalise_weights)
-                .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
-                .withSamples(samples)
-                .withPenalizeBalanceSparse(penalise_sparse_balance)
+            .withNormalizeWeights(normalise_weights)
+            .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
+            .withSamples(samples)
+            .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
@@ -123,12 +133,12 @@ class SHAPExplainer:
     """Wrapper for TrustyAI's SHAP explainer"""
 
     def __init__(
-            self,
-            background: List[_PredictionInput],
-            samples=100,
-            seed=0,
-            perturbations=0,
-            link_type: Optional[_ShapConfig.LinkType] = None,
+        self,
+        background: List[_PredictionInput],
+        samples=100,
+        seed=0,
+        perturbations=0,
+        link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         if not link_type:
             link_type = _ShapConfig.LinkType.IDENTITY
@@ -137,11 +147,11 @@ class SHAPExplainer:
         perturbation_context = PerturbationContext(self._jrandom, perturbations)
         self._config = (
             _ShapConfig.builder()
-                .withLink(link_type)
-                .withPC(perturbation_context)
-                .withBackground(background)
-                .withNSamples(JInt(samples))
-                .build()
+            .withLink(link_type)
+            .withPC(perturbation_context)
+            .withBackground(background)
+            .withNSamples(JInt(samples))
+            .build()
         )
         self._explainer = _ShapKernelExplainer(self._config)
 
