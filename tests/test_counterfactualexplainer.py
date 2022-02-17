@@ -55,7 +55,7 @@ def test_counterfactual_match():
     center = 500.0
     epsilon = 10.0
 
-    explainer = CounterfactualExplainer()
+    explainer = CounterfactualExplainer(steps=10000)
 
     prediction = counterfactual_prediction(
         input_features=features,
@@ -90,7 +90,7 @@ def test_counterfactual_match_python_model():
     ]
     domains = [(0.0, 1000.0)] * n_features
 
-    explainer = CounterfactualExplainer(steps=10000)
+    explainer = CounterfactualExplainer(steps=1000)
 
     prediction = counterfactual_prediction(
         input_features=features,
