@@ -1,11 +1,14 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code
 """General model classes"""
-from typing import List, Optional, Tuple
 import uuid as _uuid
+from typing import List, Optional
 
 from java.lang import Long
-from java.util.concurrent import CompletableFuture, ForkJoinPool
+from java.util.concurrent import CompletableFuture
 from jpype import JImplements, JOverride, _jcustomizer, _jclass
+from org.kie.kogito.explainability.local.counterfactual.entities import (
+    CounterfactualEntity,
+)
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDistribution,
@@ -21,8 +24,9 @@ from org.kie.kogito.explainability.model import (
     Value as _Value,
     Type as _Type,
 )
-from org.kie.kogito.explainability.local.counterfactual.entities import (
-    CounterfactualEntity,
+
+from org.kie.kogito.explainability.model.domain import (
+    EmptyFeatureDomain as _EmptyFeatureDomain,
 )
 
 from trustyai.model.domain import feature_domain
@@ -165,6 +169,19 @@ class _JFeature:
         """Return value"""
         return self.getValue()
 
+    @property
+    def domain(self):
+        """Return domain"""
+        _domain = self.getDomain()
+        if isinstance(_domain, _EmptyFeatureDomain):
+            return None
+        return _domain
+
+    @property
+    def is_constrained(self):
+        """Return contraint"""
+        return self.isConstrained()
+
 
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Value")
 # pylint: disable=no-member
@@ -223,11 +240,6 @@ class _JCounterfactualPrediction:
         return self.getOutput()
 
     @property
-    def constraints(self):
-        """Return constraints"""
-        return self.getConstraints()
-
-    @property
     def data_distribution(self):
         """Return data distribution"""
         return self.getDataDistribution()
@@ -266,16 +278,22 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
     return _Output(name, _type, Value(value), score)
 
 
-def feature(name: str, dtype: str, value=None) -> Feature:
+def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
     """Helper method to build features"""
+
     if dtype == "categorical":
-        _feature = FeatureFactory.newCategoricalFeature(name, value)
+        _factory = FeatureFactory.newCategoricalFeature
     elif dtype == "number":
-        _feature = FeatureFactory.newNumericalFeature(name, value)
+        _factory = FeatureFactory.newNumericalFeature
     elif dtype == "bool":
-        _feature = FeatureFactory.newBooleanFeature(name, value)
+        _factory = FeatureFactory.newBooleanFeature
     else:
-        _feature = FeatureFactory.newObjectFeature(name, value)
+        _factory = FeatureFactory.newObjectFeature
+
+    if domain:
+        _feature = _factory(name, value, feature_domain(domain))
+    else:
+        _feature = _factory(name, value)
     return _feature
 
 
@@ -291,8 +309,6 @@ def simple_prediction(
 def counterfactual_prediction(
     input_features: List[Feature],
     outputs: List[Output],
-    domains: List[Optional[Tuple]],
-    constraints: Optional[List[bool]] = None,
     data_distribution: Optional[DataDistribution] = None,
     uuid: Optional[_uuid.UUID] = None,
     timeout: Optional[float] = None,
@@ -302,19 +318,10 @@ def counterfactual_prediction(
         uuid = _uuid.uuid4()
     if timeout:
         timeout = Long(timeout)
-    if not constraints:
-        constraints = [False] * len(input_features)
-
-    # build the feature domains from the Python tuples
-    java_domains = _jclass.JClass("java.util.Arrays").asList(
-        [feature_domain(domain) for domain in domains]
-    )
 
     return CounterfactualPrediction(
         PredictionInput(input_features),
         PredictionOutput(outputs),
-        PredictionFeatureDomain(java_domains),
-        constraints,
         data_distribution,
         uuid,
         timeout,
