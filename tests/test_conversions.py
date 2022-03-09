@@ -72,3 +72,21 @@ def test_feature_function():
     assert f3.name == "f-3"
     assert f3.value.as_string() == "foo"
     assert f3.type == Type.CATEGORICAL
+
+
+def test_feature_domains():
+    """Test domains"""
+    f1 = feature(name="f-1", value=1.0, dtype="number")
+    assert f1.name == "f-1"
+    assert f1.value.as_number() == 1.0
+    assert f1.type == Type.NUMBER
+    assert f1.domain is None
+    assert f1.is_constrained
+
+    f2 = feature(name="f-2", value=2.0, dtype="number", domain=(0.0, 10.0))
+    assert f2.name == "f-2"
+    assert f2.value.as_number() == 2.0
+    assert f2.type == Type.NUMBER
+    assert f2.domain
+    print(f2.domain)
+    assert not f2.is_constrained
