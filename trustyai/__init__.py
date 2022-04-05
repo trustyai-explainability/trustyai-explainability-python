@@ -25,7 +25,7 @@ CORE_DEPS = [
     f"{DEFAULT_DEP_PATH}/io/micrometer/micrometer-core/1.8.3/micrometer-core-1.8.3.jar",
 ]
 
-if os.getenv('PYTHON_TRUSTY_DEBUG') == "1":
+if os.getenv("PYTHON_TRUSTY_DEBUG") == "1":
     _logging_level = logging.DEBUG
 else:
     _logging_level = logging.WARN
