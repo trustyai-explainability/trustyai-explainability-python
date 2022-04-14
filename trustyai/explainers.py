@@ -18,8 +18,6 @@ from org.kie.kogito.explainability.local.lime import (
 from org.kie.kogito.explainability.local.shap import (
     ShapConfig as _ShapConfig,
     ShapResults,
-    BackgroundSelectors,
-    CFBackgroundConfig,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
 
@@ -152,7 +150,7 @@ class SHAPExplainer:
         self._jrandom = Random()
         self._jrandom.setSeed(seed)
         perturbation_context = PerturbationContext(self._jrandom, perturbations)
-        self._config = (
+        self._configbuilder = (
             _ShapConfig.builder()
             .withLink(link_type)
             .withBatchSize(batch_size)
@@ -160,11 +158,11 @@ class SHAPExplainer:
             .withBackground(background)
         )
         if samples is not None:
-            self._config.withNSamples(JInt(samples))
-        self._config.build()
+            self._configbuilder.withNSamples(JInt(samples))
+        self._config = self._configbuilder.build()
         self._explainer = _ShapKernelExplainer(self._config)
 
 
-    def explain(self, prediction, model: PredictionProvider) -> List[ShapResults]:
+    def explain(self, prediction, model: PredictionProvider) -> ShapResults:
         """Request for a SHAP explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()

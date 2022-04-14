@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-TRUSTY_VERSION = "1.18.0.Final"
+TRUSTY_VERSION = "1.19.0.Final"
 
 
 class PostInstall(install):
@@ -23,12 +23,13 @@ class PostInstall(install):
         _TESTS_FILE = os.path.join("org", "kie", "kogito", "explainability-core", TRUSTY_VERSION,
                                    f"explainability-core-{TRUSTY_VERSION}-tests.jar")
         os.system(f"wget -O {os.path.join(_ROOT, _TESTS_FILE)} https://repo1.maven.org/maven2/{_TESTS_FILE}")
+        print(f"Copying Trusty-AI-Arrow dependencies into {_ROOT}")
         os.system(f"cp -r bundled_jars/* {_ROOT}")
 
 
 setup(
     name="trustyai",
-    version="0.1.0",
+    version="0.1.1",
     description="Python bindings to the TrustyAI explainability library",
     long_description=long_description,
     long_description_content_type="text/markdown",
