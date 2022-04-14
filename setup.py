@@ -23,6 +23,7 @@ class PostInstall(install):
         _TESTS_FILE = os.path.join("org", "kie", "kogito", "explainability-core", TRUSTY_VERSION,
                                    f"explainability-core-{TRUSTY_VERSION}-tests.jar")
         os.system(f"wget -O {os.path.join(_ROOT, _TESTS_FILE)} https://repo1.maven.org/maven2/{_TESTS_FILE}")
+        os.system(f"cp -r bundled_jars/* {_ROOT}")
 
 
 setup(

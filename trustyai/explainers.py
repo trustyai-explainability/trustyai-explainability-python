@@ -18,16 +18,20 @@ from org.kie.kogito.explainability.local.lime import (
 from org.kie.kogito.explainability.local.shap import (
     ShapConfig as _ShapConfig,
     ShapResults,
+    BackgroundSelectors,
+    CFBackgroundConfig,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
 
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
+    EncodingParams,
     PredictionProvider,
     Saliency,
     PerturbationContext,
     PredictionInput as _PredictionInput,
 )
+
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
@@ -119,6 +123,8 @@ class LimeExplainer:
             .withNormalizeWeights(normalise_weights)
             .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
             .withSamples(samples)
+            .withEncodingParams(EncodingParams(.07, .3))
+            .withAdaptiveVariance(True)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
 
@@ -136,6 +142,7 @@ class SHAPExplainer:
         self,
         background: List[_PredictionInput],
         samples=100,
+        batch_size=20,
         seed=0,
         perturbations=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
@@ -148,6 +155,7 @@ class SHAPExplainer:
         self._config = (
             _ShapConfig.builder()
             .withLink(link_type)
+            .withBatchSize(batch_size)
             .withPC(perturbation_context)
             .withBackground(background)
             .withNSamples(JInt(samples))
