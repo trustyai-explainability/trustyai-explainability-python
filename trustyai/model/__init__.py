@@ -75,9 +75,10 @@ class ArrowModel:
     def __init__(self, pandas_predict_function):
         self.pandas_predict_function = pandas_predict_function
 
-    def predict(self, bytearray):
-        """convert some inbound bytearray into dataframe, call predict function, wrap back into byterarray"""
-        with pa.ipc.open_file(bytearray) as reader:
+    def predict(self, inbound_bytearray):
+        """convert some inbound bytearray into dataframe, call predict function,
+        then wrap back into byte array"""
+        with pa.ipc.open_file(inbound_bytearray) as reader:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()
         outputs = self.pandas_predict_function(arr)
