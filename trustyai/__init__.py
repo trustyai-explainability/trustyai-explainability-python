@@ -11,9 +11,8 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
-TRUSTY_VERSION = "1.19.0-Final"
+TRUSTY_VERSION = "1.19.0.Final"
 DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
-TRUSTY_PATH = "/home/rob/Documents/RedHat/kogito/kogito-apps/explainability/explainability-core/target"
 
 CORE_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
@@ -36,11 +35,9 @@ ARROW_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-vector-7.0.0.jar",
     f"{DEFAULT_DEP_PATH}/org/trustyai/arrow-converters-0.0.1.jar",
     f"{DEFAULT_DEP_PATH}/com/google/flatbuffers/flatbuffers-java-2.0.3.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-core/2.12.5/jackson-core-2.12.5.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.12.5/jackson-databind-2.12.5.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.12.5/jackson-annotations-2.12.5.jar",
-    f"{DEFAULT_DEP_PATH}/org/kie/kie-api/7.59.0.Final/kie-api-7.59.0.Final.jar",
-    f"{DEFAULT_DEP_PATH}/io/micrometer/micrometer-core/1.7.4/micrometer-core-1.7.4.jar",
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-core/2.13.1/jackson-core-2.13.1.jar",
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.1/jackson-databind-2.13.1.jar",
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.1/jackson-annotations-2.13.1.jar"
 ]
 
 CORE_DEPS += ARROW_DEPS
