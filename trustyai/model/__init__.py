@@ -92,9 +92,9 @@ class ArrowModel:
         return JArray(JByte)(buffer)
 
     @JOverride
-    def predictAsync(self, bytearray: JArray(JLong)) -> CompletableFuture:
+    def predictAsync(self, inbound_bytearray: JArray(JLong)) -> CompletableFuture:
         """Python implementation of the predictAsync interface method"""
-        return CompletableFuture.completedFuture(self.predict(bytearray))
+        return CompletableFuture.completedFuture(self.predict(inbound_bytearray))
 
     def get_as_prediction_provider(self, prototype_prediction_input):
         """Wrap the PredictionProviderArrow into a normal TrustyAI Prediction Provider"""
