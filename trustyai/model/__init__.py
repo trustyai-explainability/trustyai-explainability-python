@@ -2,6 +2,8 @@
 """General model classes"""
 import uuid as _uuid
 from typing import List, Optional
+import pandas as pd
+import numpy as np
 
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
@@ -24,14 +26,11 @@ from org.kie.kogito.explainability.model import (
     SimplePrediction as _SimplePrediction,
     Value as _Value,
     Type as _Type,
-
 )
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
 from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
-
 import pyarrow as pa
-import pyarrow.jvm as pjvm
 
 from org.kie.kogito.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
@@ -53,9 +52,6 @@ VectorSchemaRoot = _VectorSchemaRoot
 Value = _Value
 Type = _Type
 
-import pandas as pd
-import numpy as np
-import jpype
 
 @JImplements("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
 class Model:
@@ -72,21 +68,17 @@ class Model:
         )
         return future
 
+
 @JImplements("org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False)
 class ArrowModel:
-    def __init__(self, predict_function):
-        self.predict_function = predict_function
-        self.col_names = None
-        self.predictcalls = 0
-        self.predicttime = 0
-        self.first_call = None
-
+    def __init__(self, pandas_predict_function):
+        self.pandas_predict_function = pandas_predict_function
 
     def predict(self, bytearray):
         with pa.ipc.open_file(bytearray) as reader:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()
-        outputs = self.predict_function(arr)
+        outputs = self.pandas_predict_function(arr)
         if isinstance(outputs, np.ndarray):
             outputs = pd.DataFrame(data=outputs)
         record_batch = pa.RecordBatch.from_pandas(outputs)
@@ -94,14 +86,15 @@ class ArrowModel:
         with pa.ipc.new_file(sink, record_batch.schema) as writer:
             writer.write_batch(record_batch)
         buffer = sink.getvalue()
-        return jpype.JArray(JByte)(buffer)
+        return JArray(JByte)(buffer)
 
     @JOverride
     def predictAsync(self, bytearray: JArray(JLong)) -> CompletableFuture:
          return CompletableFuture.completedFuture(self.predict(bytearray))
 
-    def wrap(self, prototype):
-        return PPAWrapper(self, prototype)
+    def get_as_prediction_provider(self, prototype_prediction_input):
+        return PPAWrapper(self, prototype_prediction_input)
+
 
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
 # pylint: disable=no-member
