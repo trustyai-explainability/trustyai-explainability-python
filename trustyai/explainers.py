@@ -141,7 +141,7 @@ class SHAPExplainer:
     def __init__(
         self,
         background: List[_PredictionInput],
-        samples=100,
+        samples=None,
         batch_size=20,
         seed=0,
         perturbations=0,
@@ -158,10 +158,12 @@ class SHAPExplainer:
             .withBatchSize(batch_size)
             .withPC(perturbation_context)
             .withBackground(background)
-            .withNSamples(JInt(samples))
-            .build()
         )
+        if samples is not None:
+            self._config.withNSamples(JInt(samples))
+        self._config.build()
         self._explainer = _ShapKernelExplainer(self._config)
+
 
     def explain(self, prediction, model: PredictionProvider) -> List[ShapResults]:
         """Request for a SHAP explanation given a prediction and a model"""
