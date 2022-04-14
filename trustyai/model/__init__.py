@@ -3,6 +3,7 @@
 import uuid as _uuid
 from typing import List, Optional
 import pandas as pd
+import pyarrow as pa
 import numpy as np
 
 from java.lang import Long
@@ -30,8 +31,6 @@ from org.kie.kogito.explainability.model import (
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
 from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
-import pyarrow as pa
-
 from org.kie.kogito.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
@@ -71,10 +70,13 @@ class Model:
 
 @JImplements("org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False)
 class ArrowModel:
+    """Python transformer for the TrustyAI Java PredictionProviderArrow"""
+
     def __init__(self, pandas_predict_function):
         self.pandas_predict_function = pandas_predict_function
 
     def predict(self, bytearray):
+        """convert some inbound bytearray into dataframe, call predict function, wrap back into byterarray"""
         with pa.ipc.open_file(bytearray) as reader:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()
@@ -90,9 +92,11 @@ class ArrowModel:
 
     @JOverride
     def predictAsync(self, bytearray: JArray(JLong)) -> CompletableFuture:
-         return CompletableFuture.completedFuture(self.predict(bytearray))
+        """Python implementation of the predictAsync interface method"""
+        return CompletableFuture.completedFuture(self.predict(bytearray))
 
     def get_as_prediction_provider(self, prototype_prediction_input):
+        """Wrap the PredictionProviderArrow into a normal TrustyAI Prediction Provider"""
         return PPAWrapper(self, prototype_prediction_input)
 
 
@@ -196,7 +200,6 @@ class _JFeature:
         return self.getName()
 
     @property
-
     def type(self):
         """Return type"""
         return self.getType()
@@ -335,8 +338,8 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
 
 
 def simple_prediction(
-    input_features: List[Feature],
-    outputs: List[Output],
+        input_features: List[Feature],
+        outputs: List[Output],
 ) -> SimplePrediction:
     """Helper to build SimplePrediction"""
     return SimplePrediction(PredictionInput(input_features), PredictionOutput(outputs))
@@ -344,11 +347,11 @@ def simple_prediction(
 
 # pylint: disable=too-many-arguments
 def counterfactual_prediction(
-    input_features: List[Feature],
-    outputs: List[Output],
-    data_distribution: Optional[DataDistribution] = None,
-    uuid: Optional[_uuid.UUID] = None,
-    timeout: Optional[float] = None,
+        input_features: List[Feature],
+        outputs: List[Output],
+        data_distribution: Optional[DataDistribution] = None,
+        uuid: Optional[_uuid.UUID] = None,
+        timeout: Optional[float] = None,
 ) -> CounterfactualPrediction:
     """Helper to build CounterfactualPrediction"""
     if not uuid:

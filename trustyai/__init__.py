@@ -36,8 +36,10 @@ ARROW_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/trustyai/arrow-converters-0.0.1.jar",
     f"{DEFAULT_DEP_PATH}/com/google/flatbuffers/flatbuffers-java-2.0.3.jar",
     f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-core/2.13.1/jackson-core-2.13.1.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.1/jackson-databind-2.13.1.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.1/jackson-annotations-2.13.1.jar"
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.1/"
+    f"jackson-databind-2.13.1.jar",
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.1/"
+    f"jackson-annotations-2.13.1.jar"
 ]
 
 CORE_DEPS += ARROW_DEPS
