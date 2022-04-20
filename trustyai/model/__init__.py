@@ -71,7 +71,8 @@ class Model:
 @JImplements("org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False)
 class ArrowModel:
     """Python transformer for the TrustyAI Java PredictionProviderArrow
-    The argument pandas_predict_function needs to accept a pandas dataframe of shape (n_rows x n_features)
+    The argument pandas_predict_function needs to accept a pandas dataframe of
+        shape (n_rows x n_features)
     and return a numpy array/dataframe of shape (n_rows x n_outputs)
     """
 
