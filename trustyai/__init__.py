@@ -5,6 +5,7 @@ import site
 import uuid
 from pathlib import Path
 from typing import List
+import glob
 import logging
 
 import jpype
@@ -26,15 +27,15 @@ CORE_DEPS = [
 ]
 
 ARROW_DEPS = [
-    f"{DEFAULT_DEP_PATH}/io/netty/netty-buffer-4.1.68.Final.jar",
-    f"{DEFAULT_DEP_PATH}/io/netty/netty-common-4.1.68.Final.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-compression-7.0.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-format-7.0.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-memory-core-7.0.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-memory-netty-7.0.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-vector-7.0.0.jar",
+    f"{DEFAULT_DEP_PATH}/io/netty/netty-buffer/4.1.68.Final/netty-buffer-4.1.68.Final.jar",
+    f"{DEFAULT_DEP_PATH}/io/netty/netty-common/4.1.68.Final/netty-common-4.1.68.Final.jar",
+    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-format/7.0.0/arrow-format-7.0.0.jar",
+    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-memory-core/7.0.0/arrow-memory-core-7.0.0.jar",
+    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-memory-netty/7.0.0/arrow-memory-netty-7.0.0.jar",
+    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-vector/7.0.0/arrow-vector-7.0.0.jar",
     f"{DEFAULT_DEP_PATH}/org/trustyai/arrow-converters-0.0.1.jar",
-    f"{DEFAULT_DEP_PATH}/com/google/flatbuffers/flatbuffers-java-2.0.3.jar",
+    f"{DEFAULT_DEP_PATH}/com/google/flatbuffers/flatbuffers-java/1.12.0/"
+    f"flatbuffers-java-1.12.0.jar",
     f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-core/2.13.1/jackson-core-2.13.1.jar",
     f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.1/"
     f"jackson-databind-2.13.1.jar",
@@ -59,7 +60,10 @@ def init(*args, path=CORE_DEPS):
         # check the classpath
         logging.debug("Checking for dependencies in %s", DEFAULT_DEP_PATH)
         for jar_path in CORE_DEPS:
-            jar_path_exists = Path(jar_path).exists()
+            if "*" not in jar_path:
+                jar_path_exists = Path(jar_path).exists()
+            else:
+                jar_path_exists = any([Path(fp).exists() for fp in glob.glob(jar_path)])
             if jar_path_exists:
                 logging.debug("JAR %s found.", jar_path)
             else:
