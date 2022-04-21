@@ -23,11 +23,13 @@ from org.kie.kogito.explainability.local.shap import (
 
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
+    EncodingParams,
     PredictionProvider,
     Saliency,
     PerturbationContext,
     PredictionInput as _PredictionInput,
 )
+
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
@@ -119,6 +121,8 @@ class LimeExplainer:
             .withNormalizeWeights(normalise_weights)
             .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
             .withSamples(samples)
+            .withEncodingParams(EncodingParams(.07, .3))
+            .withAdaptiveVariance(True)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
 
@@ -135,7 +139,8 @@ class SHAPExplainer:
     def __init__(
         self,
         background: List[_PredictionInput],
-        samples=100,
+        samples=None,
+        batch_size=20,
         seed=0,
         perturbations=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
@@ -145,16 +150,19 @@ class SHAPExplainer:
         self._jrandom = Random()
         self._jrandom.setSeed(seed)
         perturbation_context = PerturbationContext(self._jrandom, perturbations)
-        self._config = (
+        self._configbuilder = (
             _ShapConfig.builder()
             .withLink(link_type)
+            .withBatchSize(batch_size)
             .withPC(perturbation_context)
             .withBackground(background)
-            .withNSamples(JInt(samples))
-            .build()
         )
+        if samples is not None:
+            self._configbuilder.withNSamples(JInt(samples))
+        self._config = self._configbuilder.build()
         self._explainer = _ShapKernelExplainer(self._config)
 
-    def explain(self, prediction, model: PredictionProvider) -> List[ShapResults]:
+
+    def explain(self, prediction, model: PredictionProvider) -> ShapResults:
         """Request for a SHAP explanation given a prediction and a model"""
         return self._explainer.explainAsync(prediction, model).get()

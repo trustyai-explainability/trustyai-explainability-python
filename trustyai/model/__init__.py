@@ -2,10 +2,13 @@
 """General model classes"""
 import uuid as _uuid
 from typing import List, Optional
+import pandas as pd
+import pyarrow as pa
+import numpy as np
 
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
-from jpype import JImplements, JOverride, _jcustomizer, _jclass
+from jpype import JImplements, JOverride, _jcustomizer, _jclass, JByte, JArray, JLong
 from org.kie.kogito.explainability.local.counterfactual.entities import (
     CounterfactualEntity,
 )
@@ -20,11 +23,14 @@ from org.kie.kogito.explainability.model import (
     PredictionInput as _PredictionInput,
     PredictionOutput as _PredictionOutput,
     Prediction as _Prediction,
+    Saliency as _Saliency,
     SimplePrediction as _SimplePrediction,
     Value as _Value,
     Type as _Type,
 )
 
+from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
+from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
 from org.kie.kogito.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
@@ -39,7 +45,9 @@ PredictionFeatureDomain = _PredictionFeatureDomain
 Prediction = _Prediction
 PredictionInput = _PredictionInput
 PredictionOutput = _PredictionOutput
+Saliency = _Saliency
 SimplePrediction = _SimplePrediction
+VectorSchemaRoot = _VectorSchemaRoot
 Value = _Value
 Type = _Type
 
@@ -58,6 +66,43 @@ class Model:
             _jclass.JClass("java.util.Arrays").asList(self.predict_fun(inputs))
         )
         return future
+
+
+@JImplements("org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False)
+class ArrowModel:
+    """Python transformer for the TrustyAI Java PredictionProviderArrow
+    The argument pandas_predict_function needs to accept a pandas dataframe of
+        shape (n_rows x n_features)
+    and return a numpy array/dataframe of shape (n_rows x n_outputs)
+    """
+
+    def __init__(self, pandas_predict_function):
+        self.pandas_predict_function = pandas_predict_function
+
+    def predict(self, inbound_bytearray):
+        """convert some inbound bytearray into dataframe, call predict function,
+        then wrap back into byte array"""
+        with pa.ipc.open_file(inbound_bytearray) as reader:
+            batch = reader.get_batch(0)
+        arr = batch.to_pandas()
+        outputs = self.pandas_predict_function(arr)
+        if isinstance(outputs, np.ndarray):
+            outputs = pd.DataFrame(data=outputs)
+        record_batch = pa.RecordBatch.from_pandas(outputs)
+        sink = pa.BufferOutputStream()
+        with pa.ipc.new_file(sink, record_batch.schema) as writer:
+            writer.write_batch(record_batch)
+        buffer = sink.getvalue()
+        return JArray(JByte)(buffer)
+
+    @JOverride
+    def predictAsync(self, inbound_bytearray: JArray(JLong)) -> CompletableFuture:
+        """Python implementation of the predictAsync interface method"""
+        return CompletableFuture.completedFuture(self.predict(inbound_bytearray))
+
+    def get_as_prediction_provider(self, prototype_prediction_input):
+        """Wrap the PredictionProviderArrow into a normal TrustyAI Prediction Provider"""
+        return PPAWrapper(self, prototype_prediction_input)
 
 
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
@@ -298,8 +343,8 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
 
 
 def simple_prediction(
-    input_features: List[Feature],
-    outputs: List[Output],
+        input_features: List[Feature],
+        outputs: List[Output],
 ) -> SimplePrediction:
     """Helper to build SimplePrediction"""
     return SimplePrediction(PredictionInput(input_features), PredictionOutput(outputs))
@@ -307,11 +352,11 @@ def simple_prediction(
 
 # pylint: disable=too-many-arguments
 def counterfactual_prediction(
-    input_features: List[Feature],
-    outputs: List[Output],
-    data_distribution: Optional[DataDistribution] = None,
-    uuid: Optional[_uuid.UUID] = None,
-    timeout: Optional[float] = None,
+        input_features: List[Feature],
+        outputs: List[Output],
+        data_distribution: Optional[DataDistribution] = None,
+        uuid: Optional[_uuid.UUID] = None,
+        timeout: Optional[float] = None,
 ) -> CounterfactualPrediction:
     """Helper to build CounterfactualPrediction"""
     if not uuid:
