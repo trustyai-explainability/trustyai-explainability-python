@@ -20,6 +20,11 @@ class PostInstall(install):
         os.system(f"mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:get "
                   f"-DremoteRepositories=https://repository.sonatype.org/content/repositories/central  "
                   f"-Dartifact=org.kie.kogito:explainability-core:{TRUSTY_VERSION} -Dmaven.repo.local={_ROOT} -q")
+        print(f"Installing Arrow dependencies into {_ROOT}")
+        os.system(f"mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:get "
+                  f"-DremoteRepositories=https://repository.sonatype.org/content/repositories/central  "
+                  f"-Dartifact=org.apache.arrow:arrow-vector:7.0.0 -Dmaven.repo.local={_ROOT} -q")
+
         _TESTS_FILE = os.path.join("org", "kie", "kogito", "explainability-core", TRUSTY_VERSION,
                                    f"explainability-core-{TRUSTY_VERSION}-tests.jar")
         os.system(f"wget -O {os.path.join(_ROOT, _TESTS_FILE)} https://repo1.maven.org/maven2/{_TESTS_FILE}")
@@ -46,8 +51,15 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Software Development :: Libraries :: Java Libraries"
     ],
+    package_data={
+        # If any package contains *.jar files, include them:
+        "": ["*.jar"],
+        # And include any *.jar files found in the "dep" subdirectory
+        # of the "trustyai" package, also:
+        "trustyai": ["dep/org/trustyai/arrow-converters-0.0.1.jar"],
+    },
     packages=['trustyai', 'trustyai.model', 'trustyai.utils', 'trustyai.local'],
-    include_package_data=False,
+    include_package_data=True,
     install_requires=['Jpype1'],
     cmdclass={"install": PostInstall},
 )
