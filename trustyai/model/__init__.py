@@ -343,8 +343,8 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
 
 
 def simple_prediction(
-        input_features: List[Feature],
-        outputs: List[Output],
+    input_features: List[Feature],
+    outputs: List[Output],
 ) -> SimplePrediction:
     """Helper to build SimplePrediction"""
     return SimplePrediction(PredictionInput(input_features), PredictionOutput(outputs))
@@ -352,11 +352,11 @@ def simple_prediction(
 
 # pylint: disable=too-many-arguments
 def counterfactual_prediction(
-        input_features: List[Feature],
-        outputs: List[Output],
-        data_distribution: Optional[DataDistribution] = None,
-        uuid: Optional[_uuid.UUID] = None,
-        timeout: Optional[float] = None,
+    input_features: List[Feature],
+    outputs: List[Output],
+    data_distribution: Optional[DataDistribution] = None,
+    uuid: Optional[_uuid.UUID] = None,
+    timeout: Optional[float] = None,
 ) -> CounterfactualPrediction:
     """Helper to build CounterfactualPrediction"""
     if not uuid:
