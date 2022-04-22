@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-TRUSTY_VERSION = "1.19.0.Final"
+TRUSTY_VERSION = "1.20.0.Final"
 
 
 class PostInstall(install):
@@ -32,7 +32,7 @@ class PostInstall(install):
 
 setup(
     name="trustyai",
-    version="0.1.1",
+    version="0.2.0",
     description="Python bindings to the TrustyAI explainability library",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -52,10 +52,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Java Libraries"
     ],
     package_data={
-        # If any package contains *.jar files, include them:
         "": ["*.jar"],
-        # And include any *.jar files found in the "dep" subdirectory
-        # of the "trustyai" package, also:
         "trustyai": ["dep/org/trustyai/arrow-converters-0.0.1.jar"],
     },
     packages=['trustyai', 'trustyai.model', 'trustyai.utils', 'trustyai.local'],
