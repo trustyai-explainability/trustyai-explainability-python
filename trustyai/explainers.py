@@ -136,7 +136,6 @@ class LimeExplainer:
         return LimeExplanation(self._explainer.explainAsync(prediction, model).get())
 
 
-
 class SHAPResults:
     """Wrapper for TrustyAI's SHAPResults object"""
 
@@ -152,20 +151,21 @@ class SHAPResults:
         """Wrapper for ShapResults.getFnull()"""
         return self.shap_results.getFnull()
 
-    def _color_feature_values(self, feature_vals, background_vals):
-        """Internal function for the dataframe visualization"""
-        formats = []
-        for i, x in enumerate(feature_vals[1:-1]):
-            if x < background_vals[i]:
-                formats.append("background-color:#ee0000")
-            elif x > background_vals[i]:
-                formats.append("background-color:#13ba3c")
-            else:
-                formats.append(None)
-        return [None] + formats + [None]
-
     def visualize_as_dataframe(self):
         """Print out the SHAP values as a formatted dataframe"""
+
+        def _color_feature_values(feature_vals, background_vals):
+            """Internal function for the dataframe visualization"""
+            formats = []
+            for i, x in enumerate(feature_vals[1:-1]):
+                if x < background_vals[i]:
+                    formats.append("background-color:#ee0000")
+                elif x > background_vals[i]:
+                    formats.append("background-color:#13ba3c")
+                else:
+                    formats.append(None)
+            return [None] + formats + [None]
+
         cmap = LinearSegmentedColormap.from_list(
             name='rwg',
             colors=['#ee0000', "#ffffff", "#13ba3c"]
@@ -181,26 +181,27 @@ class SHAPResults:
             feature_names = [str(pfi.getFeature().getName())
                              for pfi in saliency.getPerFeatureImportance()]
             columns = ['Mean Background Value', 'Feature Value', 'SHAP Value']
-            df = pd.DataFrame(
+            visualizer_data_frame = pd.DataFrame(
                 [background_mean_f_vals, f_vals, shap_vals],
                 index=columns,
                 columns=feature_names).T
             fnull = self.shap_results.getFnull().getEntry(i)
-            background_row = pd.DataFrame(
-                [["-", "-", fnull]],
-                index=['Background'],
-                columns=columns)
-            prediction_row = pd.DataFrame(
-                [[fnull, sum(shap_vals) + fnull, sum(shap_vals) + fnull]],
-                index=['Prediction'],
-                columns=columns)
-            df = pd.concat([background_row, df, prediction_row])
 
-            slices = (slice(feature_names[0], feature_names[-1]), 'SHAP Value')
-            vmin, vmax = -1 * max(np.abs(shap_vals)), max(np.abs(shap_vals))
-            style = df.style.background_gradient(cmap, subset=slices, vmin=vmin, vmax=vmax)
+            visualizer_data_frame = pd.concat([
+                pd.DataFrame([["-", "-", fnull]], index=['Background'], columns=columns),
+                visualizer_data_frame,
+                pd.DataFrame(
+                    [[fnull, sum(shap_vals) + fnull, sum(shap_vals) + fnull]],
+                    index=['Prediction'],
+                    columns=columns)
+            ])
+            style = visualizer_data_frame.style.background_gradient(
+                cmap,
+                subset=(slice(feature_names[0], feature_names[-1]),'SHAP Value'),
+                vmin=-1 * max(np.abs(shap_vals)),
+                vmax=max(np.abs(shap_vals)))
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            display(style.apply(self._color_feature_values,
+            display(style.apply(_color_feature_values,
                                 background_vals=background_mean_f_vals,
                                 subset='Feature Value',
                                 axis=0))
@@ -218,12 +219,12 @@ class SHAPResults:
             prediction = fnull + sum(shap_vals)
             plt.figure()
             pos = fnull
-            for j in range(len(shap_vals)):
-                color = '#ee0000' if shap_vals[j] < 0 else "#13ba3c"
+            for j, shap_value in enumerate(shap_vals):
+                color = '#ee0000' if shap_value < 0 else "#13ba3c"
                 width = .9
                 if j > 0:
                     plt.plot([j - .5, j + width / 2 * .99], [pos, pos], color=color)
-                plt.bar(j, height=shap_vals[j], bottom=pos, color=color, width=width)
+                plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
                 pos += shap_vals[j]
 
                 if j != len(shap_vals) - 1:
