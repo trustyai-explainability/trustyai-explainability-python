@@ -154,35 +154,30 @@ class SHAPResults:
     def visualize_as_dataframe(self):
         """Print out the SHAP values as a formatted dataframe"""
 
-        def _color_feature_values(feature_vals, background_vals):
+        def _color_feature_values(feature_values, background_vals):
             """Internal function for the dataframe visualization"""
             formats = []
-            for i, x in enumerate(feature_vals[1:-1]):
-                if x < background_vals[i]:
+            for i, feature_value in enumerate(feature_values[1:-1]):
+                if feature_value < background_vals[i]:
                     formats.append("background-color:#ee0000")
-                elif x > background_vals[i]:
+                elif feature_value > background_vals[i]:
                     formats.append("background-color:#13ba3c")
                 else:
                     formats.append(None)
             return [None] + formats + [None]
 
-        cmap = LinearSegmentedColormap.from_list(
-            name='rwg',
-            colors=['#ee0000', "#ffffff", "#13ba3c"]
-        )
-
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
-            background_mean_f_vals = np.mean(
+            background_mean_feature_values = np.mean(
                 [[f.getValue().asNumber() for f in pi.getFeatures()] for pi in self.background],
                 0).tolist()
-            f_vals = [pfi.getFeature().getValue().asNumber()
-                      for pfi in saliency.getPerFeatureImportance()]
-            shap_vals = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+            feature_values = [pfi.getFeature().getValue().asNumber()
+                              for pfi in saliency.getPerFeatureImportance()]
+            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
             feature_names = [str(pfi.getFeature().getName())
                              for pfi in saliency.getPerFeatureImportance()]
             columns = ['Mean Background Value', 'Feature Value', 'SHAP Value']
             visualizer_data_frame = pd.DataFrame(
-                [background_mean_f_vals, f_vals, shap_vals],
+                [background_mean_feature_values, feature_values, shap_values],
                 index=columns,
                 columns=feature_names).T
             fnull = self.shap_results.getFnull().getEntry(i)
@@ -191,18 +186,21 @@ class SHAPResults:
                 pd.DataFrame([["-", "-", fnull]], index=['Background'], columns=columns),
                 visualizer_data_frame,
                 pd.DataFrame(
-                    [[fnull, sum(shap_vals) + fnull, sum(shap_vals) + fnull]],
+                    [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
                     index=['Prediction'],
                     columns=columns)
             ])
             style = visualizer_data_frame.style.background_gradient(
-                cmap,
+                LinearSegmentedColormap.from_list(
+                    name='rwg',
+                    colors=['#ee0000', "#ffffff", "#13ba3c"]
+                ),
                 subset=(slice(feature_names[0], feature_names[-1]),'SHAP Value'),
-                vmin=-1 * max(np.abs(shap_vals)),
-                vmax=max(np.abs(shap_vals)))
+                vmin=-1 * max(np.abs(shap_values)),
+                vmax=max(np.abs(shap_values)))
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
             display(style.apply(_color_feature_values,
-                                background_vals=background_mean_f_vals,
+                                background_vals=background_mean_feature_values,
                                 subset='Feature Value',
                                 axis=0))
 
@@ -212,22 +210,22 @@ class SHAPResults:
             'https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle')
 
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
-            shap_vals = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
             feature_names = [str(pfi.getFeature().getName())
                              for pfi in saliency.getPerFeatureImportance()]
             fnull = self.shap_results.getFnull().getEntry(i)
-            prediction = fnull + sum(shap_vals)
+            prediction = fnull + sum(shap_values)
             plt.figure()
             pos = fnull
-            for j, shap_value in enumerate(shap_vals):
+            for j, shap_value in enumerate(shap_values):
                 color = '#ee0000' if shap_value < 0 else "#13ba3c"
                 width = .9
                 if j > 0:
                     plt.plot([j - .5, j + width / 2 * .99], [pos, pos], color=color)
                 plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
-                pos += shap_vals[j]
+                pos += shap_values[j]
 
-                if j != len(shap_vals) - 1:
+                if j != len(shap_values) - 1:
                     plt.plot([j - width / 2 * .99, j + .5], [pos, pos], color=color)
 
             plt.axhline(fnull, color="#444444", linestyle="--", zorder=0, label='Background Value')
