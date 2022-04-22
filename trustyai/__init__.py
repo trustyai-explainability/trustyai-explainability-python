@@ -40,7 +40,7 @@ ARROW_DEPS = [
     f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.1/"
     f"jackson-databind-2.13.1.jar",
     f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.1/"
-    f"jackson-annotations-2.13.1.jar"
+    f"jackson-annotations-2.13.1.jar",
 ]
 
 CORE_DEPS += ARROW_DEPS
@@ -63,8 +63,9 @@ def init(*args, path=CORE_DEPS):
             if "*" not in jar_path:
                 jar_path_exists = Path(jar_path).exists()
             else:
-                jar_path_exists = any(Path(fp).exists()
-                                      for fp in glob.glob(jar_path) if ".jar" in fp)
+                jar_path_exists = any(
+                    Path(fp).exists() for fp in glob.glob(jar_path) if ".jar" in fp
+                )
             if jar_path_exists:
                 logging.debug("JAR %s found.", jar_path)
             else:
