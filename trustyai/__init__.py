@@ -12,17 +12,17 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
-TRUSTY_VERSION = "1.19.0.Final"
+TRUSTY_VERSION = "1.20.0.Final"
 DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
 
 CORE_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
     f"{DEFAULT_DEP_PATH}/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
     f"{DEFAULT_DEP_PATH}/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/optaplanner/optaplanner-core-impl/8.19.0.Final/"
-    f"optaplanner-core-impl-8.19.0.Final.jar",
+    f"{DEFAULT_DEP_PATH}/org/optaplanner/optaplanner-core-impl/8.20.0.Final/"
+    f"optaplanner-core-impl-8.20.0.Final.jar",
     f"{DEFAULT_DEP_PATH}/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-    f"{DEFAULT_DEP_PATH}/org/kie/kie-api/8.19.0.Beta/kie-api-8.19.0.Beta.jar",
+    f"{DEFAULT_DEP_PATH}/org/kie/kie-api/8.20.0.Beta/kie-api-8.20.0.Beta.jar",
     f"{DEFAULT_DEP_PATH}/io/micrometer/micrometer-core/1.8.3/micrometer-core-1.8.3.jar",
 ]
 
@@ -40,7 +40,7 @@ ARROW_DEPS = [
     f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.1/"
     f"jackson-databind-2.13.1.jar",
     f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.1/"
-    f"jackson-annotations-2.13.1.jar"
+    f"jackson-annotations-2.13.1.jar",
 ]
 
 CORE_DEPS += ARROW_DEPS
@@ -63,8 +63,9 @@ def init(*args, path=CORE_DEPS):
             if "*" not in jar_path:
                 jar_path_exists = Path(jar_path).exists()
             else:
-                jar_path_exists = any(Path(fp).exists()
-                                      for fp in glob.glob(jar_path) if ".jar" in fp)
+                jar_path_exists = any(
+                    Path(fp).exists() for fp in glob.glob(jar_path) if ".jar" in fp
+                )
             if jar_path_exists:
                 logging.debug("JAR %s found.", jar_path)
             else:
