@@ -2,7 +2,7 @@
 # pylint: disable = import-error, too-few-public-methods
 from typing import Dict, Optional, List
 import matplotlib.pyplot as plt
-from matplotlib.colors import  LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap
 from IPython.display import display
 import pandas as pd
 import numpy as np
@@ -124,7 +124,7 @@ class LimeExplainer:
             .withNormalizeWeights(normalise_weights)
             .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
             .withSamples(samples)
-            .withEncodingParams(EncodingParams(.07, .3))
+            .withEncodingParams(EncodingParams(0.07, 0.3))
             .withAdaptiveVariance(True)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
@@ -136,6 +136,7 @@ class LimeExplainer:
         return LimeExplanation(self._explainer.explainAsync(prediction, model).get())
 
 
+# pylint: disable=invalid-name
 class SHAPResults:
     """Wrapper for TrustyAI's SHAPResults object"""
 
@@ -168,74 +169,102 @@ class SHAPResults:
 
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             background_mean_feature_values = np.mean(
-                [[f.getValue().asNumber() for f in pi.getFeatures()] for pi in self.background],
-                0).tolist()
-            feature_values = [pfi.getFeature().getValue().asNumber()
-                              for pfi in saliency.getPerFeatureImportance()]
+                [
+                    [f.getValue().asNumber() for f in pi.getFeatures()]
+                    for pi in self.background
+                ],
+                0,
+            ).tolist()
+            feature_values = [
+                pfi.getFeature().getValue().asNumber()
+                for pfi in saliency.getPerFeatureImportance()
+            ]
             shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
-            feature_names = [str(pfi.getFeature().getName())
-                             for pfi in saliency.getPerFeatureImportance()]
-            columns = ['Mean Background Value', 'Feature Value', 'SHAP Value']
+            feature_names = [
+                str(pfi.getFeature().getName())
+                for pfi in saliency.getPerFeatureImportance()
+            ]
+            columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
             visualizer_data_frame = pd.DataFrame(
                 [background_mean_feature_values, feature_values, shap_values],
                 index=columns,
-                columns=feature_names).T
+                columns=feature_names,
+            ).T
             fnull = self.shap_results.getFnull().getEntry(i)
 
-            visualizer_data_frame = pd.concat([
-                pd.DataFrame([["-", "-", fnull]], index=['Background'], columns=columns),
-                visualizer_data_frame,
-                pd.DataFrame(
-                    [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
-                    index=['Prediction'],
-                    columns=columns)
-            ])
+            visualizer_data_frame = pd.concat(
+                [
+                    pd.DataFrame(
+                        [["-", "-", fnull]], index=["Background"], columns=columns
+                    ),
+                    visualizer_data_frame,
+                    pd.DataFrame(
+                        [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
+                        index=["Prediction"],
+                        columns=columns,
+                    ),
+                ]
+            )
             style = visualizer_data_frame.style.background_gradient(
                 LinearSegmentedColormap.from_list(
-                    name='rwg',
-                    colors=['#ee0000', "#ffffff", "#13ba3c"]
+                    name="rwg", colors=["#ee0000", "#ffffff", "#13ba3c"]
                 ),
-                subset=(slice(feature_names[0], feature_names[-1]),'SHAP Value'),
+                subset=(slice(feature_names[0], feature_names[-1]), "SHAP Value"),
                 vmin=-1 * max(np.abs(shap_values)),
-                vmax=max(np.abs(shap_values)))
+                vmax=max(np.abs(shap_values)),
+            )
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            display(style.apply(_color_feature_values,
-                                background_vals=background_mean_feature_values,
-                                subset='Feature Value',
-                                axis=0))
+            display(
+                style.apply(
+                    _color_feature_values,
+                    background_vals=background_mean_feature_values,
+                    subset="Feature Value",
+                    axis=0,
+                )
+            )
 
     def visualize_as_candlestick_plot(self):
-        """Plot each SHAP explanation as a candlestick plot """
+        """Plot each SHAP explanation as a candlestick plot"""
         plt.style.use(
-            'https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle')
+            "https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle"
+        )
 
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
-            feature_names = [str(pfi.getFeature().getName())
-                             for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [
+                str(pfi.getFeature().getName())
+                for pfi in saliency.getPerFeatureImportance()
+            ]
             fnull = self.shap_results.getFnull().getEntry(i)
             prediction = fnull + sum(shap_values)
             plt.figure()
             pos = fnull
             for j, shap_value in enumerate(shap_values):
-                color = '#ee0000' if shap_value < 0 else "#13ba3c"
-                width = .9
+                color = "#ee0000" if shap_value < 0 else "#13ba3c"
+                width = 0.9
                 if j > 0:
-                    plt.plot([j - .5, j + width / 2 * .99], [pos, pos], color=color)
+                    plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
                 plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
                 pos += shap_values[j]
 
                 if j != len(shap_values) - 1:
-                    plt.plot([j - width / 2 * .99, j + .5], [pos, pos], color=color)
+                    plt.plot([j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color)
 
-            plt.axhline(fnull, color="#444444", linestyle="--", zorder=0, label='Background Value')
-            plt.axhline(prediction, color="#444444", zorder=0, label='Prediction')
+            plt.axhline(
+                fnull,
+                color="#444444",
+                linestyle="--",
+                zorder=0,
+                label="Background Value",
+            )
+            plt.axhline(prediction, color="#444444", zorder=0, label="Prediction")
             plt.legend()
 
             ticksize = np.diff(plt.gca().get_yticks())[0]
             plt.ylim(
                 plt.gca().get_ylim()[0] - ticksize / 2,
-                plt.gca().get_ylim()[1] + ticksize / 2)
+                plt.gca().get_ylim()[1] + ticksize / 2,
+            )
             plt.xticks(np.arange(len(feature_names)), feature_names)
             plt.ylabel(saliency.getOutput().getName())
             plt.xlabel("Feature SHAP Value")
@@ -245,6 +274,7 @@ class SHAPResults:
 
 class SHAPExplainer:
     """Wrapper for TrustyAI's SHAP explainer"""
+
     def __init__(
         self,
         background: List[_PredictionInput],
@@ -274,4 +304,6 @@ class SHAPExplainer:
 
     def explain(self, prediction, model: PredictionProvider) -> SHAPResults:
         """Request for a SHAP explanation given a prediction and a model"""
-        return SHAPResults(self._explainer.explainAsync(prediction, model).get(), self.background)
+        return SHAPResults(
+            self._explainer.explainAsync(prediction, model).get(), self.background
+        )
