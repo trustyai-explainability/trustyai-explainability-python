@@ -32,7 +32,7 @@ class PostInstall(install):
 
 setup(
     name="trustyai",
-    version="0.2.0",
+    version="0.2.1",
     description="Python bindings to the TrustyAI explainability library",
     long_description=long_description,
     long_description_content_type="text/markdown",
