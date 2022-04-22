@@ -232,10 +232,10 @@ class SHAPResults:
             plt.axhline(prediction, color="#444444", zorder=0, label='Prediction')
             plt.legend()
 
-            miny, maxy = plt.gca().get_ylim()
-            yticks = plt.gca().get_yticks()
-            ticksize = yticks[1] - yticks[0]
-            plt.ylim(miny - ticksize / 2, maxy + ticksize / 2)
+            ticksize = np.diff(plt.gca().get_yticks())[0]
+            plt.ylim(
+                plt.gca().get_ylim()[0] - ticksize / 2,
+                plt.gca().get_ylim()[1] + ticksize / 2)
             plt.xticks(np.arange(len(feature_names)), feature_names)
             plt.ylabel(saliency.getOutput().getName())
             plt.xlabel("Feature SHAP Value")
