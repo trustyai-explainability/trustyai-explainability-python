@@ -21,7 +21,6 @@ from org.kie.kogito.explainability.local.lime import (
 
 from org.kie.kogito.explainability.local.shap import (
     ShapConfig as _ShapConfig,
-    ShapResults,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
 
@@ -153,51 +152,68 @@ class SHAPResults:
         """Wrapper for ShapResults.getFnull()"""
         return self.shap_results.getFnull()
 
+    def _color_feature_values(self, feature_vals, background_vals):
+        """Internal function for the dataframe visualization"""
+        formats = []
+        for i, x in enumerate(feature_vals[1:-1]):
+            if x < background_vals[i]:
+                formats.append("background-color:#ee0000")
+            elif x > background_vals[i]:
+                formats.append("background-color:#13ba3c")
+            else:
+                formats.append(None)
+        return [None] + formats + [None]
+
     def visualize_as_dataframe(self):
         """Print out the SHAP values as a formatted dataframe"""
-
-        def color_feature_values(feature_vals, background_vals):
-            formats = []
-            for i, x in enumerate(feature_vals[1:-1]):
-                if x < background_vals[i]:
-                    formats.append("background-color:#ee0000")
-                elif x > background_vals[i]:
-                    formats.append("background-color:#13ba3c")
-                else:
-                    formats.append(None)
-            return [None] + formats + [None]
-
-        cmap = LinearSegmentedColormap.from_list(name='rwg', colors=['#ee0000', "#ffffff", "#13ba3c"])
+        cmap = LinearSegmentedColormap.from_list(
+            name='rwg',
+            colors=['#ee0000', "#ffffff", "#13ba3c"]
+        )
 
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             background_mean_f_vals = np.mean(
                 [[f.getValue().asNumber() for f in pi.getFeatures()] for pi in self.background],
                 0).tolist()
-            f_vals = [pfi.getFeature().getValue().asNumber() for pfi in saliency.getPerFeatureImportance()]
+            f_vals = [pfi.getFeature().getValue().asNumber()
+                      for pfi in saliency.getPerFeatureImportance()]
             shap_vals = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
-            feature_names = [str(pfi.getFeature().getName()) for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [str(pfi.getFeature().getName())
+                             for pfi in saliency.getPerFeatureImportance()]
             columns = ['Mean Background Value', 'Feature Value', 'SHAP Value']
-            df = pd.DataFrame([background_mean_f_vals, f_vals, shap_vals], index=columns, columns=feature_names).T
+            df = pd.DataFrame(
+                [background_mean_f_vals, f_vals, shap_vals],
+                index=columns,
+                columns=feature_names).T
             fnull = self.shap_results.getFnull().getEntry(i)
-            background_row = pd.DataFrame([["-", "-", fnull]], index=['Background'], columns=columns)
-            prediction_row = pd.DataFrame([[fnull, sum(shap_vals) + fnull, sum(shap_vals) + fnull]],
-                                          index=['Prediction'], columns=columns)
+            background_row = pd.DataFrame(
+                [["-", "-", fnull]],
+                index=['Background'],
+                columns=columns)
+            prediction_row = pd.DataFrame(
+                [[fnull, sum(shap_vals) + fnull, sum(shap_vals) + fnull]],
+                index=['Prediction'],
+                columns=columns)
             df = pd.concat([background_row, df, prediction_row])
 
             slices = (slice(feature_names[0], feature_names[-1]), 'SHAP Value')
             vmin, vmax = -1 * max(np.abs(shap_vals)), max(np.abs(shap_vals))
             style = df.style.background_gradient(cmap, subset=slices, vmin=vmin, vmax=vmax)
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            display(style.apply(color_feature_values, background_vals=background_mean_f_vals, subset='Feature Value',
+            display(style.apply(self._color_feature_values,
+                                background_vals=background_mean_f_vals,
+                                subset='Feature Value',
                                 axis=0))
 
     def visualize_as_candlestick_plot(self):
         """Plot each SHAP explanation as a candlestick plot """
-        plt.style.use('https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle')
+        plt.style.use(
+            'https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle')
 
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             shap_vals = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
-            feature_names = [str(pfi.getFeature().getName()) for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [str(pfi.getFeature().getName())
+                             for pfi in saliency.getPerFeatureImportance()]
             fnull = self.shap_results.getFnull().getEntry(i)
             prediction = fnull + sum(shap_vals)
             plt.figure()
@@ -260,6 +276,3 @@ class SHAPExplainer:
     def explain(self, prediction, model: PredictionProvider) -> SHAPResults:
         """Request for a SHAP explanation given a prediction and a model"""
         return SHAPResults(self._explainer.explainAsync(prediction, model).get(), self.background)
-
-
-
