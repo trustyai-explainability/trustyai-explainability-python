@@ -2,6 +2,10 @@
 # pylint: disable = import-error, too-few-public-methods
 from typing import Dict, Optional, List
 import matplotlib.pyplot as plt
+from matplotlib.colors import  LinearSegmentedColormap
+from IPython.display import display
+import pandas as pd
+import numpy as np
 
 from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
@@ -17,7 +21,6 @@ from org.kie.kogito.explainability.local.lime import (
 
 from org.kie.kogito.explainability.local.shap import (
     ShapConfig as _ShapConfig,
-    ShapResults,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
 
@@ -133,9 +136,115 @@ class LimeExplainer:
         return LimeExplanation(self._explainer.explainAsync(prediction, model).get())
 
 
+class SHAPResults:
+    """Wrapper for TrustyAI's SHAPResults object"""
+
+    def __init__(self, shap_results, background):
+        self.shap_results = shap_results
+        self.background = background
+
+    def getSaliencies(self):
+        """Wrapper for ShapResults.getSaliencies()"""
+        return self.shap_results.getSaliencies()
+
+    def getFnull(self):
+        """Wrapper for ShapResults.getFnull()"""
+        return self.shap_results.getFnull()
+
+    def visualize_as_dataframe(self):
+        """Print out the SHAP values as a formatted dataframe"""
+
+        def _color_feature_values(feature_values, background_vals):
+            """Internal function for the dataframe visualization"""
+            formats = []
+            for i, feature_value in enumerate(feature_values[1:-1]):
+                if feature_value < background_vals[i]:
+                    formats.append("background-color:#ee0000")
+                elif feature_value > background_vals[i]:
+                    formats.append("background-color:#13ba3c")
+                else:
+                    formats.append(None)
+            return [None] + formats + [None]
+
+        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+            background_mean_feature_values = np.mean(
+                [[f.getValue().asNumber() for f in pi.getFeatures()] for pi in self.background],
+                0).tolist()
+            feature_values = [pfi.getFeature().getValue().asNumber()
+                              for pfi in saliency.getPerFeatureImportance()]
+            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [str(pfi.getFeature().getName())
+                             for pfi in saliency.getPerFeatureImportance()]
+            columns = ['Mean Background Value', 'Feature Value', 'SHAP Value']
+            visualizer_data_frame = pd.DataFrame(
+                [background_mean_feature_values, feature_values, shap_values],
+                index=columns,
+                columns=feature_names).T
+            fnull = self.shap_results.getFnull().getEntry(i)
+
+            visualizer_data_frame = pd.concat([
+                pd.DataFrame([["-", "-", fnull]], index=['Background'], columns=columns),
+                visualizer_data_frame,
+                pd.DataFrame(
+                    [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
+                    index=['Prediction'],
+                    columns=columns)
+            ])
+            style = visualizer_data_frame.style.background_gradient(
+                LinearSegmentedColormap.from_list(
+                    name='rwg',
+                    colors=['#ee0000', "#ffffff", "#13ba3c"]
+                ),
+                subset=(slice(feature_names[0], feature_names[-1]),'SHAP Value'),
+                vmin=-1 * max(np.abs(shap_values)),
+                vmax=max(np.abs(shap_values)))
+            style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
+            display(style.apply(_color_feature_values,
+                                background_vals=background_mean_feature_values,
+                                subset='Feature Value',
+                                axis=0))
+
+    def visualize_as_candlestick_plot(self):
+        """Plot each SHAP explanation as a candlestick plot """
+        plt.style.use(
+            'https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle')
+
+        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [str(pfi.getFeature().getName())
+                             for pfi in saliency.getPerFeatureImportance()]
+            fnull = self.shap_results.getFnull().getEntry(i)
+            prediction = fnull + sum(shap_values)
+            plt.figure()
+            pos = fnull
+            for j, shap_value in enumerate(shap_values):
+                color = '#ee0000' if shap_value < 0 else "#13ba3c"
+                width = .9
+                if j > 0:
+                    plt.plot([j - .5, j + width / 2 * .99], [pos, pos], color=color)
+                plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
+                pos += shap_values[j]
+
+                if j != len(shap_values) - 1:
+                    plt.plot([j - width / 2 * .99, j + .5], [pos, pos], color=color)
+
+            plt.axhline(fnull, color="#444444", linestyle="--", zorder=0, label='Background Value')
+            plt.axhline(prediction, color="#444444", zorder=0, label='Prediction')
+            plt.legend()
+
+            ticksize = np.diff(plt.gca().get_yticks())[0]
+            plt.ylim(
+                plt.gca().get_ylim()[0] - ticksize / 2,
+                plt.gca().get_ylim()[1] + ticksize / 2)
+            plt.xticks(np.arange(len(feature_names)), feature_names)
+            plt.ylabel(saliency.getOutput().getName())
+            plt.xlabel("Feature SHAP Value")
+            plt.title(f"Explanation of {saliency.getOutput().getName()}")
+            plt.show()
+
+
 class SHAPExplainer:
     """Wrapper for TrustyAI's SHAP explainer"""
-
     def __init__(
         self,
         background: List[_PredictionInput],
@@ -149,6 +258,7 @@ class SHAPExplainer:
             link_type = _ShapConfig.LinkType.IDENTITY
         self._jrandom = Random()
         self._jrandom.setSeed(seed)
+        self.background = background
         perturbation_context = PerturbationContext(self._jrandom, perturbations)
         self._configbuilder = (
             _ShapConfig.builder()
@@ -162,7 +272,6 @@ class SHAPExplainer:
         self._config = self._configbuilder.build()
         self._explainer = _ShapKernelExplainer(self._config)
 
-
-    def explain(self, prediction, model: PredictionProvider) -> ShapResults:
+    def explain(self, prediction, model: PredictionProvider) -> SHAPResults:
         """Request for a SHAP explanation given a prediction and a model"""
-        return self._explainer.explainAsync(prediction, model).get()
+        return SHAPResults(self._explainer.explainAsync(prediction, model).get(), self.background)
