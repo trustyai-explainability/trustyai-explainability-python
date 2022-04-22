@@ -56,3 +56,20 @@ def test_shap_arrow():
     for saliency in explanation.getSaliencies():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
             assert answers[i]-1e-3 <= feature_importance.getScore() <= answers[i]+1e-3
+
+
+def test_shap_plots():
+    data = pd.DataFrame(np.random.rand(101, 5))
+    background = [PredictionInput([feature(name=str(k), value=value, dtype="number") for k, value in row.items()]) for idx, row in data.iloc[:100].iterrows()]
+    toExplain  = [PredictionInput([feature(name=str(k), value=value, dtype="number") for k, value in row.items()]) for idx, row in data.iloc[100:].iterrows()]
+
+    model_weights = np.random.rand(5)
+    pandas_predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2*np.dot(x.values, model_weights)], -1)
+
+    model = ArrowModel(pandas_predict_function).get_as_prediction_provider(background[0])
+    prediction = simple_prediction(input_features=toExplain[0].features, outputs=model.predictAsync(toExplain).get()[0].outputs)
+    shap_explainer = SHAPExplainer(background=background)
+    explanation = shap_explainer.explain(prediction, model)
+
+    explanation.visualize_as_dataframe()
+    explanation.visualize_as_candlestick_plot()
