@@ -32,7 +32,7 @@ class PostInstall(install):
 
 setup(
     name="trustyai",
-    version="0.2.1",
+    version="0.2.2",
     description="Python bindings to the TrustyAI explainability library",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -57,6 +57,6 @@ setup(
     },
     packages=['trustyai', 'trustyai.model', 'trustyai.utils', 'trustyai.local'],
     include_package_data=True,
-    install_requires=['Jpype1'],
+    install_requires=['Jpype1', 'pyarrow'],
     cmdclass={"install": PostInstall},
 )
