@@ -57,6 +57,6 @@ setup(
     },
     packages=['trustyai', 'trustyai.model', 'trustyai.utils', 'trustyai.local'],
     include_package_data=True,
-    install_requires=['Jpype1'],
+    install_requires=['Jpype1', 'pyarrow'],
     cmdclass={"install": PostInstall},
 )
