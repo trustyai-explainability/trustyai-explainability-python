@@ -10,7 +10,7 @@ import numpy as np
 from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
-    CounterfactualResult,
+    CounterfactualResult as _CounterfactualResult,
     SolverConfigBuilder as _SolverConfigBuilder,
     CounterfactualConfig as _CounterfactualConfig,
 )
@@ -44,6 +44,27 @@ LimeConfig = _LimeConfig
 from trustyai.utils._visualisation import ExplanationVisualiser, DEFAULT_STYLE as ds
 
 
+class CounterfactualResult(ExplanationVisualiser):
+    def __init__(self, result: _CounterfactualResult) -> None:
+        self._result = result
+
+    def as_dataframe(self) -> pd.DataFrame:
+        entities = self._result.entities
+        features = self._result.getFeatures()
+
+        data = {}
+        data[f"features"] = [f"{entity.as_feature().getName()}" for entity in entities]
+        data[f"proposed"] = [entity.as_feature().value.as_obj() for entity in entities]
+        data[f"original"] = [feature.getValue().getUnderlyingObject() for feature in features]
+        data[f"constrained"] = [feature.is_constrained for feature in features]
+        import pandas as pd
+        dfr = pd.DataFrame.from_dict(data)
+        dfr["difference"] =  dfr.proposed - dfr.original
+        return dfr
+
+    def plot(self):
+        pass
+
 class CounterfactualExplainer:
     """Wrapper for TrustyAI's counterfactual explainer"""
 
@@ -64,7 +85,7 @@ class CounterfactualExplainer:
         self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
-        return self._explainer.explainAsync(prediction, model).get()
+        return CounterfactualResult(self._explainer.explainAsync(prediction, model).get())
 
 
 class LimeResults(ExplanationVisualiser):
