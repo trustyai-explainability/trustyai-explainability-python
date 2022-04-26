@@ -67,7 +67,7 @@ class CounterfactualExplainer:
         return self._explainer.explainAsync(prediction, model).get()
 
 
-class LimeExplanation:
+class LimeResults:
     """Encapsulate LIME results"""
 
     def __init__(self, saliencies: Dict[str, Saliency]):
@@ -96,13 +96,14 @@ class LimeExplanation:
                 feature_importance.getFeature().name
             ] = feature_importance.getScore()
 
-        colours = ["r" if i < 0 else "g" for i in dictionary.values()]
-        plt.title(f"LIME explanation for '{decision}'")
+        colours = [ds["negative_primary_colour"] if i < 0 else ds["positive_primary_colour"] for i in dictionary.values()]
+        plt.title(f"LIME explanation of {decision}")
         plt.barh(
             range(len(dictionary)), dictionary.values(), align="center", color=colours
         )
         plt.yticks(range(len(dictionary)), list(dictionary.keys()))
         plt.tight_layout()
+        plt.show()
 
 
 # pylint: disable=too-many-arguments
@@ -133,9 +134,9 @@ class LimeExplainer:
 
         self._explainer = _LimeExplainer(self._lime_config)
 
-    def explain(self, prediction, model: PredictionProvider) -> LimeExplanation:
+    def explain(self, prediction, model: PredictionProvider) -> LimeResults:
         """Request for a LIME explanation given a prediction and a model"""
-        return LimeExplanation(self._explainer.explainAsync(prediction, model).get())
+        return LimeResults(self._explainer.explainAsync(prediction, model).get())
 
 
 # pylint: disable=invalid-name
