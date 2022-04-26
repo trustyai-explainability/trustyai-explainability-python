@@ -67,20 +67,24 @@ class CounterfactualExplainer:
         return self._explainer.explainAsync(prediction, model).get()
 
 
-class LimeResults:
+class LimeResults(ExplanationVisualiser):
     """Encapsulate LIME results"""
 
     def __init__(self, saliencies: Dict[str, Saliency]):
         self._saliencies = saliencies
 
-    def show(self, decision: str) -> str:
-        """Return saliencies for a decision"""
-        result = f"Saliencies for '{decision}':\n"
-        for feature_importance in self._saliencies.get(
-            decision
-        ).getPerFeatureImportance():
-            result += f"\t{feature_importance.getFeature().name}: {feature_importance.getScore()}\n"
-        return result
+    def as_dataframe(self) -> pd.DataFrame:
+        outputs = self._saliencies.keys()
+
+        data = {}
+        for output in outputs:
+            pfis = self._saliencies.get(output).getPerFeatureImportance()
+            data[f"{output}_features"] = [f"{pfi.getFeature().getName()}" for pfi in pfis]
+            data[f"{output}_score"] = [pfi.getScore() for pfi in pfis]
+            data[f"{output}_value"] = [pfi.getFeature().getValue().as_number() for pfi in pfis]
+            data[f"{output}_confidence"] = [pfi.getConfidence() for pfi in pfis]
+        
+        return pd.DataFrame.from_dict(data)
 
     def map(self):
         """Return saliencies map"""
