@@ -63,7 +63,21 @@ class CounterfactualResult(ExplanationVisualiser):
         return dfr
 
     def plot(self):
-        pass
+        """Plot counterfactual"""
+        df = self.as_dataframe().copy()
+        df = df[df["difference"]!=0.0]
+
+        def change_colour(x):
+            if x == 0.0:
+                return "white"
+            elif x > 0:
+                return "green"
+            else:
+                return "red"
+
+        colour = df['difference'].transform(change_colour)
+        p = df[["features", "proposed", "original"]].plot.barh(x="features", color={"proposed": colour, "original": "black"})
+        p.set_title("Counterfactual")
 
 class CounterfactualExplainer:
     """Wrapper for TrustyAI's counterfactual explainer"""
