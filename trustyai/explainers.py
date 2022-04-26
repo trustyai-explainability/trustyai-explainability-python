@@ -41,6 +41,8 @@ SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
 LimeConfig = _LimeConfig
 
+from trustyai.utils._visualisation import ExplanationVisualiser, DEFAULT_STYLE as ds
+
 
 class CounterfactualExplainer:
     """Wrapper for TrustyAI's counterfactual explainer"""
@@ -137,7 +139,7 @@ class LimeExplainer:
 
 
 # pylint: disable=invalid-name
-class SHAPResults:
+class SHAPResults(ExplanationVisualiser):
     """Wrapper for TrustyAI's SHAPResults object"""
 
     def __init__(self, shap_results, background):
@@ -152,7 +154,7 @@ class SHAPResults:
         """Wrapper for ShapResults.getFnull()"""
         return self.shap_results.getFnull()
 
-    def visualize_as_dataframe(self):
+    def as_dataframe(self) -> pd.DataFrame:
         """Print out the SHAP values as a formatted dataframe"""
 
         def _color_feature_values(feature_values, background_vals):
@@ -167,6 +169,7 @@ class SHAPResults:
                     formats.append(None)
             return [None] + formats + [None]
 
+        visualizer_data_frame = pd.DataFrame()
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             background_mean_feature_values = np.mean(
                 [
@@ -207,23 +210,22 @@ class SHAPResults:
             )
             style = visualizer_data_frame.style.background_gradient(
                 LinearSegmentedColormap.from_list(
-                    name="rwg", colors=["#ee0000", "#ffffff", "#13ba3c"]
+                    name="rwg", colors=[ds["negative_primary_colour"], ds["neutral_primary_colour"], ds["positive_primary_colour"]]
                 ),
                 subset=(slice(feature_names[0], feature_names[-1]), "SHAP Value"),
                 vmin=-1 * max(np.abs(shap_values)),
                 vmax=max(np.abs(shap_values)),
             )
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            display(
-                style.apply(
-                    _color_feature_values,
-                    background_vals=background_mean_feature_values,
-                    subset="Feature Value",
-                    axis=0,
-                )
+            visualizer_data_frame.style.apply(
+                _color_feature_values,
+                background_vals=background_mean_feature_values,
+                subset="Feature Value",
+                axis=0,
             )
+        return visualizer_data_frame
 
-    def visualize_as_candlestick_plot(self):
+    def candlestick_plot(self):
         """Plot each SHAP explanation as a candlestick plot"""
         plt.style.use(
             "https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle"
@@ -240,7 +242,7 @@ class SHAPResults:
             plt.figure()
             pos = fnull
             for j, shap_value in enumerate(shap_values):
-                color = "#ee0000" if shap_value < 0 else "#13ba3c"
+                color = ds["negative_primary_colour"] if shap_value < 0 else ds["positive_primary_colour"]
                 width = 0.9
                 if j > 0:
                     plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
