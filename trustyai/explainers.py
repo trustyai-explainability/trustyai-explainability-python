@@ -62,7 +62,7 @@ class CounterfactualResult(ExplanationVisualiser):
         dfr["difference"] = dfr.proposed - dfr.original
         return dfr
 
-    def as_html(self) -> None:
+    def as_html(self) -> Styler:
         """Returned styled dataframe"""
         return self.as_dataframe().style
 
@@ -329,7 +329,7 @@ class SHAPResults(ExplanationVisualiser):
                 vmax=max(np.abs(shap_values)),
             )
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            return visualizer_data_frame.style.apply(
+            return style.apply(
                 _color_feature_values,
                 background_vals=background_mean_feature_values,
                 subset="Feature Value",
