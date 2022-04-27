@@ -3,14 +3,13 @@
 from typing import Dict, Optional, List
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-from IPython.display import display
 import pandas as pd
+import pandas.io.formats.style as Styler
 import numpy as np
-
 from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
-    CounterfactualResult,
+    CounterfactualResult as _CounterfactualResult,
     SolverConfigBuilder as _SolverConfigBuilder,
     CounterfactualConfig as _CounterfactualConfig,
 )
@@ -18,12 +17,10 @@ from org.kie.kogito.explainability.local.lime import (
     LimeConfig as _LimeConfig,
     LimeExplainer as _LimeExplainer,
 )
-
 from org.kie.kogito.explainability.local.shap import (
     ShapConfig as _ShapConfig,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
-
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
     EncodingParams,
@@ -32,14 +29,63 @@ from org.kie.kogito.explainability.model import (
     PerturbationContext,
     PredictionInput as _PredictionInput,
 )
-
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
+from trustyai.utils._visualisation import ExplanationVisualiser, DEFAULT_STYLE as ds
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
 LimeConfig = _LimeConfig
+
+
+class CounterfactualResult(ExplanationVisualiser):
+    """Encapsulate counterfactual results"""
+
+    def __init__(self, result: _CounterfactualResult) -> None:
+        self._result = result
+
+    def as_dataframe(self) -> pd.DataFrame:
+        """Return the counterfactual result as a dataframe"""
+        entities = self._result.entities
+        features = self._result.getFeatures()
+
+        data = {}
+        data["features"] = [f"{entity.as_feature().getName()}" for entity in entities]
+        data["proposed"] = [entity.as_feature().value.as_obj() for entity in entities]
+        data["original"] = [
+            feature.getValue().getUnderlyingObject() for feature in features
+        ]
+        data["constrained"] = [feature.is_constrained for feature in features]
+
+        dfr = pd.DataFrame.from_dict(data)
+        dfr["difference"] = dfr.proposed - dfr.original
+        return dfr
+
+    def as_html(self) -> Styler:
+        """Returned styled dataframe"""
+        return self.as_dataframe().style
+
+    def plot(self) -> None:
+        """Plot counterfactual"""
+        _df = self.as_dataframe().copy()
+        _df = _df[_df["difference"] != 0.0]
+
+        def change_colour(value):
+            if value == 0.0:
+                colour = ds["neutral_primary_colour"]
+            elif value > 0:
+                colour = ds["positive_primary_colour"]
+            else:
+                colour = ds["negative_primary_colour"]
+            return colour
+
+        colour = _df["difference"].transform(change_colour)
+        plot = _df[["features", "proposed", "original"]].plot.barh(
+            x="features", color={"proposed": colour, "original": "black"}
+        )
+        plot.set_title("Counterfactual")
+        plot.show()
 
 
 class CounterfactualExplainer:
@@ -62,29 +108,44 @@ class CounterfactualExplainer:
         self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
-        return self._explainer.explainAsync(prediction, model).get()
+        return CounterfactualResult(
+            self._explainer.explainAsync(prediction, model).get()
+        )
 
 
-class LimeExplanation:
+class LimeResults(ExplanationVisualiser):
     """Encapsulate LIME results"""
 
     def __init__(self, saliencies: Dict[str, Saliency]):
         self._saliencies = saliencies
 
-    def show(self, decision: str) -> str:
-        """Return saliencies for a decision"""
-        result = f"Saliencies for '{decision}':\n"
-        for feature_importance in self._saliencies.get(
-            decision
-        ).getPerFeatureImportance():
-            result += f"\t{feature_importance.getFeature().name}: {feature_importance.getScore()}\n"
-        return result
+    def as_dataframe(self) -> pd.DataFrame:
+        """Return the LIME result as a dataframe"""
+        outputs = self._saliencies.keys()
+
+        data = {}
+        for output in outputs:
+            pfis = self._saliencies.get(output).getPerFeatureImportance()
+            data[f"{output}_features"] = [
+                f"{pfi.getFeature().getName()}" for pfi in pfis
+            ]
+            data[f"{output}_score"] = [pfi.getScore() for pfi in pfis]
+            data[f"{output}_value"] = [
+                pfi.getFeature().getValue().as_number() for pfi in pfis
+            ]
+            data[f"{output}_confidence"] = [pfi.getConfidence() for pfi in pfis]
+
+        return pd.DataFrame.from_dict(data)
+
+    def as_html(self) -> Styler:
+        """Return styled dataframe"""
+        return self.as_dataframe().style
 
     def map(self):
         """Return saliencies map"""
         return self._saliencies
 
-    def plot(self, decision: str):
+    def plot(self, decision: str) -> None:
         """Plot saliencies"""
         dictionary = {}
         for feature_importance in self._saliencies.get(
@@ -94,13 +155,17 @@ class LimeExplanation:
                 feature_importance.getFeature().name
             ] = feature_importance.getScore()
 
-        colours = ["r" if i < 0 else "g" for i in dictionary.values()]
-        plt.title(f"LIME explanation for '{decision}'")
+        colours = [
+            ds["negative_primary_colour"] if i < 0 else ds["positive_primary_colour"]
+            for i in dictionary.values()
+        ]
+        plt.title(f"LIME explanation of {decision}")
         plt.barh(
             range(len(dictionary)), dictionary.values(), align="center", color=colours
         )
         plt.yticks(range(len(dictionary)), list(dictionary.keys()))
         plt.tight_layout()
+        plt.show()
 
 
 # pylint: disable=too-many-arguments
@@ -131,13 +196,13 @@ class LimeExplainer:
 
         self._explainer = _LimeExplainer(self._lime_config)
 
-    def explain(self, prediction, model: PredictionProvider) -> LimeExplanation:
+    def explain(self, prediction, model: PredictionProvider) -> LimeResults:
         """Request for a LIME explanation given a prediction and a model"""
-        return LimeExplanation(self._explainer.explainAsync(prediction, model).get())
+        return LimeResults(self._explainer.explainAsync(prediction, model).get())
 
 
 # pylint: disable=invalid-name
-class SHAPResults:
+class SHAPResults(ExplanationVisualiser):
     """Wrapper for TrustyAI's SHAPResults object"""
 
     def __init__(self, shap_results, background):
@@ -152,7 +217,51 @@ class SHAPResults:
         """Wrapper for ShapResults.getFnull()"""
         return self.shap_results.getFnull()
 
-    def visualize_as_dataframe(self):
+    def as_dataframe(self) -> pd.DataFrame:
+        """Returns SHAP explanation as a dataframe"""
+
+        visualizer_data_frame = pd.DataFrame()
+        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+            background_mean_feature_values = np.mean(
+                [
+                    [f.getValue().asNumber() for f in pi.getFeatures()]
+                    for pi in self.background
+                ],
+                0,
+            ).tolist()
+            feature_values = [
+                pfi.getFeature().getValue().asNumber()
+                for pfi in saliency.getPerFeatureImportance()
+            ]
+            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [
+                str(pfi.getFeature().getName())
+                for pfi in saliency.getPerFeatureImportance()
+            ]
+            columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
+            visualizer_data_frame = pd.DataFrame(
+                [background_mean_feature_values, feature_values, shap_values],
+                index=columns,
+                columns=feature_names,
+            ).T
+            fnull = self.shap_results.getFnull().getEntry(i)
+
+            visualizer_data_frame = pd.concat(
+                [
+                    pd.DataFrame(
+                        [["-", "-", fnull]], index=["Background"], columns=columns
+                    ),
+                    visualizer_data_frame,
+                    pd.DataFrame(
+                        [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
+                        index=["Prediction"],
+                        columns=columns,
+                    ),
+                ]
+            )
+            return visualizer_data_frame
+
+    def as_html(self) -> Styler:
         """Print out the SHAP values as a formatted dataframe"""
 
         def _color_feature_values(feature_values, background_vals):
@@ -160,13 +269,14 @@ class SHAPResults:
             formats = []
             for i, feature_value in enumerate(feature_values[1:-1]):
                 if feature_value < background_vals[i]:
-                    formats.append("background-color:#ee0000")
+                    formats.append(f"background-color:{ds['negative_primary_colour']}")
                 elif feature_value > background_vals[i]:
-                    formats.append("background-color:#13ba3c")
+                    formats.append(f"background-color:{ds['positive_primary_colour']}")
                 else:
                     formats.append(None)
             return [None] + formats + [None]
 
+        visualizer_data_frame = pd.DataFrame()
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             background_mean_feature_values = np.mean(
                 [
@@ -207,23 +317,26 @@ class SHAPResults:
             )
             style = visualizer_data_frame.style.background_gradient(
                 LinearSegmentedColormap.from_list(
-                    name="rwg", colors=["#ee0000", "#ffffff", "#13ba3c"]
+                    name="rwg",
+                    colors=[
+                        ds["negative_primary_colour"],
+                        ds["neutral_primary_colour"],
+                        ds["positive_primary_colour"],
+                    ],
                 ),
                 subset=(slice(feature_names[0], feature_names[-1]), "SHAP Value"),
                 vmin=-1 * max(np.abs(shap_values)),
                 vmax=max(np.abs(shap_values)),
             )
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            display(
-                style.apply(
-                    _color_feature_values,
-                    background_vals=background_mean_feature_values,
-                    subset="Feature Value",
-                    axis=0,
-                )
+            return style.apply(
+                _color_feature_values,
+                background_vals=background_mean_feature_values,
+                subset="Feature Value",
+                axis=0,
             )
 
-    def visualize_as_candlestick_plot(self):
+    def candlestick_plot(self) -> None:
         """Plot each SHAP explanation as a candlestick plot"""
         plt.style.use(
             "https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle"
@@ -240,7 +353,11 @@ class SHAPResults:
             plt.figure()
             pos = fnull
             for j, shap_value in enumerate(shap_values):
-                color = "#ee0000" if shap_value < 0 else "#13ba3c"
+                color = (
+                    ds["negative_primary_colour"]
+                    if shap_value < 0
+                    else ds["positive_primary_colour"]
+                )
                 width = 0.9
                 if j > 0:
                     plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
