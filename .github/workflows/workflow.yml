@@ -34,7 +34,7 @@ jobs:
           pylint --ignore-imports=yes $(find trustyai -type f -name "*.py")
       - name: Test with pytest
         run: |
-          pytest
+          pytest -s
       - name: Style
         run: |
           black --check $(find trustyai -type f -name "*.py")
