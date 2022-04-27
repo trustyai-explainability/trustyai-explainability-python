@@ -3,10 +3,8 @@
 from typing import Dict, Optional, List
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-from IPython.display import display
 import pandas as pd
 import numpy as np
-
 from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
@@ -18,12 +16,10 @@ from org.kie.kogito.explainability.local.lime import (
     LimeConfig as _LimeConfig,
     LimeExplainer as _LimeExplainer,
 )
-
 from org.kie.kogito.explainability.local.shap import (
     ShapConfig as _ShapConfig,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
-
 from org.kie.kogito.explainability.model import (
     CounterfactualPrediction,
     EncodingParams,
@@ -32,52 +28,59 @@ from org.kie.kogito.explainability.model import (
     PerturbationContext,
     PredictionInput as _PredictionInput,
 )
-
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
+from trustyai.utils._visualisation import ExplanationVisualiser, DEFAULT_STYLE as ds
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
 LimeConfig = _LimeConfig
 
-from trustyai.utils._visualisation import ExplanationVisualiser, DEFAULT_STYLE as ds
-
 
 class CounterfactualResult(ExplanationVisualiser):
+    """Encapsulate counterfactual results"""
+
     def __init__(self, result: _CounterfactualResult) -> None:
         self._result = result
 
     def as_dataframe(self) -> pd.DataFrame:
+        """Return the counterfactual result as a dataframe"""
         entities = self._result.entities
         features = self._result.getFeatures()
 
         data = {}
-        data[f"features"] = [f"{entity.as_feature().getName()}" for entity in entities]
-        data[f"proposed"] = [entity.as_feature().value.as_obj() for entity in entities]
-        data[f"original"] = [feature.getValue().getUnderlyingObject() for feature in features]
-        data[f"constrained"] = [feature.is_constrained for feature in features]
-        import pandas as pd
+        data["features"] = [f"{entity.as_feature().getName()}" for entity in entities]
+        data["proposed"] = [entity.as_feature().value.as_obj() for entity in entities]
+        data["original"] = [
+            feature.getValue().getUnderlyingObject() for feature in features
+        ]
+        data["constrained"] = [feature.is_constrained for feature in features]
+
         dfr = pd.DataFrame.from_dict(data)
-        dfr["difference"] =  dfr.proposed - dfr.original
+        dfr["difference"] = dfr.proposed - dfr.original
         return dfr
 
     def plot(self):
         """Plot counterfactual"""
-        df = self.as_dataframe().copy()
-        df = df[df["difference"]!=0.0]
+        _df = self.as_dataframe().copy()
+        _df = _df[_df["difference"] != 0.0]
 
-        def change_colour(x):
-            if x == 0.0:
-                return "white"
-            elif x > 0:
-                return "green"
+        def change_colour(value):
+            if value == 0.0:
+                colour = "white"
+            elif value > 0:
+                colour = "green"
             else:
-                return "red"
+                colour = "red"
+            return colour
 
-        colour = df['difference'].transform(change_colour)
-        p = df[["features", "proposed", "original"]].plot.barh(x="features", color={"proposed": colour, "original": "black"})
-        p.set_title("Counterfactual")
+        colour = _df["difference"].transform(change_colour)
+        plot = _df[["features", "proposed", "original"]].plot.barh(
+            x="features", color={"proposed": colour, "original": "black"}
+        )
+        plot.set_title("Counterfactual")
+
 
 class CounterfactualExplainer:
     """Wrapper for TrustyAI's counterfactual explainer"""
@@ -99,7 +102,9 @@ class CounterfactualExplainer:
         self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a prediction and a model"""
-        return CounterfactualResult(self._explainer.explainAsync(prediction, model).get())
+        return CounterfactualResult(
+            self._explainer.explainAsync(prediction, model).get()
+        )
 
 
 class LimeResults(ExplanationVisualiser):
@@ -109,16 +114,21 @@ class LimeResults(ExplanationVisualiser):
         self._saliencies = saliencies
 
     def as_dataframe(self) -> pd.DataFrame:
+        """Return the LIME result as a dataframe"""
         outputs = self._saliencies.keys()
 
         data = {}
         for output in outputs:
             pfis = self._saliencies.get(output).getPerFeatureImportance()
-            data[f"{output}_features"] = [f"{pfi.getFeature().getName()}" for pfi in pfis]
+            data[f"{output}_features"] = [
+                f"{pfi.getFeature().getName()}" for pfi in pfis
+            ]
             data[f"{output}_score"] = [pfi.getScore() for pfi in pfis]
-            data[f"{output}_value"] = [pfi.getFeature().getValue().as_number() for pfi in pfis]
+            data[f"{output}_value"] = [
+                pfi.getFeature().getValue().as_number() for pfi in pfis
+            ]
             data[f"{output}_confidence"] = [pfi.getConfidence() for pfi in pfis]
-        
+
         return pd.DataFrame.from_dict(data)
 
     def map(self):
@@ -135,7 +145,10 @@ class LimeResults(ExplanationVisualiser):
                 feature_importance.getFeature().name
             ] = feature_importance.getScore()
 
-        colours = [ds["negative_primary_colour"] if i < 0 else ds["positive_primary_colour"] for i in dictionary.values()]
+        colours = [
+            ds["negative_primary_colour"] if i < 0 else ds["positive_primary_colour"]
+            for i in dictionary.values()
+        ]
         plt.title(f"LIME explanation of {decision}")
         plt.barh(
             range(len(dictionary)), dictionary.values(), align="center", color=colours
@@ -250,7 +263,12 @@ class SHAPResults(ExplanationVisualiser):
             )
             style = visualizer_data_frame.style.background_gradient(
                 LinearSegmentedColormap.from_list(
-                    name="rwg", colors=[ds["negative_primary_colour"], ds["neutral_primary_colour"], ds["positive_primary_colour"]]
+                    name="rwg",
+                    colors=[
+                        ds["negative_primary_colour"],
+                        ds["neutral_primary_colour"],
+                        ds["positive_primary_colour"],
+                    ],
                 ),
                 subset=(slice(feature_names[0], feature_names[-1]), "SHAP Value"),
                 vmin=-1 * max(np.abs(shap_values)),
@@ -282,7 +300,11 @@ class SHAPResults(ExplanationVisualiser):
             plt.figure()
             pos = fnull
             for j, shap_value in enumerate(shap_values):
-                color = ds["negative_primary_colour"] if shap_value < 0 else ds["positive_primary_colour"]
+                color = (
+                    ds["negative_primary_colour"]
+                    if shap_value < 0
+                    else ds["positive_primary_colour"]
+                )
                 width = 0.9
                 if j > 0:
                     plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
