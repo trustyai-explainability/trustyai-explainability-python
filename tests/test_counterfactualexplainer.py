@@ -35,7 +35,7 @@ def test_non_empty_input():
     )
 
     counterfactual_result = explainer.explain(prediction, model)
-    for entity in counterfactual_result.entities:
+    for entity in counterfactual_result._result.entities:
         print(entity)
         assert entity is not None
 
@@ -61,16 +61,16 @@ def test_counterfactual_match():
     result = explainer.explain(prediction, model)
 
     total_sum = 0
-    for entity in result.entities:
+    for entity in result._result.entities:
         total_sum += entity.as_feature().value.as_number()
         print(entity)
 
     print("Counterfactual match:")
-    print(result.output[0].outputs)
+    print(result._result.output[0].outputs)
 
     assert total_sum <= center + epsilon
     assert total_sum >= center - epsilon
-    assert result.isValid()
+    assert result._result.isValid()
 
 
 def test_counterfactual_match_python_model():
@@ -94,4 +94,4 @@ def test_counterfactual_match_python_model():
     model = Model(sum_skip_model)
 
     result = explainer.explain(prediction, model)
-    assert sum([entity.as_feature().value.as_number() for entity in result.entities]) == approx(GOAL_VALUE, rel=3)
+    assert sum([entity.as_feature().value.as_number() for entity in result._result.entities]) == approx(GOAL_VALUE, rel=3)
