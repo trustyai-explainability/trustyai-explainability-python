@@ -215,9 +215,9 @@ class SHAPResults(ExplanationVisualiser):
             formats = []
             for i, feature_value in enumerate(feature_values[1:-1]):
                 if feature_value < background_vals[i]:
-                    formats.append("background-color:#ee0000")
+                    formats.append(f"background-color:{ds['negative_primary_colour']}")
                 elif feature_value > background_vals[i]:
-                    formats.append("background-color:#13ba3c")
+                    formats.append(f"background-color:{ds['positive_primary_colour']}")
                 else:
                     formats.append(None)
             return [None] + formats + [None]
