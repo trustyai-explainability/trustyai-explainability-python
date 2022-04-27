@@ -4,6 +4,7 @@ from typing import Dict, Optional, List
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
+import pandas.io.formats.style as Styler
 import numpy as np
 from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
@@ -61,7 +62,11 @@ class CounterfactualResult(ExplanationVisualiser):
         dfr["difference"] = dfr.proposed - dfr.original
         return dfr
 
-    def plot(self):
+    def as_html(self) -> None:
+        """Returned styled dataframe"""
+        return self.as_dataframe().style
+
+    def plot(self) -> None:
         """Plot counterfactual"""
         _df = self.as_dataframe().copy()
         _df = _df[_df["difference"] != 0.0]
@@ -80,6 +85,7 @@ class CounterfactualResult(ExplanationVisualiser):
             x="features", color={"proposed": colour, "original": "black"}
         )
         plot.set_title("Counterfactual")
+        plot.show()
 
 
 class CounterfactualExplainer:
@@ -131,11 +137,15 @@ class LimeResults(ExplanationVisualiser):
 
         return pd.DataFrame.from_dict(data)
 
+    def as_html(self) -> Styler:
+        """Return styled dataframe"""
+        return self.as_dataframe().style
+
     def map(self):
         """Return saliencies map"""
         return self._saliencies
 
-    def plot(self, decision: str):
+    def plot(self, decision: str) -> None:
         """Plot saliencies"""
         dictionary = {}
         for feature_importance in self._saliencies.get(
@@ -208,6 +218,50 @@ class SHAPResults(ExplanationVisualiser):
         return self.shap_results.getFnull()
 
     def as_dataframe(self) -> pd.DataFrame:
+        """Returns SHAP explanation as a dataframe"""
+
+        visualizer_data_frame = pd.DataFrame()
+        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+            background_mean_feature_values = np.mean(
+                [
+                    [f.getValue().asNumber() for f in pi.getFeatures()]
+                    for pi in self.background
+                ],
+                0,
+            ).tolist()
+            feature_values = [
+                pfi.getFeature().getValue().asNumber()
+                for pfi in saliency.getPerFeatureImportance()
+            ]
+            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [
+                str(pfi.getFeature().getName())
+                for pfi in saliency.getPerFeatureImportance()
+            ]
+            columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
+            visualizer_data_frame = pd.DataFrame(
+                [background_mean_feature_values, feature_values, shap_values],
+                index=columns,
+                columns=feature_names,
+            ).T
+            fnull = self.shap_results.getFnull().getEntry(i)
+
+            visualizer_data_frame = pd.concat(
+                [
+                    pd.DataFrame(
+                        [["-", "-", fnull]], index=["Background"], columns=columns
+                    ),
+                    visualizer_data_frame,
+                    pd.DataFrame(
+                        [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
+                        index=["Prediction"],
+                        columns=columns,
+                    ),
+                ]
+            )
+            return visualizer_data_frame
+
+    def as_html(self) -> Styler:
         """Print out the SHAP values as a formatted dataframe"""
 
         def _color_feature_values(feature_values, background_vals):
@@ -275,15 +329,14 @@ class SHAPResults(ExplanationVisualiser):
                 vmax=max(np.abs(shap_values)),
             )
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            visualizer_data_frame.style.apply(
+            return visualizer_data_frame.style.apply(
                 _color_feature_values,
                 background_vals=background_mean_feature_values,
                 subset="Feature Value",
                 axis=0,
             )
-        return visualizer_data_frame
 
-    def candlestick_plot(self):
+    def candlestick_plot(self) -> None:
         """Plot each SHAP explanation as a candlestick plot"""
         plt.style.use(
             "https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle"
