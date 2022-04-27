@@ -68,11 +68,11 @@ class CounterfactualResult(ExplanationVisualiser):
 
         def change_colour(value):
             if value == 0.0:
-                colour = "white"
+                colour = ds["neutral_primary_colour"]
             elif value > 0:
-                colour = "green"
+                colour = ds["positive_primary_colour"]
             else:
-                colour = "red"
+                colour = ds["negative_primary_colour"]
             return colour
 
         colour = _df["difference"].transform(change_colour)
