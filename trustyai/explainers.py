@@ -36,7 +36,7 @@ from java.util import Random
 from trustyai.utils._visualisation import (
     ExplanationVisualiser,
     DEFAULT_STYLE as ds,
-    DEFAULT_RC_PARAMS as drcp
+    DEFAULT_RC_PARAMS as drcp,
 )
 
 SolverConfigBuilder = _SolverConfigBuilder
@@ -163,12 +163,17 @@ class LimeResults(ExplanationVisualiser):
                 ] = feature_importance.getScore()
 
             colours = [
-                ds["negative_primary_colour"] if i < 0 else ds["positive_primary_colour"]
+                ds["negative_primary_colour"]
+                if i < 0
+                else ds["positive_primary_colour"]
                 for i in dictionary.values()
             ]
             plt.title(f"LIME explanation of {decision}")
             plt.barh(
-                range(len(dictionary)), dictionary.values(), align="center", color=colours
+                range(len(dictionary)),
+                dictionary.values(),
+                align="center",
+                color=colours,
             )
             plt.yticks(range(len(dictionary)), list(dictionary.keys()))
             plt.tight_layout()
@@ -347,7 +352,9 @@ class SHAPResults(ExplanationVisualiser):
         """Plot each SHAP explanation as a candlestick plot"""
         with mpl.rc_context(drcp):
             for i, saliency in enumerate(self.shap_results.getSaliencies()):
-                shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+                shap_values = [
+                    pfi.getScore() for pfi in saliency.getPerFeatureImportance()
+                ]
                 feature_names = [
                     str(pfi.getFeature().getName())
                     for pfi in saliency.getPerFeatureImportance()
@@ -364,12 +371,16 @@ class SHAPResults(ExplanationVisualiser):
                     )
                     width = 0.9
                     if j > 0:
-                        plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
+                        plt.plot(
+                            [j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color
+                        )
                     plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
                     pos += shap_values[j]
 
                     if j != len(shap_values) - 1:
-                        plt.plot([j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color)
+                        plt.plot(
+                            [j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color
+                        )
 
                 plt.axhline(
                     fnull,
