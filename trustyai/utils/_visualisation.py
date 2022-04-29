@@ -21,3 +21,33 @@ DEFAULT_STYLE = {
     "negative_primary_colour": "#ee0000",
     "neutral_primary_colour": "#ffffff",
 }
+
+
+DEFAULT_RC_PARAMS = {
+    'patch.linewidth': 0.5,
+    'patch.facecolor': '348ABD',
+    'patch.edgecolor': 'EEEEEE',
+    'patch.antialiased': True,
+    'font.size': 10.0,
+    'axes.facecolor': 'DDDDDD',
+    'axes.edgecolor': 'white',
+    'axes.linewidth': 1,
+    'axes.grid': True,
+    'axes.titlesize': 'x-large',
+    'axes.labelsize': 'large',
+    'axes.labelcolor': 'black',
+    'axes.axisbelow': True,
+    'text.color': 'black',
+    'xtick.color': 'black',
+    'xtick.direction': 'out',
+    'ytick.color': 'black',
+    'ytick.direction': 'out',
+    'legend.facecolor': 'ffffff',
+    'grid.color': 'white',
+    'grid.linestyle': '-',    # solid line
+    'figure.figsize': (16,9),
+    'figure.dpi': 100,
+    'figure.facecolor': 'ffffff',
+    'figure.edgecolor': '777777',
+    'savefig.bbox': 'tight'
+}

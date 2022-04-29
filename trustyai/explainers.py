@@ -2,6 +2,7 @@
 # pylint: disable = import-error, too-few-public-methods
 from typing import Dict, Optional, List
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import pandas.io.formats.style as Styler
@@ -32,7 +33,11 @@ from org.kie.kogito.explainability.model import (
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
-from trustyai.utils._visualisation import ExplanationVisualiser, DEFAULT_STYLE as ds
+from trustyai.utils._visualisation import (
+    ExplanationVisualiser,
+    DEFAULT_STYLE as ds,
+    DEFAULT_RC_PARAMS as drcp
+)
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -80,12 +85,13 @@ class CounterfactualResult(ExplanationVisualiser):
                 colour = ds["negative_primary_colour"]
             return colour
 
-        colour = _df["difference"].transform(change_colour)
-        plot = _df[["features", "proposed", "original"]].plot.barh(
-            x="features", color={"proposed": colour, "original": "black"}
-        )
-        plot.set_title("Counterfactual")
-        plot.show()
+        with mpl.rc_context(drcp):
+            colour = _df["difference"].transform(change_colour)
+            plot = _df[["features", "proposed", "original"]].plot.barh(
+                x="features", color={"proposed": colour, "original": "black"}
+            )
+            plot.set_title("Counterfactual")
+            plt.show()
 
 
 class CounterfactualExplainer:
@@ -147,25 +153,26 @@ class LimeResults(ExplanationVisualiser):
 
     def plot(self, decision: str) -> None:
         """Plot saliencies"""
-        dictionary = {}
-        for feature_importance in self._saliencies.get(
-            decision
-        ).getPerFeatureImportance():
-            dictionary[
-                feature_importance.getFeature().name
-            ] = feature_importance.getScore()
+        with mpl.rc_context(drcp):
+            dictionary = {}
+            for feature_importance in self._saliencies.get(
+                decision
+            ).getPerFeatureImportance():
+                dictionary[
+                    feature_importance.getFeature().name
+                ] = feature_importance.getScore()
 
-        colours = [
-            ds["negative_primary_colour"] if i < 0 else ds["positive_primary_colour"]
-            for i in dictionary.values()
-        ]
-        plt.title(f"LIME explanation of {decision}")
-        plt.barh(
-            range(len(dictionary)), dictionary.values(), align="center", color=colours
-        )
-        plt.yticks(range(len(dictionary)), list(dictionary.keys()))
-        plt.tight_layout()
-        plt.show()
+            colours = [
+                ds["negative_primary_colour"] if i < 0 else ds["positive_primary_colour"]
+                for i in dictionary.values()
+            ]
+            plt.title(f"LIME explanation of {decision}")
+            plt.barh(
+                range(len(dictionary)), dictionary.values(), align="center", color=colours
+            )
+            plt.yticks(range(len(dictionary)), list(dictionary.keys()))
+            plt.tight_layout()
+            plt.show()
 
 
 # pylint: disable=too-many-arguments
@@ -338,55 +345,52 @@ class SHAPResults(ExplanationVisualiser):
 
     def candlestick_plot(self) -> None:
         """Plot each SHAP explanation as a candlestick plot"""
-        plt.style.use(
-            "https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle"
-        )
+        with mpl.rc_context(drcp):
+            for i, saliency in enumerate(self.shap_results.getSaliencies()):
+                shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+                feature_names = [
+                    str(pfi.getFeature().getName())
+                    for pfi in saliency.getPerFeatureImportance()
+                ]
+                fnull = self.shap_results.getFnull().getEntry(i)
+                prediction = fnull + sum(shap_values)
+                plt.figure()
+                pos = fnull
+                for j, shap_value in enumerate(shap_values):
+                    color = (
+                        ds["negative_primary_colour"]
+                        if shap_value < 0
+                        else ds["positive_primary_colour"]
+                    )
+                    width = 0.9
+                    if j > 0:
+                        plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
+                    plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
+                    pos += shap_values[j]
 
-        for i, saliency in enumerate(self.shap_results.getSaliencies()):
-            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
-            feature_names = [
-                str(pfi.getFeature().getName())
-                for pfi in saliency.getPerFeatureImportance()
-            ]
-            fnull = self.shap_results.getFnull().getEntry(i)
-            prediction = fnull + sum(shap_values)
-            plt.figure()
-            pos = fnull
-            for j, shap_value in enumerate(shap_values):
-                color = (
-                    ds["negative_primary_colour"]
-                    if shap_value < 0
-                    else ds["positive_primary_colour"]
+                    if j != len(shap_values) - 1:
+                        plt.plot([j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color)
+
+                plt.axhline(
+                    fnull,
+                    color="#444444",
+                    linestyle="--",
+                    zorder=0,
+                    label="Background Value",
                 )
-                width = 0.9
-                if j > 0:
-                    plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
-                plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
-                pos += shap_values[j]
+                plt.axhline(prediction, color="#444444", zorder=0, label="Prediction")
+                plt.legend()
 
-                if j != len(shap_values) - 1:
-                    plt.plot([j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color)
-
-            plt.axhline(
-                fnull,
-                color="#444444",
-                linestyle="--",
-                zorder=0,
-                label="Background Value",
-            )
-            plt.axhline(prediction, color="#444444", zorder=0, label="Prediction")
-            plt.legend()
-
-            ticksize = np.diff(plt.gca().get_yticks())[0]
-            plt.ylim(
-                plt.gca().get_ylim()[0] - ticksize / 2,
-                plt.gca().get_ylim()[1] + ticksize / 2,
-            )
-            plt.xticks(np.arange(len(feature_names)), feature_names)
-            plt.ylabel(saliency.getOutput().getName())
-            plt.xlabel("Feature SHAP Value")
-            plt.title(f"Explanation of {saliency.getOutput().getName()}")
-            plt.show()
+                ticksize = np.diff(plt.gca().get_yticks())[0]
+                plt.ylim(
+                    plt.gca().get_ylim()[0] - ticksize / 2,
+                    plt.gca().get_ylim()[1] + ticksize / 2,
+                )
+                plt.xticks(np.arange(len(feature_names)), feature_names)
+                plt.ylabel(saliency.getOutput().getName())
+                plt.xlabel("Feature SHAP Value")
+                plt.title(f"Explanation of {saliency.getOutput().getName()}")
+                plt.show()
 
 
 class SHAPExplainer:
