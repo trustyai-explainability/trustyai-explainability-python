@@ -15,7 +15,7 @@ from org.kie.kogito.explainability.local import (
 
 
 def mock_features(n_features: int):
-    return [mock_feature(i) for i in range(n_features)]
+    return [mock_feature(i, f"f-num{i}") for i in range(n_features)]
 
 
 def test_empty_prediction():
@@ -93,3 +93,16 @@ def test_normalized_weights():
     per_feature_importance = saliency.getPerFeatureImportance()
     for feature_importance in per_feature_importance:
         assert -3.0 < feature_importance.getScore() < 3.0
+
+
+def test_lime_plots():
+    """Test normalized weights"""
+    lime_explainer = LimeExplainer(normalise_weights=False, perturbations=2, samples=10)
+    n_features = 15
+    features = mock_features(n_features)
+    model = TestUtils.getSumSkipModel(0)
+    outputs = model.predict([features])[0].outputs
+    prediction = simple_prediction(input_features=features, outputs=outputs)
+
+    lime_results = lime_explainer.explain(prediction, model)
+    lime_results.plot("sum-but0")

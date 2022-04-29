@@ -22,9 +22,9 @@ from trustyai.model import (
 )
 
 
-def mock_feature(value):
+def mock_feature(value, name='f-num'):
     """Create a mock numerical feature"""
-    return FeatureFactory.newNumericalFeature("f-num", value)
+    return FeatureFactory.newNumericalFeature(name, value)
 
 
 from org.kie.kogito.explainability.model import PredictionInput, PredictionOutput
