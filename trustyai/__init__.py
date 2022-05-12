@@ -12,18 +12,18 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
-TRUSTY_VERSION = "1.20.0.Final"
+TRUSTY_VERSION = "1.21.0.Final"
 DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
 
 CORE_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
     f"{DEFAULT_DEP_PATH}/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
     f"{DEFAULT_DEP_PATH}/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/optaplanner/optaplanner-core-impl/8.20.0.Final/"
-    f"optaplanner-core-impl-8.20.0.Final.jar",
+    f"{DEFAULT_DEP_PATH}/org/optaplanner/optaplanner-core-impl/8.21.0.Final/"
+    f"optaplanner-core-impl-8.21.0.Final.jar",
     f"{DEFAULT_DEP_PATH}/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-    f"{DEFAULT_DEP_PATH}/org/kie/kie-api/8.20.0.Beta/kie-api-8.20.0.Beta.jar",
-    f"{DEFAULT_DEP_PATH}/io/micrometer/micrometer-core/1.8.3/micrometer-core-1.8.3.jar",
+    f"{DEFAULT_DEP_PATH}/org/kie/kie-api/8.21.0.Beta/kie-api-8.21.0.Beta.jar",
+    f"{DEFAULT_DEP_PATH}/io/micrometer/micrometer-core/1.8.5/micrometer-core-1.8.5.jar",
 ]
 
 ARROW_DEPS = [
@@ -36,11 +36,11 @@ ARROW_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/trustyai/arrow-converters-0.0.1.jar",
     f"{DEFAULT_DEP_PATH}/com/google/flatbuffers/flatbuffers-java/1.12.0/"
     f"flatbuffers-java-1.12.0.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-core/2.13.1/jackson-core-2.13.1.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.1/"
-    f"jackson-databind-2.13.1.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.1/"
-    f"jackson-annotations-2.13.1.jar",
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-core/2.13.2/jackson-core-2.13.2.jar",
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.2.2/"
+    f"jackson-databind-2.13.2.2.jar",
+    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.2/"
+    f"jackson-annotations-2.13.2.jar",
 ]
 
 CORE_DEPS += ARROW_DEPS
