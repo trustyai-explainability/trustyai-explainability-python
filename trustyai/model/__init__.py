@@ -27,6 +27,7 @@ from org.kie.kogito.explainability.model import (
     SimplePrediction as _SimplePrediction,
     Value as _Value,
     Type as _Type,
+    Dataset as _Dataset,
 )
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
@@ -50,6 +51,7 @@ SimplePrediction = _SimplePrediction
 VectorSchemaRoot = _VectorSchemaRoot
 Value = _Value
 Type = _Type
+Dataset = _Dataset
 
 
 @JImplements("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
