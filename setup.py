@@ -55,7 +55,7 @@ setup(
         "": ["*.jar"],
         "trustyai": ["dep/org/trustyai/arrow-converters-0.0.1.jar"],
     },
-    packages=['trustyai', 'trustyai.model', 'trustyai.utils', 'trustyai.local'],
+    packages=['trustyai', 'trustyai.model', 'trustyai.utils', 'trustyai.local', 'trustyai.metrics'],
     include_package_data=True,
     install_requires=['Jpype1', 'pyarrow'],
     cmdclass={"install": PostInstall},
