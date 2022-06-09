@@ -1,7 +1,7 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code
 """General model classes"""
 import uuid as _uuid
-from typing import List, Optional
+from typing import List, Optional, Union
 import pandas as pd
 import pyarrow as pa
 import numpy as np
@@ -51,7 +51,66 @@ SimplePrediction = _SimplePrediction
 VectorSchemaRoot = _VectorSchemaRoot
 Value = _Value
 Type = _Type
-Dataset = _Dataset
+
+trusty_type_map = {"i": "number", "O": "categorical", "f": "number", "b": "bool"}
+
+# pylint: disable = no-member
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Dataset")
+class Dataset:
+    """Wrapper class for TrustyAI Datasets"""
+
+    @property
+    def data(self):
+        """Return the dataset's data"""
+        return self.getData()
+
+    @property
+    def inputs(self):
+        """Return the dataset's input"""
+        return self.getInputs()
+
+    @property
+    def outputs(self):
+        """Return the dataset's output"""
+        return self.getOutputs()
+
+    @staticmethod
+    def from_df(df: pd.DataFrame, outputs: Optional[List[str]] = None) -> _Dataset:
+        """Create a TrustyAI Dataset from a Pandas dataframe.
+        `outputs` is an optional list of column names indicating the model outcomes.
+        If not supplied, the right-most column will be the default outcome."""
+        if not outputs:
+            outputs = [df.iloc[:, -1].name]
+        prediction_inputs = Dataset._df_to_prediction_object(
+            df.loc[:, ~df.columns.isin(outputs)], feature, PredictionInput
+        )
+        prediction_outputs = Dataset._df_to_prediction_object(
+            df[outputs], output, PredictionOutput
+        )
+        predictions = [
+            SimplePrediction(prediction_inputs[i], prediction_outputs[i])
+            for i in range(len(prediction_inputs))
+        ]
+        return _Dataset(predictions)
+
+    @staticmethod
+    def _df_to_prediction_object(
+        df: pd.DataFrame, func, wrapper
+    ) -> Union[List[PredictionInput], List[PredictionOutput]]:
+        df = df.reset_index(drop=True)
+        features_names = df.columns.values
+        rows = df.values.tolist()
+        types = [trusty_type_map[t.kind] for t in df.dtypes.values]
+        typed_rows = [zip(row, types, features_names) for row in rows]
+        predictions = []
+        for row in typed_rows:
+            values = list(row)
+            collection = []
+            for fv in values:
+                f = func(name=fv[2], dtype=fv[1], value=fv[0])
+                collection.append(f)
+            predictions.append(wrapper(collection))
+        return predictions
 
 
 @JImplements("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
