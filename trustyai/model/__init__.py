@@ -94,6 +94,27 @@ class Dataset:
         return _Dataset(predictions)
 
     @staticmethod
+    def from_numpy(array: np.ndarray, outputs: Optional[List[int]] = None) -> _Dataset:
+        """Create a TrustyAI Dataset from a NumPy array.
+        `outputs` is an optional list of column names indicating the model outcomes.
+        If not supplied, the right-most column will be the default outcome."""
+        shape = array.shape
+        if not outputs:
+            outputs = [shape[1] - 1]
+        inputs = list(set(range(shape[1])).difference(outputs))
+        prediction_inputs = Dataset._numpy_to_prediction_object(
+            array[:, inputs], feature, PredictionInput
+        )
+        prediction_outputs = Dataset._numpy_to_prediction_object(
+            array[:, outputs], output, PredictionOutput
+        )
+        predictions = [
+            SimplePrediction(prediction_inputs[i], prediction_outputs[i])
+            for i in range(len(prediction_inputs))
+        ]
+        return _Dataset(predictions)
+
+    @staticmethod
     def _df_to_prediction_object(
         df: pd.DataFrame, func, wrapper
     ) -> Union[List[PredictionInput], List[PredictionOutput]]:
@@ -108,6 +129,30 @@ class Dataset:
             collection = []
             for fv in values:
                 f = func(name=fv[2], dtype=fv[1], value=fv[0])
+                collection.append(f)
+            predictions.append(wrapper(collection))
+        return predictions
+
+    @staticmethod
+    def _numpy_to_prediction_object(
+        array: np.ndarray, func, wrapper
+    ) -> Union[List[PredictionInput], List[PredictionOutput]]:
+        shape = array.shape
+        if wrapper == PredictionInput:
+            prefix = "input"
+        else:
+            prefix = "output"
+        names = [f"{prefix}-{i}" for i in range(shape[1])]
+        types = [trusty_type_map[array[:, i].dtype.kind] for i in range(shape[1])]
+        predictions = []
+        for row_index in range(shape[0]):
+            collection = []
+            for col_index in range(shape[1]):
+                f = func(
+                    name=names[col_index],
+                    dtype=types[col_index],
+                    value=array[row_index, col_index],
+                )
                 collection.append(f)
             predictions.append(wrapper(collection))
         return predictions
