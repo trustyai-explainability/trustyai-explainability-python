@@ -25,6 +25,9 @@ def generate_test_df():
     }
     return pd.DataFrame(data=data)
 
+def generate_test_array():
+    return np.random.rand(100, 5)
+
 
 def test_no_output():
     """Checks whether we have an output when specifying none"""
@@ -64,3 +67,30 @@ def test_types():
     assert features[3].type == Type.BOOLEAN and features[3].name == 'select'
     outputs = dataset.outputs[0].outputs
     assert outputs[0].type == Type.NUMBER and outputs[0].name == 'x4'
+
+def test_array_no_output():
+    """Checks whether we have an output when specifying none"""
+    array = generate_test_array()
+    dataset = Dataset.from_numpy(array)
+    outputs = dataset.outputs[0].outputs
+    assert len(outputs) == 1
+    assert outputs[0].name == 'output-0'
+
+def test_array_outputs():
+    """Checks whether we have the correct specified outputs"""
+    array = generate_test_array()
+    dataset = Dataset.from_numpy(array, outputs=[1, 2])
+    outputs = dataset.outputs[0].outputs
+    assert len(outputs) == 2
+    assert outputs[0].name == 'output-0' and outputs[1].name == 'output-1'
+
+def test_array_shape():
+    """Checks whether we have the correct shape"""
+    array = generate_test_array()
+    dataset = Dataset.from_numpy(array, outputs=[4])
+    assert len(dataset.outputs) == 100
+    assert len(dataset.inputs) == 100
+    assert len(dataset.data) == 100
+
+    assert len(dataset.inputs[0].features) == 4
+    assert len(dataset.outputs[0].outputs) == 1
