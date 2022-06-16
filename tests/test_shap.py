@@ -38,7 +38,7 @@ def test_no_variance_one_output():
             for feature_importance in saliency.getPerFeatureImportance():
                 assert feature_importance.getScore() == 0.0
 
-
+@pytest.mark.skip(reason="https://issues.redhat.com/browse/FAI-785")
 def test_shap_arrow():
     data = pd.DataFrame(np.random.rand(101, 5))
     background = [PredictionInput([feature(name=str(k), value=value, dtype="number") for k, value in row.items()]) for idx, row in data.iloc[:100].iterrows()]
@@ -58,6 +58,7 @@ def test_shap_arrow():
             assert answers[i]-1e-3 <= feature_importance.getScore() <= answers[i]+1e-3
 
 
+@pytest.mark.skip(reason="https://issues.redhat.com/browse/FAI-785")
 def test_shap_plots():
     data = pd.DataFrame(np.random.rand(101, 5))
     background = [PredictionInput([feature(name=str(k), value=value, dtype="number") for k, value in row.items()]) for idx, row in data.iloc[:100].iterrows()]

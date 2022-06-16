@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-TRUSTY_VERSION = "1.21.0.Final"
+TRUSTY_VERSION = "1.22.1.Final"
 
 
 class PostInstall(install):
@@ -32,7 +32,7 @@ class PostInstall(install):
 
 setup(
     name="trustyai",
-    version="0.2.3",
+    version="0.2.4",
     description="Python bindings to the TrustyAI explainability library",
     long_description=long_description,
     long_description_content_type="text/markdown",
