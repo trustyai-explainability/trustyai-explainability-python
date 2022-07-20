@@ -11,5 +11,3 @@ wheel
 xgboost==1.4.2
 twine==3.4.2
 pyarrow==7.0.0
-numpydoc
-sphinx-rtd-theme
