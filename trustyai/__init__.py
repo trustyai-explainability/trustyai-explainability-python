@@ -7,13 +7,18 @@ from pathlib import Path
 from typing import List
 import glob
 import logging
+from distutils.sysconfig import get_python_lib
 
 import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
+
 TRUSTY_VERSION = "1.22.1.Final"
-DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
+try:
+    DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
+except AttributeError:
+    DEFAULT_DEP_PATH = os.path.join(get_python_lib(), "trustyai", "dep")
 print(DEFAULT_DEP_PATH)
 
 CORE_DEPS = [
