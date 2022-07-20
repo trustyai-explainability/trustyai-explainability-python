@@ -24,8 +24,10 @@ def feature_domain(
     values : Optional[Union[Tuple, List[str]]]
         The valid values of the feature. If `values` takes the form of:
 
-        * **A tuple of floats or integers:** The feature domain will be a continuous range from ``values[0]`` to ``values[1]``.
-        * **A list of strings:** The feature domain will be categorical, where `values` contains all possible valid feature values.
+        * **A tuple of floats or integers:** The feature domain will be a continuous range from ``values[0]``
+          to ``values[1]``.
+        * **A list of strings:** The feature domain will be categorical, where `values` contains
+          all possible valid feature values.
 
         Otherwise, the feature domain will be taken as `Empty`, which will mean it will be held fixed during
         the counterfactual explanation.

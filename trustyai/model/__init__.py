@@ -85,7 +85,8 @@ class Dataset:
         df : pd.DataFrame
             The pandas DataFrame to be converted into a :class:`Dataset`.
         outputs : Optional[List[str]]
-            An optional list of column names that represent model outputs. If not supplied, the right-most column will taken as the model output.
+            An optional list of column names that represent model outputs. If not supplied, the right-most column will
+            taken as the model output.
 
         Returns
         -------
@@ -114,7 +115,8 @@ class Dataset:
         df : pd.DataFrame
             The pandas DataFrame to be converted into a :class:`Dataset`.
         outputs : Optional[List[int]]
-            An optional list of column indeces that represent model outputs. If not supplied, the right-most column will taken as the model output.
+            An optional list of column indeces that represent model outputs. If not supplied, the right-most column
+             will taken as the model output.
 
         Returns
         -------
@@ -205,7 +207,8 @@ class Model:
     @JOverride
     def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
         """
-        Python implementation of the :func:`predictAsync` function with the TrustyAI :obj:`PredictionProvider` interface.
+        Python implementation of the :func:`predictAsync` function with the TrustyAI :obj:`PredictionProvider`
+        interface.
 
         Parameters
         ----------
@@ -546,8 +549,8 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
 
 
 def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
-    """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the individual components (or features)
-    of input data points.
+    """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the individual components
+    (or features) of input data points.
 
     Parameters
     ----------
