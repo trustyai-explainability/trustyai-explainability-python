@@ -270,7 +270,8 @@ class ArrowModel:
     @JOverride
     def predictAsync(self, inbound_bytearray: JArray(JLong)) -> CompletableFuture:
         """
-        Python implementation of the :func:`predictAsync` function with the TrustyAI :obj:`PredictionProvider` interface.
+        Python implementation of the :func:`predictAsync` function with the
+        TrustyAI :obj:`PredictionProvider` interface.
 
         Parameters
         ----------

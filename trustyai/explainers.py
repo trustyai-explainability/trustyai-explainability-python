@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
-import pandas.io.formats.style as Styler
 import numpy as np
 from jpype import JInt
 from org.kie.kogito.explainability.local.counterfactual import (
@@ -127,9 +126,9 @@ class CounterfactualResult(ExplanationVisualiser):
 class CounterfactualExplainer:
     """ *"How do I get the result I want?"*
 
-    The CounterfactualExplainer class seeks to answer this question by exploring "what-if" scenarios.
-    Given some initial input and desired outcome, the counterfactual explainer tries to find a set
-    of nearby inputs that produces the desired outcome. Mathematically, if we have a
+    The CounterfactualExplainer class seeks to answer this question by exploring "what-if"
+    scenarios. Given some initial input and desired outcome, the counterfactual explainer tries to
+    find a set of nearby inputs that produces the desired outcome. Mathematically, if we have a
     model :math:`f`, some input :math:`x` and a desired model output :math:`y'`, the counterfactual
     explainer finds some nearby input :math:`x'` such that :math:`f(x') = y'`.
     """
@@ -584,8 +583,8 @@ class SHAPExplainer:
     r""" *"By how much did each feature contribute to the outputs?"*
 
     SHAP (`SHapley Additive exPlanations <https://arxiv.org/abs/1705.07874>`_) seeks to answer
-    this question via providing SHAP values that provide an additive explanation of the model output;
-    essentially a `receipt` for the model's output. SHAP does this by finding an
+    this question via providing SHAP values that provide an additive explanation of the model
+    output; essentially a `receipt` for the model's output. SHAP does this by finding an
     *additive explanatory model* :math:`g` of the form:
 
     .. math::
