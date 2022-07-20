@@ -1,7 +1,7 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code
 """General model classes"""
 import uuid as _uuid
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Callable
 import pandas as pd
 import pyarrow as pa
 import numpy as np
@@ -37,6 +37,7 @@ from org.kie.kogito.explainability.model.domain import (
 )
 
 from trustyai.model.domain import feature_domain
+from trustyai.utils import JImplementsWithDocstring
 
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain
@@ -54,10 +55,11 @@ Type = _Type
 
 trusty_type_map = {"i": "number", "O": "categorical", "f": "number", "b": "bool"}
 
+
 # pylint: disable = no-member
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Dataset")
 class Dataset:
-    """Wrapper class for TrustyAI Datasets"""
+    """Wrapper class for TrustyAI Datasets. """
 
     @property
     def data(self):
@@ -76,9 +78,19 @@ class Dataset:
 
     @staticmethod
     def from_df(df: pd.DataFrame, outputs: Optional[List[str]] = None) -> _Dataset:
-        """Create a TrustyAI Dataset from a Pandas dataframe.
-        `outputs` is an optional list of column names indicating the model outcomes.
-        If not supplied, the right-most column will be the default outcome."""
+        """Create a TrustyAI Dataset from a Pandas DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The pandas DataFrame to be converted into a :class:`Dataset`.
+        outputs : Optional[List[str]]
+            An optional list of column names that represent model outputs. If not supplied, the right-most column will taken as the model output.
+
+        Returns
+        -------
+        :class:`Dataset`
+        """
         if not outputs:
             outputs = [df.iloc[:, -1].name]
         prediction_inputs = Dataset._df_to_prediction_object(
@@ -95,9 +107,19 @@ class Dataset:
 
     @staticmethod
     def from_numpy(array: np.ndarray, outputs: Optional[List[int]] = None) -> _Dataset:
-        """Create a TrustyAI Dataset from a NumPy array.
-        `outputs` is an optional list of column names indicating the model outcomes.
-        If not supplied, the right-most column will be the default outcome."""
+        """Create a TrustyAI Dataset from a Pandas DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The pandas DataFrame to be converted into a :class:`Dataset`.
+        outputs : Optional[List[int]]
+            An optional list of column indeces that represent model outputs. If not supplied, the right-most column will taken as the model output.
+
+        Returns
+        -------
+        :class:`Dataset`
+        """
         shape = array.shape
         if not outputs:
             outputs = [shape[1] - 1]
@@ -158,36 +180,75 @@ class Dataset:
         return predictions
 
 
-@JImplements("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
+@JImplementsWithDocstring("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
 class Model:
-    """Python transformer for the TrustyAI Java PredictionProvider"""
+    """Model(predict_fun)
+    Wrapper for any predictive function.
 
-    def __init__(self, predict_fun):
+    Wrapper for any predictive function to be explained. This implements the TrustyAI Java
+    class :class:`~PredictionProvider`, which is required to interface with any
+    of the explainers.
+    """
+
+    def __init__(self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]):
+        """
+        Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
+
+        Parameters
+        ----------
+        predict_fun : Callable[[List[:obj:`PredictionInput`]], List[:obj:`PredictionOutput`]]
+            A function that takes a list of prediction inputs and outputs a list of prediction outputs.
+
+        """
         self.predict_fun = predict_fun
 
     @JOverride
     def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
-        """Python implementation of the predictAsync interface method"""
+        """
+        Python implementation of the :func:`predictAsync` function with the TrustyAI :obj:`PredictionProvider` interface.
+
+        Parameters
+        ----------
+        inputs : List[:obj:`PredictionInput`]
+            A list of inputs.
+
+        Returns
+        -------
+        :obj:`CompletableFuture`
+            A Java :obj:`CompletableFuture` containing the model outputs.
+        """
         future = CompletableFuture.completedFuture(
             _jclass.JClass("java.util.Arrays").asList(self.predict_fun(inputs))
         )
         return future
 
 
-@JImplements("org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False)
+@JImplementsWithDocstring("org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False)
 class ArrowModel:
-    """Python transformer for the TrustyAI Java PredictionProviderArrow
-    The argument pandas_predict_function needs to accept a pandas dataframe of
-        shape (n_rows x n_features)
-    and return a numpy array/dataframe of shape (n_rows x n_outputs)
-    """
+    """ArrowModel(pandas_predict_fun)
 
+    Wrapper for any predictive function, optimized for Python-Java communication.
+
+    The :class:`ArrowModel` class takes advantage of Apache Arrow to drastically
+    speed up data transfer between Python and Java. We recommend using an ArrowModel
+    whenever seeking LIME or SHAP explanations.
+    """
     def __init__(self, pandas_predict_function):
+        """
+        Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
+
+        Parameters
+        ----------
+        predict_fun : Callable[:class:`pd.DataFrame`, :class:`np.array`]
+            A function that takes in Pandas DataFrame as input and outputs a Numpy array. In general, the
+            ``model.predict`` functions of sklearn-style models meet this requirement.
+
+        """
         self.pandas_predict_function = pandas_predict_function
 
     def predict(self, inbound_bytearray):
-        """convert some inbound bytearray into dataframe, call predict function,
-        then wrap back into byte array"""
+        """The function called internally by :func:`predictAsync` when communicating between Java and Python. This
+        function should never need to be called manually."""
         with pa.ipc.open_file(inbound_bytearray) as reader:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()
@@ -203,11 +264,38 @@ class ArrowModel:
 
     @JOverride
     def predictAsync(self, inbound_bytearray: JArray(JLong)) -> CompletableFuture:
-        """Python implementation of the predictAsync interface method"""
+        """
+        Python implementation of the :func:`predictAsync` function with the TrustyAI :obj:`PredictionProvider` interface.
+
+        Parameters
+        ----------
+        inputs : List[:obj:`PredictionInput`]
+            A list of inputs.
+
+        Returns
+        -------
+        :obj:`CompletableFuture`
+            A Java :obj:`CompletableFuture` containing the model outputs.
+        """
         return CompletableFuture.completedFuture(self.predict(inbound_bytearray))
 
     def get_as_prediction_provider(self, prototype_prediction_input):
-        """Wrap the PredictionProviderArrow into a normal TrustyAI Prediction Provider"""
+        """
+        Wrap the :class:`ArrowModel` into a TrustyAI :class:`PredictionProvider`.
+        This is required to use an :class:`ArrowModel` with any of the explainers.
+
+
+        Parameters
+        ----------
+        prototype_prediction_input : :obj:`PredictionInput`
+            A single example input to the model. This is necessary to specify the data
+            schema to be communicated between Python and Java.
+
+        Returns
+        -------
+        :obj:`PredictionProvider`
+            A TrustyAI :class:`PredictionProvider`.
+        """
         return PPAWrapper(self, prototype_prediction_input)
 
 
@@ -415,7 +503,35 @@ class _JPredictionFeatureDomain:
 
 
 def output(name, dtype, value=None, score=1.0) -> _Output:
-    """Helper method returning a Java Output"""
+    """Create a Java :class:`Output`. The :class:`Output` class is used to represent the individual components
+    of model outputs.
+
+    Parameters
+    ----------
+    name : str
+        The name of the given output.
+    dtype: str
+        The type of the given output, one of:
+
+        * ``text`` for textual outputs.
+        * ``number`` for numeric outputs.
+        * ``bool`` for binary or boolean outputs.
+        * ``categorical`` for categorical outputs.
+
+        If `dtype` is unspecified or takes a different value than listed above, the feature type will be
+        set as `UNDEFINED`.
+    value : Any
+        The value of this output.
+    score : float
+        The confidence of this particular output.
+
+    Returns
+    -------
+    :class:`Output`
+        A TrustyAI :class:`Output` object, to be used in the :func:`~trustyai.model.simple_prediction` or
+        :func:`~trustyai.model.counterfactual_prediction` functions.
+
+    """
     if dtype == "text":
         _type = Type.TEXT
     elif dtype == "number":
@@ -430,7 +546,34 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
 
 
 def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
-    """Helper method to build features"""
+    """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the individual components (or features)
+    of input data points.
+
+    Parameters
+    ----------
+    name : str
+        The name of the given feature.
+    dtype: str
+        The type of the given feature, one of:
+
+        * ``categorical`` for categorical features.
+        * ``number`` for numeric features.
+        * ``bool`` for binary or boolean features.
+
+        If `dtype` is unspecified or takes a different value than listed above, the feature type will be
+        taken as a generic object.
+    value : Any
+        The value of this feature.
+    domain : :class:`FeatureDomain`
+        A TrustyAI :class:`FeatureDomain` that defines the range of valid values for this feature.
+
+    Returns
+    -------
+    :class:`Feature`
+        A TrustyAI :class:`Feature` object, to be used in the :func:`~trustyai.model.simple_prediction` or
+        :func:`~trustyai.model.counterfactual_prediction` functions.
+
+    """
 
     if dtype == "categorical":
         _factory = FeatureFactory.newCategoricalFeature
@@ -452,7 +595,16 @@ def simple_prediction(
     input_features: List[Feature],
     outputs: List[Output],
 ) -> SimplePrediction:
-    """Helper to build SimplePrediction"""
+    """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs, this function
+    will bundle them into Prediction objects for use with the LIME and SHAP explainers.
+
+    Parameters
+    ----------
+    input_features : List[:class:`Feature`]
+        List of input features.
+    outputs : List[:class:`Output`]
+        The corresponding model outputs for the provided features, that is, ``outputs = model(input_features)``
+    """
     return SimplePrediction(PredictionInput(input_features), PredictionOutput(outputs))
 
 
@@ -464,7 +616,23 @@ def counterfactual_prediction(
     uuid: Optional[_uuid.UUID] = None,
     timeout: Optional[float] = None,
 ) -> CounterfactualPrediction:
-    """Helper to build CounterfactualPrediction"""
+
+    """Wrap features and outputs into a CounterfactualPrediction. Given a list of features and outputs, this function
+    will bundle them into Prediction objects for use with the :class:`CounterfactualExplainer`.
+
+    Parameters
+    ----------
+    input_features : List[:class:`Feature`]
+        List of input features.
+    outputs : List[:class:`Output`]
+        The desired model outputs to be searched for in the counterfactual explanation.
+    data_distribution : Optional[:class:`DataDistribution`]
+        The :class:`DataDistribution` to use when sampling the inputs.
+    uuid : Optional[:class:`_uuid.UUID`]
+        The UUID to use during search.
+    timeout : Optional[float]
+        The timeout time in seconds of the counterfactual explanation.
+    """
     if not uuid:
         uuid = _uuid.uuid4()
     if timeout:
