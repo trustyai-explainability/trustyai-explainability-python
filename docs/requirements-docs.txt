@@ -1,3 +1,2 @@
-trustyai
 numpydoc
 sphinx-rtd-theme
