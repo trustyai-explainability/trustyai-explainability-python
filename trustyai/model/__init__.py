@@ -85,8 +85,8 @@ class Dataset:
         df : pd.DataFrame
             The pandas DataFrame to be converted into a :class:`Dataset`.
         outputs : Optional[List[str]]
-            An optional list of column names that represent model outputs. If not supplied, the right-most column will
-            taken as the model output.
+            An optional list of column names that represent model outputs. If not supplied,
+            the right-most column will taken as the model output.
 
         Returns
         -------
@@ -115,8 +115,8 @@ class Dataset:
         df : pd.DataFrame
             The pandas DataFrame to be converted into a :class:`Dataset`.
         outputs : Optional[List[int]]
-            An optional list of column indeces that represent model outputs. If not supplied, the right-most column
-             will taken as the model output.
+            An optional list of column indeces that represent model outputs. If not supplied,
+            the right-most column will taken as the model output.
 
         Returns
         -------
@@ -182,7 +182,8 @@ class Dataset:
         return predictions
 
 
-@JImplementsWithDocstring("org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
+@JImplementsWithDocstring(
+    "org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
 class Model:
     """Model(predict_fun)
     Wrapper for any predictive function.
@@ -199,7 +200,8 @@ class Model:
         Parameters
         ----------
         predict_fun : Callable[[List[:obj:`PredictionInput`]], List[:obj:`PredictionOutput`]]
-            A function that takes a list of prediction inputs and outputs a list of prediction outputs.
+            A function that takes a list of prediction inputs and outputs a list of prediction
+            outputs.
 
         """
         self.predict_fun = predict_fun
@@ -207,8 +209,8 @@ class Model:
     @JOverride
     def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
         """
-        Python implementation of the :func:`predictAsync` function with the TrustyAI :obj:`PredictionProvider`
-        interface.
+        Python implementation of the :func:`predictAsync` function with the
+        TrustyAI :obj:`PredictionProvider` interface.
 
         Parameters
         ----------
@@ -549,8 +551,8 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
 
 
 def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
-    """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the individual components
-    (or features) of input data points.
+    """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the
+    individual components (or features) of input data points.
 
     Parameters
     ----------
@@ -563,8 +565,8 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
         * ``number`` for numeric features.
         * ``bool`` for binary or boolean features.
 
-        If `dtype` is unspecified or takes a different value than listed above, the feature type will be
-        taken as a generic object.
+        If `dtype` is unspecified or takes a different value than listed above, the feature
+        type will be taken as a generic object.
     value : Any
         The value of this feature.
     domain : :class:`FeatureDomain`
@@ -573,7 +575,8 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
     Returns
     -------
     :class:`Feature`
-        A TrustyAI :class:`Feature` object, to be used in the :func:`~trustyai.model.simple_prediction` or
+        A TrustyAI :class:`Feature` object, to be used in the
+        :func:`~trustyai.model.simple_prediction` or
         :func:`~trustyai.model.counterfactual_prediction` functions.
 
     """
@@ -598,15 +601,17 @@ def simple_prediction(
     input_features: List[Feature],
     outputs: List[Output],
 ) -> SimplePrediction:
-    """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs, this function
-    will bundle them into Prediction objects for use with the LIME and SHAP explainers.
+    """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
+    this function will bundle them into Prediction objects for use with the LIME and SHAP
+    explainers.
 
     Parameters
     ----------
     input_features : List[:class:`Feature`]
         List of input features.
     outputs : List[:class:`Output`]
-        The corresponding model outputs for the provided features, that is, ``outputs = model(input_features)``
+        The corresponding model outputs for the provided features, that is,
+        ``outputs = model(input_features)``
     """
     return SimplePrediction(PredictionInput(input_features), PredictionOutput(outputs))
 
@@ -620,8 +625,9 @@ def counterfactual_prediction(
     timeout: Optional[float] = None,
 ) -> CounterfactualPrediction:
 
-    """Wrap features and outputs into a CounterfactualPrediction. Given a list of features and outputs, this function
-    will bundle them into Prediction objects for use with the :class:`CounterfactualExplainer`.
+    """Wrap features and outputs into a CounterfactualPrediction. Given a list of features and
+    outputs, this function will bundle them into Prediction objects for use with the
+    :class:`CounterfactualExplainer`.
 
     Parameters
     ----------
