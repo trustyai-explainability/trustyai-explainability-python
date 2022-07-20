@@ -1,8 +1,7 @@
 # pylint: disable = import-error, invalid-name
-
 from jpype._jproxy import _createJProxy, _createJProxyDeferred
 
-"""General model classes"""
+# General model classes
 from org.kie.kogito.explainability import (
     TestUtils as _TestUtils,
     Config as _Config,

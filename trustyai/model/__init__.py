@@ -245,15 +245,16 @@ class ArrowModel:
         Parameters
         ----------
         predict_fun : Callable[:class:`pd.DataFrame`, :class:`np.array`]
-            A function that takes in Pandas DataFrame as input and outputs a Numpy array. In general, the
-            ``model.predict`` functions of sklearn-style models meet this requirement.
+            A function that takes in Pandas DataFrame as input and outputs a Numpy array.
+            In general, the ``model.predict`` functions of sklearn-style models meet this
+            requirement.
 
         """
         self.pandas_predict_function = pandas_predict_function
 
     def predict(self, inbound_bytearray):
-        """The function called internally by :func:`predictAsync` when communicating between Java and Python. This
-        function should never need to be called manually."""
+        """The function called internally by :func:`predictAsync` when communicating
+        between Java and Python. This function should never need to be called manually."""
         with pa.ipc.open_file(inbound_bytearray) as reader:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()
@@ -509,8 +510,8 @@ class _JPredictionFeatureDomain:
 
 
 def output(name, dtype, value=None, score=1.0) -> _Output:
-    """Create a Java :class:`Output`. The :class:`Output` class is used to represent the individual components
-    of model outputs.
+    """Create a Java :class:`Output`. The :class:`Output` class is used to represent the
+     individual components of model outputs.
 
     Parameters
     ----------
@@ -524,8 +525,8 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
         * ``bool`` for binary or boolean outputs.
         * ``categorical`` for categorical outputs.
 
-        If `dtype` is unspecified or takes a different value than listed above, the feature type will be
-        set as `UNDEFINED`.
+        If `dtype` is unspecified or takes a different value than listed above, the
+         feature type will be set as `UNDEFINED`.
     value : Any
         The value of this output.
     score : float
@@ -534,7 +535,8 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
     Returns
     -------
     :class:`Output`
-        A TrustyAI :class:`Output` object, to be used in the :func:`~trustyai.model.simple_prediction` or
+        A TrustyAI :class:`Output` object, to be used in
+        the :func:`~trustyai.model.simple_prediction` or
         :func:`~trustyai.model.counterfactual_prediction` functions.
 
     """
