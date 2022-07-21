@@ -234,13 +234,13 @@ class LimeResults(ExplanationVisualiser):
         """
         return self.as_dataframe().style
 
-    def map(self) -> dict[str, Saliency]:
+    def map(self) -> Dict[str, Saliency]:
         """
         Return the dictionary of the found saliencies.
 
         Returns
         -------
-        dict[str, Saliency]
+        Dict[str, Saliency]
              A dictionary keyed by output name, and the values will be the corresponding
               :class:`~trustyai.model.Saliency` object.
         """
