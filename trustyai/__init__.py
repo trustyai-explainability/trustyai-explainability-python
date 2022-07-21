@@ -13,6 +13,7 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
+
 TRUSTY_VERSION = "1.22.1.Final"
 
 try:
