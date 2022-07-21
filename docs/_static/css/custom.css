@@ -1,18 +1,19 @@
-@import url("css/theme.css");
+@import url("theme.css");
+
 
 @font-face {
     font-family: "Red Hat Text", sans-serif; !important;
-    src: url("css/fonts/RedHatText-VariableFont_wght.woff");
+    src: url("fonts/RedHatText-VariableFont_wght.woff");
 }
 
 @font-face {
     font-family: "Red Hat Display", sans-serif; !important;
-    src: url("css/fonts/RedHatDisplay-VariableFont_wght.woff");
+    src: url("fonts/RedHatDisplay-VariableFont_wght.woff");
 }
 
 @font-face {
     font-family: "Red Hat Mono", sans-serif; !important;
-    src: url("css/fonts/RedHatMono-VariableFont_wght.woff");
+    src: url("fonts/RedHatMono-VariableFont_wght.woff");
 }
 
 body {
