@@ -511,7 +511,7 @@ class _JPredictionFeatureDomain:
 
 def output(name, dtype, value=None, score=1.0) -> _Output:
     """Create a Java :class:`Output`. The :class:`Output` class is used to represent the
-     individual components of model outputs.
+    individual components of model outputs.
 
     Parameters
     ----------
