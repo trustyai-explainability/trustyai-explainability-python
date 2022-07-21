@@ -15,7 +15,7 @@ benefits from both the speed of Java as well as the ease-of-use of Python; our w
 the TrustyAI-Python LIME and SHAP explainers can run faster than the the official implementations.
 
 Installation
-========
+============
 ``pip install trustyai``
 
 Examples
@@ -37,8 +37,8 @@ Paper
 =====
 `TrustyAI Explainability Toolkit <https://arxiv.org/abs/2104.12717>`_, 2022
 
-API Reference
-=============
+Contents
+========
 .. toctree::
    api
 
