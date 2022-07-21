@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trustyai.model.ArrowModel &mdash; TrustyAI  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/trustyai_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="trustyai.explainers.CounterfactualExplainer" href="trustyai.explainers.CounterfactualExplainer.html" />
+    <link rel="prev" title="trustyai.model.Model" href="trustyai.model.Model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/trustyai_placeholder_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#trustyai">trustyai</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#trustyai-model">trustyai.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api.html#feature-and-output-objects">Feature and Output Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#data-objects">Data Objects</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#model-classes">Model Classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="trustyai.model.Model.html">trustyai.model.Model</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">trustyai.model.ArrowModel</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#trustyai-explainers">trustyai.explainers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TrustyAI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+      <li>trustyai.model.ArrowModel</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/trustyai.model.ArrowModel.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trustyai-model-arrowmodel">
+<h1>trustyai.model.ArrowModel<a class="headerlink" href="#trustyai-model-arrowmodel" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="trustyai.model.ArrowModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trustyai.model.</span></span><span class="sig-name descname"><span class="pre">ArrowModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandas_predict_fun</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trustyai.model.ArrowModel" title="Permalink to this definition"></a></dt>
+<dd><p>Wrapper for any predictive function, optimized for Python-Java communication.</p>
+<p>The <a class="reference internal" href="#trustyai.model.ArrowModel" title="trustyai.model.ArrowModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrowModel</span></code></a> class takes advantage of Apache Arrow to drastically
+speed up data transfer between Python and Java. We recommend using an ArrowModel
+whenever seeking LIME or SHAP explanations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trustyai.model.ArrowModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandas_predict_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trustyai.model.ArrowModel.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create the model as a TrustyAI <code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionProvider</span></code> Java class.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>predict_fun</strong><span class="classifier">Callable[<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code>]</span></dt><dd><p>A function that takes in Pandas DataFrame as input and outputs a Numpy array.
+In general, the <code class="docutils literal notranslate"><span class="pre">model.predict</span></code> functions of sklearn-style models meet this
+requirement.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#trustyai.model.ArrowModel.__init__" title="trustyai.model.ArrowModel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(pandas_predict_function)</p></td>
+<td><p>Create the model as a TrustyAI <code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionProvider</span></code> Java class.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">equals</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#trustyai.model.ArrowModel.get_as_prediction_provider" title="trustyai.model.ArrowModel.get_as_prediction_provider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_as_prediction_provider</span></code></a>(...)</p></td>
+<td><p>Wrap the <a class="reference internal" href="#trustyai.model.ArrowModel" title="trustyai.model.ArrowModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrowModel</span></code></a> into a TrustyAI <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionProvider</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hashCode</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#trustyai.model.ArrowModel.predict" title="trustyai.model.ArrowModel.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(inbound_bytearray)</p></td>
+<td><p>The function called internally by <a class="reference internal" href="#trustyai.model.ArrowModel.predictAsync" title="trustyai.model.ArrowModel.predictAsync"><code class="xref py py-func docutils literal notranslate"><span class="pre">predictAsync()</span></code></a> when communicating between Java and Python.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#trustyai.model.ArrowModel.predictAsync" title="trustyai.model.ArrowModel.predictAsync"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predictAsync</span></code></a>(inbound_bytearray)</p></td>
+<td><p>Python implementation of the <a class="reference internal" href="#trustyai.model.ArrowModel.predictAsync" title="trustyai.model.ArrowModel.predictAsync"><code class="xref py py-func docutils literal notranslate"><span class="pre">predictAsync()</span></code></a> function with the TrustyAI <code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionProvider</span></code> interface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toString</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="trustyai.model.ArrowModel.get_as_prediction_provider">
+<span class="sig-name descname"><span class="pre">get_as_prediction_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prototype_prediction_input</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trustyai.model.ArrowModel.get_as_prediction_provider" title="Permalink to this definition"></a></dt>
+<dd><p>Wrap the <a class="reference internal" href="#trustyai.model.ArrowModel" title="trustyai.model.ArrowModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrowModel</span></code></a> into a TrustyAI <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionProvider</span></code>.
+This is required to use an <a class="reference internal" href="#trustyai.model.ArrowModel" title="trustyai.model.ArrowModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrowModel</span></code></a> with any of the explainers.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>prototype_prediction_input</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionInput</span></code></span></dt><dd><p>A single example input to the model. This is necessary to specify the data
+schema to be communicated between Python and Java.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionProvider</span></code></dt><dd><p>A TrustyAI <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionProvider</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trustyai.model.ArrowModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inbound_bytearray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trustyai.model.ArrowModel.predict" title="Permalink to this definition"></a></dt>
+<dd><p>The function called internally by <a class="reference internal" href="#trustyai.model.ArrowModel.predictAsync" title="trustyai.model.ArrowModel.predictAsync"><code class="xref py py-func docutils literal notranslate"><span class="pre">predictAsync()</span></code></a> when communicating
+between Java and Python. This function should never need to be called manually.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trustyai.model.ArrowModel.predictAsync">
+<span class="sig-name descname"><span class="pre">predictAsync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inbound_bytearray:</span> <span class="pre">~jpype._jarray.long[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CompletableFuture</span></span></span><a class="headerlink" href="#trustyai.model.ArrowModel.predictAsync" title="Permalink to this definition"></a></dt>
+<dd><p>Python implementation of the <a class="reference internal" href="#trustyai.model.ArrowModel.predictAsync" title="trustyai.model.ArrowModel.predictAsync"><code class="xref py py-func docutils literal notranslate"><span class="pre">predictAsync()</span></code></a> function with the
+TrustyAI <code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionProvider</span></code> interface.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>inputs</strong><span class="classifier">List[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionInput</span></code>]</span></dt><dd><p>A list of inputs.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompletableFuture</span></code></dt><dd><p>A Java <code class="xref py py-obj docutils literal notranslate"><span class="pre">CompletableFuture</span></code> containing the model outputs.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trustyai.model.Model.html" class="btn btn-neutral float-left" title="trustyai.model.Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trustyai.explainers.CounterfactualExplainer.html" class="btn btn-neutral float-right" title="trustyai.explainers.CounterfactualExplainer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rob Geada, Tommaso Teofili, Rui Viera, Rebecca Whitworth, Daniele Zonca.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 import os
 from setuptools import setup
 from setuptools.command.install import install
+from distutils.sysconfig import get_python_lib
 import site
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -18,7 +19,6 @@ class PostInstall(install):
         try:
             _ROOT = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
         except AttributeError:
-            from distutils.sysconfig import get_python_lib
             _ROOT = os.path.join(get_python_lib(), "trustyai", "dep")
         print(f"Installing Maven dependencies into {_ROOT}")
         os.system(f"mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:get "

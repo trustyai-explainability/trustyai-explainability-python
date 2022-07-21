@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 import glob
 import logging
+from distutils.sysconfig import get_python_lib
 
 import jpype
 import jpype.imports
@@ -17,9 +18,7 @@ TRUSTY_VERSION = "1.22.1.Final"
 try:
     DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
 except AttributeError:
-    from distutils.sysconfig import get_python_lib
     DEFAULT_DEP_PATH = os.path.join(get_python_lib(), "trustyai", "dep")
-print(DEFAULT_DEP_PATH)
 
 CORE_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",

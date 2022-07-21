@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trustyai.explainers.LimeExplainer &mdash; TrustyAI  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/trustyai_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="trustyai.explainers.LimeResults" href="trustyai.explainers.LimeResults.html" />
+    <link rel="prev" title="trustyai.explainers.CounterfactualResult" href="trustyai.explainers.CounterfactualResult.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/trustyai_placeholder_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#trustyai">trustyai</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#trustyai-model">trustyai.model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#trustyai-explainers">trustyai.explainers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="trustyai.explainers.CounterfactualExplainer.html">trustyai.explainers.CounterfactualExplainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trustyai.explainers.CounterfactualResult.html">trustyai.explainers.CounterfactualResult</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">trustyai.explainers.LimeExplainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trustyai.explainers.LimeResults.html">trustyai.explainers.LimeResults</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trustyai.explainers.SHAPExplainer.html">trustyai.explainers.SHAPExplainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trustyai.explainers.SHAPResults.html">trustyai.explainers.SHAPResults</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TrustyAI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+      <li>trustyai.explainers.LimeExplainer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/trustyai.explainers.LimeExplainer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trustyai-explainers-limeexplainer">
+<h1>trustyai.explainers.LimeExplainer<a class="headerlink" href="#trustyai-explainers-limeexplainer" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="trustyai.explainers.LimeExplainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trustyai.explainers.</span></span><span class="sig-name descname"><span class="pre">LimeExplainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perturbations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalise_sparse_balance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalise_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trustyai.explainers.LimeExplainer" title="Permalink to this definition"></a></dt>
+<dd><p><em>“Which features were most important to the results?”</em></p>
+<p>LIME (<a class="reference external" href="https://arxiv.org/abs/1602.04938">Local Interpretable Model-agnostic Explanations</a>)
+seeks to answer this question via providing <em>saliencies</em>, weights associated with each input
+feature that describe how strongly said feature contributed to the model’s output.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trustyai.explainers.LimeExplainer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perturbations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalise_sparse_balance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalise_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trustyai.explainers.LimeExplainer.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the <a class="reference internal" href="#trustyai.explainers.LimeExplainer" title="trustyai.explainers.LimeExplainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LimeExplainer</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>perturbations: int</strong></dt><dd><p>The starting number of feature perturbations within the explanation process.</p>
+</dd>
+<dt><strong>seed: int</strong></dt><dd><p>The random seed to be used.</p>
+</dd>
+<dt><strong>samples: int</strong></dt><dd><p>Number of samples to be generated for the local linear model training.</p>
+</dd>
+<dt><strong>penalise_sparse_balance</strong><span class="classifier">bool</span></dt><dd><p>Whether to penalise features that are likely to produce linearly inseparable outputs.
+This can improve the efficacy and interpretability of the outputted saliencies.</p>
+</dd>
+<dt><strong>normalise_weights</strong><span class="classifier">bool</span></dt><dd><p>Whether to normalise the saliencies generated by LIME. If selected, saliencies will be
+normalized between 0 and 1.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#trustyai.explainers.LimeExplainer.__init__" title="trustyai.explainers.LimeExplainer.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([perturbations, seed, samples, ...])</p></td>
+<td><p>Initialize the <a class="reference internal" href="#trustyai.explainers.LimeExplainer" title="trustyai.explainers.LimeExplainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LimeExplainer</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#trustyai.explainers.LimeExplainer.explain" title="trustyai.explainers.LimeExplainer.explain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">explain</span></code></a>(prediction, model)</p></td>
+<td><p>Produce a LIME explanation.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="trustyai.explainers.LimeExplainer.explain">
+<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PredictionProvider</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trustyai.explainers.LimeResults.html#trustyai.explainers.LimeResults" title="trustyai.explainers.LimeResults"><span class="pre">LimeResults</span></a></span></span><a class="headerlink" href="#trustyai.explainers.LimeExplainer.explain" title="Permalink to this definition"></a></dt>
+<dd><p>Produce a LIME explanation.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>prediction</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Prediction</span></code></span></dt><dd><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">Prediction</span></code> as returned
+by <a class="reference internal" href="trustyai.model.simple_prediction.html#trustyai.model.simple_prediction" title="trustyai.model.simple_prediction"><code class="xref py py-func docutils literal notranslate"><span class="pre">simple_prediction()</span></code></a>. This object wraps the
+original model input and output together.</p>
+</dd>
+<dt><strong>model</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionProvider</span></code></span></dt><dd><p>The TrustyAI PredictionProvider, as generated by <a class="reference internal" href="trustyai.model.Model.html#trustyai.model.Model" title="trustyai.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a>
+or <a class="reference internal" href="trustyai.model.ArrowModel.html#trustyai.model.ArrowModel" title="trustyai.model.ArrowModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrowModel</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="trustyai.explainers.LimeResults.html#trustyai.explainers.LimeResults" title="trustyai.explainers.LimeResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">LimeResults</span></code></a></dt><dd><p>Object containing the results of the LIME explanation.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trustyai.explainers.CounterfactualResult.html" class="btn btn-neutral float-left" title="trustyai.explainers.CounterfactualResult" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trustyai.explainers.LimeResults.html" class="btn btn-neutral float-right" title="trustyai.explainers.LimeResults" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rob Geada, Tommaso Teofili, Rui Viera, Rebecca Whitworth, Daniele Zonca.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
