@@ -1,0 +1,38 @@
+@import url("css/theme.css");
+
+@font-face {
+    font-family: "Red Hat Text", sans-serif; !important;
+    src: url("css/fonts/RedHatText-VariableFont_wght.woff");
+}
+
+@font-face {
+    font-family: "Red Hat Display", sans-serif; !important;
+    src: url("css/fonts/RedHatDisplay-VariableFont_wght.woff");
+}
+
+@font-face {
+    font-family: "Red Hat Mono", sans-serif; !important;
+    src: url("css/fonts/RedHatMono-VariableFont_wght.woff");
+}
+
+body {
+    font-family: "Red Hat Text", sans-serif; !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Red Hat Display", sans-serif; !important;
+}
+
+.rst-content code, .rst-content tt {
+    font-family: "Red Hat Mono", sans-serif; !important;
+}
+
+.wy-side-nav-search {
+    background-color: #343131 !important;
+}
+
+html.writer-html4 .rst-content dl:not(.docutils)>dt, html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.simple)>dt{
+    border-top: 3px solid #e06666;
+    background: #e0666633;
+    color: #a64d79;
+}
