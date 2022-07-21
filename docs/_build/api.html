@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; TrustyAI  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/trustyai_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="trustyai.init" href="generated/trustyai.init.html" />
+    <link rel="prev" title="Welcome to TrustyAI’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/trustyai_placeholder_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#trustyai">trustyai</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/trustyai.init.html">trustyai.init</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#trustyai-model">trustyai.model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#feature-and-output-objects">Feature and Output Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.feature.html">trustyai.model.feature</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.feature_domain.html">trustyai.model.feature_domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.output.html">trustyai.model.output</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#data-objects">Data Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.simple_prediction.html">trustyai.model.simple_prediction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.counterfactual_prediction.html">trustyai.model.counterfactual_prediction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.Dataset.html">trustyai.model.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#model-classes">Model Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.Model.html">trustyai.model.Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/trustyai.model.ArrowModel.html">trustyai.model.ArrowModel</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#trustyai-explainers">trustyai.explainers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/trustyai.explainers.CounterfactualExplainer.html">trustyai.explainers.CounterfactualExplainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/trustyai.explainers.CounterfactualResult.html">trustyai.explainers.CounterfactualResult</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/trustyai.explainers.LimeExplainer.html">trustyai.explainers.LimeExplainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/trustyai.explainers.LimeResults.html">trustyai.explainers.LimeResults</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/trustyai.explainers.SHAPExplainer.html">trustyai.explainers.SHAPExplainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/trustyai.explainers.SHAPResults.html">trustyai.explainers.SHAPResults</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TrustyAI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this heading"></a></h1>
+<p>This page contains the API reference for public objects and function within TrustyAI. See the
+(example notebooks) for usage guides and tutorials.</p>
+<section id="trustyai">
+<h2>trustyai<a class="headerlink" href="#trustyai" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.init.html#trustyai.init" title="trustyai.init"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trustyai.init</span></code></a>(*args[, path])</p></td>
+<td><p>Initialize the Java bindings.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="trustyai-model">
+<h2>trustyai.model<a class="headerlink" href="#trustyai-model" title="Permalink to this heading"></a></h2>
+<section id="feature-and-output-objects">
+<h3>Feature and Output Objects<a class="headerlink" href="#feature-and-output-objects" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.model.feature.html#trustyai.model.feature" title="trustyai.model.feature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature</span></code></a>(name, dtype[, value, domain])</p></td>
+<td><p>Helper method to build features</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/trustyai.model.feature_domain.html#trustyai.model.feature_domain" title="trustyai.model.feature_domain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature_domain</span></code></a>(values)</p></td>
+<td><p>Create Java FeatureDomain from a Python tuple or list</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.model.output.html#trustyai.model.output" title="trustyai.model.output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output</span></code></a>(name, dtype[, value, score])</p></td>
+<td><p>Helper method returning a Java Output</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data-objects">
+<h3>Data Objects<a class="headerlink" href="#data-objects" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.model.simple_prediction.html#trustyai.model.simple_prediction" title="trustyai.model.simple_prediction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simple_prediction</span></code></a>(input_features, outputs)</p></td>
+<td><p>Wrap features and outputs into a SimplePrediction.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/trustyai.model.counterfactual_prediction.html#trustyai.model.counterfactual_prediction" title="trustyai.model.counterfactual_prediction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">counterfactual_prediction</span></code></a>(input_features, ...)</p></td>
+<td><p>Wrap features and outputs into a CounterfactualPrediction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.model.Dataset.html#trustyai.model.Dataset" title="trustyai.model.Dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset</span></code></a>()</p></td>
+<td><p>Wrapper class for TrustyAI Datasets</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="model-classes">
+<h3>Model Classes<a class="headerlink" href="#model-classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.model.Model.html#trustyai.model.Model" title="trustyai.model.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model</span></code></a>(predict_fun)</p></td>
+<td><p>Wrapper for any predictive function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/trustyai.model.ArrowModel.html#trustyai.model.ArrowModel" title="trustyai.model.ArrowModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArrowModel</span></code></a>(pandas_predict_fun)</p></td>
+<td><p>Wrapper for any predictive function, optimized for Python-Java communication.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="trustyai-explainers">
+<h2>trustyai.explainers<a class="headerlink" href="#trustyai-explainers" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.explainers.CounterfactualExplainer.html#trustyai.explainers.CounterfactualExplainer" title="trustyai.explainers.CounterfactualExplainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CounterfactualExplainer</span></code></a>([steps])</p></td>
+<td><p><em>&quot;How do I get the result I want?&quot;</em></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/trustyai.explainers.CounterfactualResult.html#trustyai.explainers.CounterfactualResult" title="trustyai.explainers.CounterfactualResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CounterfactualResult</span></code></a>(result)</p></td>
+<td><p>Wraps Counterfactual results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.explainers.LimeExplainer.html#trustyai.explainers.LimeExplainer" title="trustyai.explainers.LimeExplainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LimeExplainer</span></code></a>([perturbations, seed, ...])</p></td>
+<td><p><em>&quot;Which features were most important to the results?&quot;</em></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/trustyai.explainers.LimeResults.html#trustyai.explainers.LimeResults" title="trustyai.explainers.LimeResults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LimeResults</span></code></a>(saliencies)</p></td>
+<td><p>Wraps LIME results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/trustyai.explainers.SHAPExplainer.html#trustyai.explainers.SHAPExplainer" title="trustyai.explainers.SHAPExplainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SHAPExplainer</span></code></a>(background[, samples, ...])</p></td>
+<td><p><em>&quot;By how much did each feature contribute to the outputs?&quot;</em></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/trustyai.explainers.SHAPResults.html#trustyai.explainers.SHAPResults" title="trustyai.explainers.SHAPResults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SHAPResults</span></code></a>(shap_results, background)</p></td>
+<td><p>Wraps SHAP results.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to TrustyAI’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="generated/trustyai.init.html" class="btn btn-neutral float-right" title="trustyai.init" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rob Geada, Tommaso Teofili, Rui Viera, Rebecca Whitworth, Daniele Zonca.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
