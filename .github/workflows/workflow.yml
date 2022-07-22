@@ -18,7 +18,7 @@ jobs:
           check-latest: true
       - uses: stCarolas/setup-maven@v4
         with:
-          maven-version: 3.5.4
+          maven-version: 3.8.1
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
