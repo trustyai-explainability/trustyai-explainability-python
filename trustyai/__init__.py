@@ -13,13 +13,12 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
-
 TRUSTY_VERSION = "1.22.1.Final"
+
 try:
     DEFAULT_DEP_PATH = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
 except AttributeError:
     DEFAULT_DEP_PATH = os.path.join(get_python_lib(), "trustyai", "dep")
-print(DEFAULT_DEP_PATH)
 
 CORE_DEPS = [
     f"{DEFAULT_DEP_PATH}/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
@@ -60,7 +59,28 @@ logging.basicConfig(level=_logging_level)
 
 
 def init(*args, path=CORE_DEPS):
-    """Initialise Java binding"""
+    """init(*args, path=JAVA_DEPENDENCIES)
+
+    Initialize the Java bindings. We recommend calling this directly after importing trustyai,
+    to avoid import errors:
+
+    ::
+
+        import trustyai
+        trustyai.init()
+
+
+    Parameters
+    ----------
+    args: list
+        List of args to be passed to ``jpype.startJVM``. See the
+        `JPype manual <https://jpype.readthedocs.io/en/latest/api.html#jpype.startJVM>`_
+        for more details.
+    path: list[str]
+        List of jar files to add the Java class path. By default, this will add the necessary
+        dependencies of the TrustyAI Java library.
+
+    """
     # Launch the JVM
     try:
         # check the classpath
