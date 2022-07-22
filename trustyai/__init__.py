@@ -80,8 +80,7 @@ def init(*args, path=CORE_DEPS):
         List of jar files to add the Java class path. By default, this will add the necessary
         dependencies of the TrustyAI Java library.
 
-
-"""
+    """
     # Launch the JVM
     try:
         # check the classpath
