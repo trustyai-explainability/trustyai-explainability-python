@@ -43,6 +43,9 @@ The Jupyter server will be available at `localhost:8888`.
 
 You can also run the example Jupyter notebooks using `mybinder.org`: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trustyai-python/trustyai-explainability-python-examples/main?labpath=examples)
 
+## Documentation
+Check out the [ReadTheDocs page](https://trustyai-explainability-python.readthedocs.io/en/latest/) for API references and examples.
+
 ## Getting started
 
 To initialise, import the module and initialise it. For instance,
