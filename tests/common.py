@@ -27,7 +27,7 @@ def mock_feature(value, name='f-num'):
     return FeatureFactory.newNumericalFeature(name, value)
 
 
-from org.kie.kogito.explainability.model import PredictionInput, PredictionOutput
+from org.kie.trustyai.explainability.model import PredictionInput, PredictionOutput
 
 
 def sum_skip_model(inputs: List[PredictionInput]) -> List[PredictionOutput]:

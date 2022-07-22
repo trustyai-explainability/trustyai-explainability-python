@@ -9,7 +9,7 @@ from trustyai.explainers import LimeExplainer
 from trustyai.utils import TestUtils
 from trustyai.model import feature, simple_prediction
 
-from org.kie.kogito.explainability.local import (
+from org.kie.trustyai.explainability.local import (
     LocalExplanationException,
 )
 

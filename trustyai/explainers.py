@@ -7,21 +7,21 @@ from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
 from jpype import JInt
-from org.kie.kogito.explainability.local.counterfactual import (
+from org.kie.trustyai.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult as _CounterfactualResult,
     SolverConfigBuilder as _SolverConfigBuilder,
     CounterfactualConfig as _CounterfactualConfig,
 )
-from org.kie.kogito.explainability.local.lime import (
+from org.kie.trustyai.explainability.local.lime import (
     LimeConfig as _LimeConfig,
     LimeExplainer as _LimeExplainer,
 )
-from org.kie.kogito.explainability.local.shap import (
+from org.kie.trustyai.explainability.local.shap import (
     ShapConfig as _ShapConfig,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
-from org.kie.kogito.explainability.model import (
+from org.kie.trustyai.explainability.model import (
     CounterfactualPrediction,
     EncodingParams,
     PredictionProvider,

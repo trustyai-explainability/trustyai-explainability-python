@@ -3,7 +3,7 @@
 from typing import Optional, Tuple, List, Union
 
 from jpype import _jclass
-from org.kie.kogito.explainability.model.domain import (
+from org.kie.trustyai.explainability.model.domain import (
     FeatureDomain,
     NumericalFeatureDomain,
     CategoricalFeatureDomain,

@@ -3,7 +3,7 @@
 ### Build
 ```
 cd trusty-ai-arrow
-mvn clean install dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target/lib -DskipTests=true
+mvn clean install package -DincludeScope=runtime -DoutputDirectory=target/lib -DskipTests=true
 ```
 
 ### Add to Python bindings
