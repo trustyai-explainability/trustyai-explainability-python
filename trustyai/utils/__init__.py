@@ -3,10 +3,9 @@
 
 from jpype._jproxy import _createJProxy, _createJProxyDeferred
 
-from org.kie.kogito.explainability import (
-    TestUtils as _TestUtils,
-    Config as _Config,
-)
+from org.kie.trustyai.explainability import Config as _Config
+from org.kie.trustyai.explainability import TestUtils as _TestUtils
+
 
 TestUtils = _TestUtils
 Config = _Config

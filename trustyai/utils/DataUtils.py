@@ -1,6 +1,6 @@
 # pylint: disable = invalid-name, import-error
 """DataUtils module"""
-from org.kie.kogito.explainability.utils import DataUtils as du
+from org.kie.trustyai.explainability.utils import DataUtils as du
 
 getMean = du.getMean
 getStdDev = du.getStdDev

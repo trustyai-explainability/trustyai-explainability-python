@@ -21,31 +21,12 @@ except AttributeError:
     DEFAULT_DEP_PATH = os.path.join(get_python_lib(), "trustyai", "dep")
 
 CORE_DEPS = [
-    f"{DEFAULT_DEP_PATH}/org/kie/kogito/explainability-core/{TRUSTY_VERSION}/*",
-    f"{DEFAULT_DEP_PATH}/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/optaplanner/optaplanner-core-impl/8.22.1.Final/"
-    f"optaplanner-core-impl-8.22.1.Final.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-    f"{DEFAULT_DEP_PATH}/org/kie/kie-api/8.22.1.Beta/kie-api-8.22.1.Beta.jar",
-    f"{DEFAULT_DEP_PATH}/io/micrometer/micrometer-core/1.8.6/micrometer-core-1.8.6.jar",
+    f"{DEFAULT_DEP_PATH}/org/trustyai/explainability-core-2.0.0-SNAPSHOT.jar",
+    f"{DEFAULT_DEP_PATH}/org/trustyai/explainability-core-2.0.0-SNAPSHOT-tests.jar",
 ]
 
 ARROW_DEPS = [
-    f"{DEFAULT_DEP_PATH}/io/netty/netty-buffer/4.1.68.Final/netty-buffer-4.1.68.Final.jar",
-    f"{DEFAULT_DEP_PATH}/io/netty/netty-common/4.1.68.Final/netty-common-4.1.68.Final.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-format/7.0.0/arrow-format-7.0.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-memory-core/7.0.0/arrow-memory-core-7.0.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-memory-netty/7.0.0/arrow-memory-netty-7.0.0.jar",
-    f"{DEFAULT_DEP_PATH}/org/apache/arrow/arrow-vector/7.0.0/arrow-vector-7.0.0.jar",
     f"{DEFAULT_DEP_PATH}/org/trustyai/arrow-converters-0.0.1.jar",
-    f"{DEFAULT_DEP_PATH}/com/google/flatbuffers/flatbuffers-java/1.12.0/"
-    f"flatbuffers-java-1.12.0.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-core/2.13.3/jackson-core-2.13.3.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-databind/2.13.3/"
-    f"jackson-databind-2.13.3.jar",
-    f"{DEFAULT_DEP_PATH}/com/fasterxml/jackson/core/jackson-annotations/2.13.3/"
-    f"jackson-annotations-2.13.3.jar",
 ]
 
 CORE_DEPS += ARROW_DEPS
