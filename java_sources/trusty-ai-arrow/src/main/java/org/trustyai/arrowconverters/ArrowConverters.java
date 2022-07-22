@@ -43,12 +43,12 @@ import org.apache.arrow.vector.types.pojo.FieldType;
 import org.apache.arrow.vector.types.pojo.Schema;
 import org.apache.arrow.vector.util.ByteArrayReadableSeekableByteChannel;
 import org.apache.arrow.vector.util.Text;
-import org.kie.kogito.explainability.model.Feature;
-import org.kie.kogito.explainability.model.Output;
-import org.kie.kogito.explainability.model.PredictionInput;
-import org.kie.kogito.explainability.model.PredictionOutput;
-import org.kie.kogito.explainability.model.Type;
-import org.kie.kogito.explainability.model.Value;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
 
 public class ArrowConverters {
     private ArrowConverters() {
