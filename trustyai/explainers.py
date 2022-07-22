@@ -45,8 +45,8 @@ LimeConfig = _LimeConfig
 
 class CounterfactualResult(ExplanationVisualiser):
     """Wraps Counterfactual results. This object is returned by the
-     :class:`~CounterfactualExplainer`, and provides a variety of methods to visualize and interact
-     with the results of the counterfactual explanation.
+    :class:`~CounterfactualExplainer`, and provides a variety of methods to visualize and interact
+    with the results of the counterfactual explanation.
     """
 
     def __init__(self, result: _CounterfactualResult) -> None:
@@ -124,7 +124,7 @@ class CounterfactualResult(ExplanationVisualiser):
 
 
 class CounterfactualExplainer:
-    """ *"How do I get the result I want?"*
+    """*"How do I get the result I want?"*
 
     The CounterfactualExplainer class seeks to answer this question by exploring "what-if"
     scenarios. Given some initial input and desired outcome, the counterfactual explainer tries to
@@ -156,7 +156,7 @@ class CounterfactualExplainer:
 
     def explain(
         self, prediction: CounterfactualPrediction, model: PredictionProvider
- ) -> CounterfactualResult:
+    ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a :class:`~CounterfactualPrediction` and a
         :class:`~PredictionProvider`
 
@@ -277,7 +277,7 @@ class LimeResults(ExplanationVisualiser):
 
 # pylint: disable=too-many-arguments
 class LimeExplainer:
-    """ *"Which features were most important to the results?"*
+    """*"Which features were most important to the results?"*
 
     LIME (`Local Interpretable Model-agnostic Explanations <https://arxiv.org/abs/1602.04938>`_)
     seeks to answer this question via providing *saliencies*, weights associated with each input
@@ -580,7 +580,7 @@ class SHAPResults(ExplanationVisualiser):
 
 
 class SHAPExplainer:
-    r""" *"By how much did each feature contribute to the outputs?"*
+    r"""*"By how much did each feature contribute to the outputs?"*
 
     SHAP (`SHapley Additive exPlanations <https://arxiv.org/abs/1705.07874>`_) seeks to answer
     this question via providing SHAP values that provide an additive explanation of the model

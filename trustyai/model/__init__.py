@@ -59,7 +59,7 @@ trusty_type_map = {"i": "number", "O": "categorical", "f": "number", "b": "bool"
 # pylint: disable = no-member
 @_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Dataset")
 class Dataset:
-    """Wrapper class for TrustyAI Datasets. """
+    """Wrapper class for TrustyAI Datasets."""
 
     @property
     def data(self):
@@ -183,7 +183,8 @@ class Dataset:
 
 
 @JImplementsWithDocstring(
-    "org.kie.kogito.explainability.model.PredictionProvider", deferred=False)
+    "org.kie.kogito.explainability.model.PredictionProvider", deferred=False
+)
 class Model:
     """Model(predict_fun)
     Wrapper for any predictive function.
@@ -193,7 +194,9 @@ class Model:
     of the explainers.
     """
 
-    def __init__(self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]):
+    def __init__(
+        self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
+    ):
         """
         Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
 
@@ -228,7 +231,9 @@ class Model:
         return future
 
 
-@JImplementsWithDocstring("org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False)
+@JImplementsWithDocstring(
+    "org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False
+)
 class ArrowModel:
     """ArrowModel(pandas_predict_fun)
 
@@ -238,6 +243,7 @@ class ArrowModel:
     speed up data transfer between Python and Java. We recommend using an ArrowModel
     whenever seeking LIME or SHAP explanations.
     """
+
     def __init__(self, pandas_predict_function):
         """
         Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
