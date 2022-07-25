@@ -34,6 +34,7 @@ def test_no_variance_one_output():
 
 
 def test_shap_arrow():
+    np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
     background = data.iloc[:100]
     to_explain = data.iloc[100:101]

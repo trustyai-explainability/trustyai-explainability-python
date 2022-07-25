@@ -12,14 +12,14 @@ np.random.seed(0)
 
 @pytest.mark.skip("redundant")
 def test_all_explainers():
-    # universal setup
+    # universal setup ==============================================================================
     data = pd.DataFrame(np.random.rand(1, 5))
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
     model = Model(predict_function, dataframe=True, arrow=True)
     prediction = simple_prediction(input_features=data, outputs=model(data))
 
-    # SHAP
+    # SHAP =========================================================================================
     background = pd.DataFrame(np.zeros([100, 5]))
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(prediction, model)
@@ -27,13 +27,13 @@ def test_all_explainers():
     for score in explanation.as_dataframe()['SHAP Value'].iloc[1:-1]:
         assert score > 0
 
-    # LIME
+    # LIME =========================================================================================
     explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
     explanation = explainer.explain(prediction, model)
     for score in explanation.as_dataframe()["output-0_score"]:
         assert score > 0
 
-    # Counterfactual
+    # Counterfactual ===============================================================================
     features = [feature(str(k), "number", v, domain=(-10., 10.)) for k, v in data.iloc[0].items()]
     goal = np.array([[0]])
     cf_prediction = counterfactual_prediction(input_features=features, outputs=goal)
