@@ -116,3 +116,5 @@ def init(*args, path=CORE_DEPS):
 
     except OSError:
         print("JVM already started")
+
+init()

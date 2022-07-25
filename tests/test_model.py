@@ -3,7 +3,7 @@
 
 from common import *
 
-from trustyai.model import Model, feature
+from trustyai.model import Model, Dataset, feature
 
 
 def foo():
@@ -13,17 +13,7 @@ def foo():
 def test_basic_model():
     """Test basic model"""
 
-    def test_model(inputs):
-        outputs = [output(name=feature.name, dtype="number", value=feature.value.as_number()) for feature in
-                   inputs]
-        return [PredictionOutput(outputs)]
-
-    model = Model(test_model)
-
-    features = [
-        feature(name=f"f-num{i}", value=i * 2.0, dtype="number")
-        for i in range(5)
-    ]
-
+    model = Model(lambda x: x, output_names=['a','b','c','d','e'])
+    features = Dataset.numpy_to_prediction_object(np.arange(0, 100).reshape(20, 5), feature)
     result = model.predictAsync(features).get()
     assert len(result[0].outputs) == 5
