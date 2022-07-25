@@ -49,7 +49,7 @@ def test_shap_arrow():
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
     for saliency in explanation.getSaliencies():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
-            assert answers[i]-1e-3 <= feature_importance.getScore() <= answers[i]+1e-3
+            assert answers[i]-1e-2 <= feature_importance.getScore() <= answers[i]+1e-2
 
 
 def test_shap_plots():
