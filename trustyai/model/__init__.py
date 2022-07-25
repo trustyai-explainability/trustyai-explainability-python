@@ -97,9 +97,7 @@ class Dataset:
         prediction_inputs = Dataset.df_to_prediction_object(
             df.loc[:, ~df.columns.isin(outputs)], feature
         )
-        prediction_outputs = Dataset.df_to_prediction_object(
-            df[outputs], output
-        )
+        prediction_outputs = Dataset.df_to_prediction_object(df[outputs], output)
         predictions = [
             SimplePrediction(prediction_inputs[i], prediction_outputs[i])
             for i in range(len(prediction_inputs))
@@ -126,8 +124,12 @@ class Dataset:
         if not outputs:
             outputs = [shape[1] - 1]
         inputs = list(set(range(shape[1])).difference(outputs))
-        prediction_inputs = Dataset.numpy_to_prediction_object(array[:, inputs], feature)
-        prediction_outputs = Dataset.numpy_to_prediction_object(array[:, outputs], output)
+        prediction_inputs = Dataset.numpy_to_prediction_object(
+            array[:, inputs], feature
+        )
+        prediction_outputs = Dataset.numpy_to_prediction_object(
+            array[:, outputs], output
+        )
         predictions = [
             SimplePrediction(prediction_inputs[i], prediction_outputs[i])
             for i in range(len(prediction_inputs))
@@ -137,7 +139,7 @@ class Dataset:
     # pylint: disable=comparison-with-callable
     @staticmethod
     def df_to_prediction_object(
-            df: pd.DataFrame, func
+        df: pd.DataFrame, func
     ) -> Union[List[PredictionInput], List[PredictionOutput]]:
         """
         Convert a Pandas DataFrame into a list of TrustyAI
@@ -171,7 +173,7 @@ class Dataset:
 
     @staticmethod
     def numpy_to_prediction_object(
-            array: np.ndarray, func
+        array: np.ndarray, func
     ) -> Union[List[PredictionInput], List[PredictionOutput]]:
         """
         Convert a Numpy array into a list of TrustyAI
@@ -212,7 +214,8 @@ class Dataset:
 
     @staticmethod
     def prediction_object_to_numpy(
-            objects: Union[List[PredictionInput], List[PredictionOutput]]) -> np.array:
+        objects: Union[List[PredictionInput], List[PredictionOutput]]
+    ) -> np.array:
         """
         Convert a list of TrustyAI
         :class:`PredictionInput` or :class:`PredictionOutput` into a Numpy array.
@@ -224,17 +227,24 @@ class Dataset:
         """
         if isinstance(objects[0], PredictionInput):
             arr = np.array(
-                [[f.getValue().getUnderlyingObject() for f in pi.getFeatures()] for pi in objects]
+                [
+                    [f.getValue().getUnderlyingObject() for f in pi.getFeatures()]
+                    for pi in objects
+                ]
             )
         else:
             arr = np.array(
-                [[o.getValue().getUnderlyingObject() for o in po.getOutputs()] for po in objects]
+                [
+                    [o.getValue().getUnderlyingObject() for o in po.getOutputs()]
+                    for po in objects
+                ]
             )
         return arr
 
     @staticmethod
     def prediction_object_to_pandas(
-            objects: Union[List[PredictionInput], List[PredictionOutput]]) -> pd.DataFrame:
+        objects: Union[List[PredictionInput], List[PredictionOutput]]
+    ) -> pd.DataFrame:
         """
         Convert a list of TrustyAI
         :class:`PredictionInput` or :class:`PredictionOutput` into a Pandas DataFrame.
@@ -245,15 +255,25 @@ class Dataset:
             The PredictionInput or PredictionOutput objects to be converted.
         """
         if isinstance(objects[0], PredictionInput):
-            df = pd.DataFrame([
-                {in_feature.getName(): in_feature.getValue().getUnderlyingObject()
-                 for in_feature in pi.getFeatures()} for pi in objects
-            ])
+            df = pd.DataFrame(
+                [
+                    {
+                        in_feature.getName(): in_feature.getValue().getUnderlyingObject()
+                        for in_feature in pi.getFeatures()
+                    }
+                    for pi in objects
+                ]
+            )
         else:
-            df = pd.DataFrame([
-                {output.getName(): output.getValue().getUnderlyingObject()
-                 for output in po.getOutputs()} for po in objects
-            ])
+            df = pd.DataFrame(
+                [
+                    {
+                        output.getName(): output.getValue().getUnderlyingObject()
+                        for output in po.getOutputs()
+                    }
+                    for po in objects
+                ]
+            )
         return df
 
 
@@ -270,7 +290,7 @@ class PredictionProvider:
     """
 
     def __init__(
-            self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
+        self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
     ):
         """
         Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
@@ -437,12 +457,14 @@ class Model:
             if dataframe:
                 self.prediction_provider = PredictionProvider(
                     lambda x: self._cast_outputs(
-                        predict_fun(Dataset.prediction_object_to_pandas(x)))
+                        predict_fun(Dataset.prediction_object_to_pandas(x))
+                    )
                 )
             else:
                 self.prediction_provider = PredictionProvider(
                     lambda x: self._cast_outputs(
-                        predict_fun(Dataset.prediction_object_to_numpy(x)))
+                        predict_fun(Dataset.prediction_object_to_numpy(x))
+                    )
                 )
 
     def _cast_outputs(self, output_array):
@@ -453,8 +475,10 @@ class Model:
             objs = Dataset.df_to_prediction_object(output_array, output)
         else:
             raise ValueError(
-                "Unsupported model output type: {}, must be numpy.ndarray or pandas.DataFrame"
-                    .format(type(output_array)))
+                "Unsupported model output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
+                    type(output_array)
+                )
+            )
         return objs
 
     @JOverride
@@ -474,10 +498,9 @@ class Model:
             A Java :obj:`CompletableFuture` containing the model outputs.
         """
         if self.arrow and self.prediction_provider is None:
-            self.prediction_provider = \
-                self.prediction_provider_arrow.get_as_prediction_provider(
-                    inputs[0]
-                )
+            self.prediction_provider = (
+                self.prediction_provider_arrow.get_as_prediction_provider(inputs[0])
+            )
         return self.prediction_provider.predictAsync(inputs)
 
     def __call__(self, inputs):
@@ -787,8 +810,8 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
 
 # pylint: disable=line-too-long
 def simple_prediction(
-        input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+    input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+    outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
 ) -> SimplePrediction:
     """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
     this function will bundle them into Prediction objects for use with the LIME and SHAP
@@ -842,11 +865,11 @@ def simple_prediction(
 
 # pylint: disable=too-many-arguments
 def counterfactual_prediction(
-        input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-        data_distribution: Optional[DataDistribution] = None,
-        uuid: Optional[_uuid.UUID] = None,
-        timeout: Optional[float] = None,
+    input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+    outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+    data_distribution: Optional[DataDistribution] = None,
+    uuid: Optional[_uuid.UUID] = None,
+    timeout: Optional[float] = None,
 ) -> CounterfactualPrediction:
     """Wrap features and outputs into a CounterfactualPrediction. Given a list of features and
     outputs, this function will bundle them into Prediction objects for use with the
