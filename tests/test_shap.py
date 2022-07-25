@@ -66,5 +66,5 @@ def test_shap_plots():
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(prediction, model)
 
-    explanation.as_dataframe()
+    print(explanation.as_dataframe())
     explanation.candlestick_plot()
