@@ -119,6 +119,6 @@ def test_lime_v2():
     explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
     explanation = explainer.explain(prediction, model)
     for score in explanation.as_dataframe()["output-0_score"]:
-        assert score>0
+        assert score > 0
 
 
