@@ -120,3 +120,19 @@ def test_counterfactual_plot():
 
     result = explainer.explain(prediction, model)
     result.plot()
+
+def test_counterfactual_v2():
+    np.random.seed(0)
+    data = pd.DataFrame(np.random.rand(1, 5))
+    features = [feature(str(k), "number", v, domain=(-10., 10.)) for k, v in data.iloc[0].items()]
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.dot(x.values, model_weights)
+
+    model = Model(predict_function, dataframe=True)
+    goal = np.array([[0]])
+    prediction = counterfactual_prediction(input_features=features, outputs=goal)
+    explainer = CounterfactualExplainer(steps=10_000)
+    explanation = explainer.explain(prediction, model)
+    result_output = model(explanation.get_proposed_features_as_pandas())
+    assert result_output<.01
+    assert result_output>-.01
