@@ -475,7 +475,7 @@ class Model:
             objs = Dataset.df_to_prediction_object(output_array, output)
         else:
             raise ValueError(
-                "Unsupported model output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
+                "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
                     type(output_array)
                 )
             )
