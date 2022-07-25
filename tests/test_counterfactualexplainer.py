@@ -77,23 +77,18 @@ def test_counterfactual_match():
 def test_counterfactual_match_python_model():
     """Test if there's a valid counterfactual with a Python model"""
     GOAL_VALUE = 1000
-    goal = [output(name="sum-but-0", dtype="number", value=GOAL_VALUE, score=1.0)]
-
+    goal = np.array([[GOAL_VALUE]])
     n_features = 5
 
     features = [
         feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(n_features)
     ]
-
     explainer = CounterfactualExplainer(steps=1000)
-
     prediction = counterfactual_prediction(
         input_features=features,
         outputs=goal,
     )
-
-    model = Model(sum_skip_model)
-
+    model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
     result = explainer.explain(prediction, model)
     assert sum([entity.as_feature().value.as_number() for entity in result._result.entities]) == approx(GOAL_VALUE, rel=3)
 
@@ -101,14 +96,12 @@ def test_counterfactual_match_python_model():
 def test_counterfactual_plot():
     """Test if there's a valid counterfactual with a Python model"""
     GOAL_VALUE = 1000
-    goal = [output(name="sum-but-0", dtype="number", value=GOAL_VALUE, score=1.0)]
-
+    goal = np.array([[GOAL_VALUE]])
     n_features = 5
 
     features = [
         feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(n_features)
     ]
-
     explainer = CounterfactualExplainer(steps=1000)
 
     prediction = counterfactual_prediction(
@@ -116,7 +109,7 @@ def test_counterfactual_plot():
         outputs=goal,
     )
 
-    model = Model(sum_skip_model)
+    model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
 
     result = explainer.explain(prediction, model)
     result.plot()
