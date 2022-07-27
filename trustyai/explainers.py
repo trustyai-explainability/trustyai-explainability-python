@@ -675,7 +675,9 @@ class SHAPExplainer:
         elif isinstance(background[0], PredictionInput):
             self.background = background
         else:
-            raise AttributeError("Unsupported background type: {}".format(type(background)))
+            raise AttributeError(
+                "Unsupported background type: {}".format(type(background))
+            )
 
         self._configbuilder = (
             _ShapConfig.builder()
