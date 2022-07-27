@@ -114,6 +114,7 @@ def test_counterfactual_plot():
     result = explainer.explain(prediction, model)
     result.plot()
 
+
 def test_counterfactual_v2():
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(1, 5))
@@ -126,6 +127,6 @@ def test_counterfactual_v2():
     prediction = counterfactual_prediction(input_features=features, outputs=goal)
     explainer = CounterfactualExplainer(steps=10_000)
     explanation = explainer.explain(prediction, model)
-    result_output = model(explanation.get_proposed_features_as_pandas())
+    result_output = model(explanation.proposed_features_dataframe)
     assert result_output<.01
     assert result_output>-.01

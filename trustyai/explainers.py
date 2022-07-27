@@ -54,7 +54,8 @@ class CounterfactualResult(ExplanationVisualiser):
         used manually."""
         self._result = result
 
-    def get_proposed_features_as_numpy(self):
+    @property
+    def proposed_features_array(self):
         """Return the proposed feature values found from the counterfactual explanation
         as a Numpy array.
         """
@@ -62,7 +63,8 @@ class CounterfactualResult(ExplanationVisualiser):
             [PredictionInput([entity.as_feature() for entity in self._result.entities])]
         )
 
-    def get_proposed_features_as_pandas(self):
+    @property
+    def proposed_features_dataframe(self):
         """Return the proposed feature values found from the counterfactual explanation
         as a Pandas DataFrame.
         """
@@ -373,7 +375,7 @@ class SHAPResults(ExplanationVisualiser):
         self.shap_results = shap_results
         self.background = background
 
-    def getSaliencies(self) -> List[Saliency]:
+    def get_saliencies(self) -> List[Saliency]:
         """
         Return the list of the found saliencies.
 
@@ -384,7 +386,7 @@ class SHAPResults(ExplanationVisualiser):
         """
         return self.shap_results.getSaliencies()
 
-    def getFnull(self):
+    def get_fnull(self):
         """
         Return the list of the found fnulls (y-intercepts) of the SHAP explanations
 
