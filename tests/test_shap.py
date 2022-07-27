@@ -28,7 +28,7 @@ def test_no_variance_one_output():
     explanations = [shap_explainer.explain(prediction, model) for prediction in predictions]
 
     for explanation in explanations:
-        for saliency in explanation.getSaliencies():
+        for saliency in explanation.get_saliencies():
             for feature_importance in saliency.getPerFeatureImportance():
                 assert feature_importance.getScore() == 0.0
 
@@ -48,7 +48,7 @@ def test_shap_arrow():
     explanation = shap_explainer.explain(prediction, model)
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
-    for saliency in explanation.getSaliencies():
+    for saliency in explanation.get_saliencies():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
             assert answers[i]-1e-2 <= feature_importance.getScore() <= answers[i]+1e-2
 
