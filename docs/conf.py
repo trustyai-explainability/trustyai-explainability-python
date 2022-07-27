@@ -79,5 +79,7 @@ numpydoc_show_class_members=False
 
 
 def setup(app):
+    import trustyai
+    trustyai.init()
     import trustyai.model
     trustyai.model.Model.__name__ = "Model"
