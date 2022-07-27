@@ -8,6 +8,7 @@ myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../")
 
 import trustyai
+trustyai.init()
 import numpy as np
 import pandas as pd
 

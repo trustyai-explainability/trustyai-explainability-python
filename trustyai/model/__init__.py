@@ -339,19 +339,19 @@ class PredictionProviderArrow:
     whenever seeking LIME or SHAP explanations.
     """
 
-    def __init__(self, pandas_predict_function):
+    def __init__(self, predict_fun):
         """
         Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
 
         Parameters
         ----------
-        pandas_predict_function : Callable[:class:`pd.DataFrame`, :class:`np.array`]
+        predict_fun : Callable[:class:`pd.DataFrame`, :class:`np.array`]
             A function that takes in Pandas DataFrame as input and outputs a Numpy array.
             In general, the ``model.predict`` functions of sklearn-style models meet this
             requirement.
 
         """
-        self.pandas_predict_function = pandas_predict_function
+        self.predict_function = predict_fun
 
     def predict(self, inbound_bytearray):
         """The function called internally by :func:`predictAsync` when communicating
@@ -359,7 +359,7 @@ class PredictionProviderArrow:
         with pa.ipc.open_file(inbound_bytearray) as reader:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()
-        outputs = self.pandas_predict_function(arr)
+        outputs = self.predict_function(arr)
         if isinstance(outputs, np.ndarray):
             outputs = pd.DataFrame(data=outputs)
         record_batch = pa.RecordBatch.from_pandas(outputs)
@@ -441,14 +441,11 @@ class Model:
         self.predict_fun = predict_fun
         self.output_names = output_names
 
-        if not dataframe and not output_names:
-            raise AttributeError("If dataframe=false, output_names must be specified.")
-
         if arrow:
             self.prediction_provider = None
             if not dataframe:
                 self.prediction_provider_arrow = PredictionProviderArrow(
-                    lambda x: predict_fun(pd.DataFrame(x))
+                    lambda x: predict_fun(x.values)
                 )
             else:
                 self.prediction_provider_arrow = PredictionProviderArrow(predict_fun)
@@ -501,6 +498,7 @@ class Model:
             self.prediction_provider = (
                 self.prediction_provider_arrow.get_as_prediction_provider(inputs[0])
             )
+
         return self.prediction_provider.predictAsync(inputs)
 
     def __call__(self, inputs):

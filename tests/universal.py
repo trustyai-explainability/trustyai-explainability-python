@@ -1,5 +1,4 @@
 # General Setup
-import trustyai
 from trustyai.model import Model, simple_prediction, counterfactual_prediction
 from trustyai.explainers import *
 

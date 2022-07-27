@@ -623,7 +623,7 @@ class SHAPExplainer:
 
     def __init__(
         self,
-        background: Union[np.ndarray, pd.DataFrame],
+        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
         samples=None,
         batch_size=20,
         seed=0,
@@ -634,9 +634,10 @@ class SHAPExplainer:
 
         Parameters
         ----------
-        background : :class:`numpy.array` or :class:`Pandas.DataFrame`
-            The set of background datapoints as an array or dataframe of shape
-            ``[n_datapoints, n_features]``
+        background : :class:`numpy.array`, :class:`Pandas.DataFrame`
+        or List[:class:`PredictionInput]
+            The set of background datapoints as an array, dataframe of shape
+            ``[n_datapoints, n_features]``, or list of TrustyAI PredictionInputs.
         samples: int
             The number of samples to use when computing SHAP values. Higher values will increase
             explanation accuracy, at the  cost of runtime.
@@ -669,8 +670,12 @@ class SHAPExplainer:
 
         if isinstance(background, np.ndarray):
             self.background = Dataset.numpy_to_prediction_object(background, feature)
-        else:
+        elif isinstance(background, pd.DataFrame):
             self.background = Dataset.df_to_prediction_object(background, feature)
+        elif isinstance(background[0], PredictionInput):
+            self.background = background
+        else:
+            raise AttributeError("Unsupported background type: {}".format(type(background)))
 
         self._configbuilder = (
             _ShapConfig.builder()
