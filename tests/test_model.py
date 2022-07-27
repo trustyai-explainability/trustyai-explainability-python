@@ -2,16 +2,9 @@
 """Test model provider interface"""
 
 from common import *
-import jpype
-from trustyai.explainers import SHAPExplainer
-from trustyai.model import Model, Dataset, feature, PredictionInput, simple_prediction
+from trustyai.model import Model, Dataset, feature
 
-
-#import pytest
-
-
-def foo():
-    return "works!"
+import pytest
 
 
 def test_basic_model():
