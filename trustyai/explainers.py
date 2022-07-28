@@ -1,6 +1,6 @@
 """Explainers module"""
 # pylint: disable = import-error, too-few-public-methods
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
@@ -27,7 +27,6 @@ from org.kie.kogito.explainability.model import (
     PredictionProvider,
     Saliency,
     PerturbationContext,
-    PredictionInput as _PredictionInput,
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
@@ -37,6 +36,7 @@ from trustyai.utils._visualisation import (
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
 )
+from trustyai.model import feature, Dataset, PredictionInput
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -53,6 +53,24 @@ class CounterfactualResult(ExplanationVisualiser):
         """Constructor method. This is called internally, and shouldn't ever need to be
         used manually."""
         self._result = result
+
+    @property
+    def proposed_features_array(self):
+        """Return the proposed feature values found from the counterfactual explanation
+        as a Numpy array.
+        """
+        return Dataset.prediction_object_to_numpy(
+            [PredictionInput([entity.as_feature() for entity in self._result.entities])]
+        )
+
+    @property
+    def proposed_features_dataframe(self):
+        """Return the proposed feature values found from the counterfactual explanation
+        as a Pandas DataFrame.
+        """
+        return Dataset.prediction_object_to_pandas(
+            [PredictionInput([entity.as_feature() for entity in self._result.entities])]
+        )
 
     def as_dataframe(self) -> pd.DataFrame:
         """
@@ -357,7 +375,7 @@ class SHAPResults(ExplanationVisualiser):
         self.shap_results = shap_results
         self.background = background
 
-    def getSaliencies(self) -> List[Saliency]:
+    def get_saliencies(self) -> List[Saliency]:
         """
         Return the list of the found saliencies.
 
@@ -368,7 +386,7 @@ class SHAPResults(ExplanationVisualiser):
         """
         return self.shap_results.getSaliencies()
 
-    def getFnull(self):
+    def get_fnull(self):
         """
         Return the list of the found fnulls (y-intercepts) of the SHAP explanations
 
@@ -607,7 +625,7 @@ class SHAPExplainer:
 
     def __init__(
         self,
-        background: List[_PredictionInput],
+        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
         samples=None,
         batch_size=20,
         seed=0,
@@ -618,8 +636,10 @@ class SHAPExplainer:
 
         Parameters
         ----------
-        background : list[:obj:`~trustyai.model.PredictionInput`]
-            The set of background datapoints
+        background : :class:`numpy.array`, :class:`Pandas.DataFrame`
+        or List[:class:`PredictionInput]
+            The set of background datapoints as an array, dataframe of shape
+            ``[n_datapoints, n_features]``, or list of TrustyAI PredictionInputs.
         samples: int
             The number of samples to use when computing SHAP values. Higher values will increase
             explanation accuracy, at the  cost of runtime.
@@ -636,7 +656,7 @@ class SHAPExplainer:
         link_type : :obj:`~_ShapConfig.LinkType`
             A choice of either ``trustyai.explainers._ShapConfig.LinkType.IDENTITY``
             or ``trustyai.explainers._ShapConfig.LinkType.LOGIT``. If the model output is a
-            probability, choosing the ``LOGIT`` link will rescale explanations into log-oods units.
+            probability, choosing the ``LOGIT`` link will rescale explanations into log-odds units.
             Otherwise, choose ``IDENTITY``.
 
         Returns
@@ -648,14 +668,25 @@ class SHAPExplainer:
             link_type = _ShapConfig.LinkType.IDENTITY
         self._jrandom = Random()
         self._jrandom.setSeed(seed)
-        self.background = background
         perturbation_context = PerturbationContext(self._jrandom, perturbations)
+
+        if isinstance(background, np.ndarray):
+            self.background = Dataset.numpy_to_prediction_object(background, feature)
+        elif isinstance(background, pd.DataFrame):
+            self.background = Dataset.df_to_prediction_object(background, feature)
+        elif isinstance(background[0], PredictionInput):
+            self.background = background
+        else:
+            raise AttributeError(
+                "Unsupported background type: {}".format(type(background))
+            )
+
         self._configbuilder = (
             _ShapConfig.builder()
             .withLink(link_type)
             .withBatchSize(batch_size)
             .withPC(perturbation_context)
-            .withBackground(background)
+            .withBackground(self.background)
         )
         if samples is not None:
             self._configbuilder.withNSamples(JInt(samples))

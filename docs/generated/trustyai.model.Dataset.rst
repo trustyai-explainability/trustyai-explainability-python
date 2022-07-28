@@ -14,8 +14,12 @@
    .. autosummary::
    
       ~Dataset.__init__
+      ~Dataset.df_to_prediction_object
       ~Dataset.from_df
       ~Dataset.from_numpy
+      ~Dataset.numpy_to_prediction_object
+      ~Dataset.prediction_object_to_numpy
+      ~Dataset.prediction_object_to_pandas
    
    
 
