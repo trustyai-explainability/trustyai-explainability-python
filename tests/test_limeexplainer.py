@@ -7,7 +7,7 @@ import pytest
 
 from trustyai.explainers import LimeExplainer
 from trustyai.utils import TestUtils
-from trustyai.model import feature, simple_prediction
+from trustyai.model import feature, simple_prediction, Model
 
 from org.kie.kogito.explainability.local import (
     LocalExplanationException,
@@ -106,3 +106,19 @@ def test_lime_plots():
 
     lime_results = lime_explainer.explain(prediction, model)
     lime_results.plot("sum-but0")
+
+
+def test_lime_v2():
+    np.random.seed(0)
+    data = pd.DataFrame(np.random.rand(1, 5))
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.dot(x.values, model_weights)
+
+    model = Model(predict_function, dataframe=True, arrow=True)
+    prediction = simple_prediction(input_features=data, outputs=model(data))
+    explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
+    explanation = explainer.explain(prediction, model)
+    for score in explanation.as_dataframe()["output-0_score"]:
+        assert score > 0
+
+
