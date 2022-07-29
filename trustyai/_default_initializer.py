@@ -7,4 +7,3 @@ from trustyai import initializer
 if os.environ.get("TRUSTYAI_IS_INITIALIZED", "0") == "0":
     initialized = initializer.init()
     os.environ["TRUSTYAI_IS_INITIALIZED"] = "1" if initialized else "0"
-    print("_di initialized:", os.environ["TRUSTYAI_IS_INITIALIZED"])
