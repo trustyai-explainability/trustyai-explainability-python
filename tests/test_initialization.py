@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 
 import pytest
@@ -34,42 +35,20 @@ def default_initializer_process_exp(initial_state, final_state):
     # test initialization is set
     final_state.value = int(os.environ["TRUSTYAI_IS_INITIALIZED"])
 
-
-# test that import ta.explainers correctly initializes
-def test_default_initialization_explainers():
-    os.environ["TRUSTYAI_IS_INITIALIZED"] = "0"
-    initial_state = Value('i', -1)
-    final_state = Value('i', -1)
-    process = Process(target=default_initializer_process_exp, args=(initial_state, final_state))
-    process.start()
-    process.join()
-    assert initial_state.value == 0
-    assert final_state.value == 1
-
-
-# test that import ta.models correctly initializes
-def test_default_initialization_models():
-    os.environ["TRUSTYAI_IS_INITIALIZED"] = "0"
-    initial_state = Value('i', -1)
-    final_state = Value('i', -1)
-    process = Process(target=default_initializer_process_mod, args=(initial_state, final_state))
-    process.start()
-    process.join()
-    assert initial_state.value == 0
-    assert final_state.value == 1
-
+functions = [
+    manual_initializer_process,
+    default_initializer_process_exp,
+    default_initializer_process_mod
+]
 
 # test that manually initializing also works
-def test_manual_initialization():
-    os.environ["TRUSTYAI_IS_INITIALIZED"] = "0"
+@pytest.mark.parametrize("function",functions)
+def test_initialization(function):
+    ctx = multiprocessing.get_context("spawn")
     initial_state = Value('i', -1)
     final_state = Value('i', -1)
-    process = Process(target=manual_initializer_process, args=(initial_state, final_state))
+    process = ctx.Process(target=function, args=(initial_state, final_state))
     process.start()
     process.join()
     assert initial_state.value == 0
     assert final_state.value == 1
-
-
-if __name__ == "__main__":
-    test_manual_initialization()
