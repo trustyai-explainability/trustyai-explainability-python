@@ -125,7 +125,7 @@ def test_counterfactual_v2():
     model = Model(predict_function, dataframe=True)
     goal = np.array([[0]])
     prediction = counterfactual_prediction(input_features=features, outputs=goal)
-    explainer = CounterfactualExplainer(steps=10_000)
+    explainer = CounterfactualExplainer(steps=100_000)
     explanation = explainer.explain(prediction, model)
     result_output = model(explanation.proposed_features_dataframe)
     assert result_output<.01
