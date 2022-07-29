@@ -111,6 +111,7 @@ def init(*args, path=None):
         @_jcustomizer.JConversion("java.util.UUID", instanceof=uuid.UUID)
         def _JUUIDConvert(_, obj):
             return UUID.fromString(str(obj))
+
     except OSError:
         warnings.warn("JVM already initialized")
 
