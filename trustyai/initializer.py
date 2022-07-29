@@ -1,18 +1,18 @@
 # pylint: disable = import-error, import-outside-toplevel, dangerous-default-value, invalid-name, R0801
 """Main TrustyAI Python bindings"""
-import os
-import uuid
-from pathlib import Path
-from typing import List
+from distutils.sysconfig import get_python_lib
 import glob
 import logging
+import os
+from pathlib import Path
+import site
+from typing import List
+import uuid
+import warnings
 
 import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
-import site
-from distutils.sysconfig import get_python_lib
-import warnings
 
 
 def _get_default_path():

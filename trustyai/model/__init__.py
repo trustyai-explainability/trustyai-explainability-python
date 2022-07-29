@@ -1,4 +1,5 @@
-# pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code
+# pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code,
+# pylint: disable = unused-import, wrong-import-order
 """General model classes"""
 import uuid as _uuid
 from typing import List, Optional, Union, Callable
@@ -7,6 +8,9 @@ import pyarrow as pa
 import numpy as np
 
 from trustyai import _default_initializer
+from trustyai.model.domain import feature_domain
+from trustyai.utils import JImplementsWithDocstring
+
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
 from jpype import JImplements, JOverride, _jcustomizer, _jclass, JByte, JArray, JLong
@@ -36,9 +40,6 @@ from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
 from org.kie.kogito.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
-
-from trustyai.model.domain import feature_domain
-from trustyai.utils import JImplementsWithDocstring
 
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain
