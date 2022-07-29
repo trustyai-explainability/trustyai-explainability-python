@@ -544,7 +544,9 @@ class _JOutput:
         return self.__str__()
 
 
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.PredictionOutput")
+@_jcustomizer.JImplementationFor(
+    "org.kie.trustyai.explainability.model.PredictionOutput"
+)
 # pylint: disable=no-member
 class _JPredictionOutput:
     """Java PredictionOutput implicit methods"""
@@ -559,7 +561,9 @@ class _JPredictionOutput:
         return self.getByName(name)
 
 
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.PredictionInput")
+@_jcustomizer.JImplementationFor(
+    "org.kie.trustyai.explainability.model.PredictionInput"
+)
 # pylint: disable=no-member
 class _JPredictionInput:
     """Java PredictionInput implicit methods"""
