@@ -8,12 +8,9 @@ myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../")
 
 import trustyai
-
-INITIALISED = False
-
-if not INITIALISED:
-    trustyai.init()
-    INITIALISED = True
+trustyai.init()
+import numpy as np
+import pandas as pd
 
 from trustyai.model import (
     FeatureFactory,
@@ -27,15 +24,6 @@ def mock_feature(value, name='f-num'):
     return FeatureFactory.newNumericalFeature(name, value)
 
 
-from org.kie.trustyai.explainability.model import PredictionInput, PredictionOutput
-
-
-def sum_skip_model(inputs: List[PredictionInput]) -> List[PredictionOutput]:
+def sum_skip_model(inputs: np.ndarray) -> np.ndarray:
     """SumSkip test model"""
-    features = inputs[0].features
-    result = 0.0
-    for i in range(len(features)):
-        if i != 0:
-            result += features[i].value.as_number()
-    _output = [output(name="sum-but-0", dtype="number", value=result)]
-    return [PredictionOutput(_output)]
+    return np.sum(inputs[:,[i for i in range(inputs.shape[1]) if i != 5]], 1)
