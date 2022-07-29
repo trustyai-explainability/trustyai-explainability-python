@@ -1,4 +1,5 @@
-# pylint: disable = import-error, import-outside-toplevel, dangerous-default-value, invalid-name, R0801
+# pylint: disable = import-error, import-outside-toplevel, dangerous-default-value,
+# pylint: disbale = invalid-name, R0801
 """Main TrustyAI Python bindings"""
 import os
 import logging
