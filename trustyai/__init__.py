@@ -1,5 +1,5 @@
-# pylint: disable = import-error, import-outside-toplevel, dangerous-default-value,
-# pylint: disbale = invalid-name, R0801
+# pylint: disable = import-error, import-outside-toplevel, dangerous-default-value
+# pylint: disable = invalid-name, R0801
 """Main TrustyAI Python bindings"""
 import os
 import logging
@@ -8,8 +8,8 @@ import logging
 os.environ['TRUSTYAI_IS_INITIALIZED'] = "0"
 
 if os.getenv("PYTHON_TRUSTY_DEBUG") == "1":
-    _logging_level = logging.DEBUG
+    _LOGGING_LEVEL = logging.DEBUG
 else:
-    _logging_level = logging.WARN
+    _LOGGING_LEVEL = logging.WARN
 
-logging.basicConfig(level=_logging_level)
+logging.basicConfig(level=_LOGGING_LEVEL)
