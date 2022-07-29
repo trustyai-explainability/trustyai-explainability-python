@@ -113,7 +113,6 @@ def init(*args, path=None):
             return UUID.fromString(str(obj))
     except OSError:
         warnings.warn("JVM already initialized")
-        return False
 
     os.environ["TRUSTYAI_IS_INITIALIZED"] = "1"
     return True
