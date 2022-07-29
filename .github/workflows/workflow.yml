@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           git clone https://github.com/trustyai-explainability/trustyai-explainability.git
-          mvn clean install package -DskipTests -f trustyai-explainability/explainability-core/pom.xml
+          mvn clean install package -DskipTests -f trustyai-explainability/explainability-core/pom.xml -Pshaded
           mvn clean compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
           mv java_sources/trusty-ai-arrow/target/arrow-converters-0.0.1.jar trustyai/dep/org/trustyai/
           python -m pip install --upgrade pip
