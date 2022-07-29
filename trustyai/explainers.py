@@ -173,7 +173,7 @@ class CounterfactualExplainer:
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
-        self, prediction: CounterfactualPrediction, model: PredictionProvider
+            self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a :class:`~CounterfactualPrediction` and a
         :class:`~PredictionProvider`
@@ -269,7 +269,7 @@ class LimeResults(ExplanationVisualiser):
         with mpl.rc_context(drcp):
             dictionary = {}
             for feature_importance in self._saliencies.get(
-                decision
+                    decision
             ).getPerFeatureImportance():
                 dictionary[
                     feature_importance.getFeature().name
@@ -303,12 +303,12 @@ class LimeExplainer:
     """
 
     def __init__(
-        self,
-        perturbations=1,
-        seed=0,
-        samples=10,
-        penalise_sparse_balance=True,
-        normalise_weights=True,
+            self,
+            perturbations=1,
+            seed=0,
+            samples=10,
+            penalise_sparse_balance=True,
+            normalise_weights=True,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -413,7 +413,7 @@ class SHAPResults(ExplanationVisualiser):
         """
 
         visualizer_data_frame = pd.DataFrame()
-        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+        for i, saliency in enumerate(self.shap_results.getSaliencies().values()):
             background_mean_feature_values = np.mean(
                 [
                     [f.getValue().asNumber() for f in pi.getFeatures()]
@@ -436,7 +436,7 @@ class SHAPResults(ExplanationVisualiser):
                 index=columns,
                 columns=feature_names,
             ).T
-            fnull = self.shap_results.getFnull().getEntry(i)
+            fnull = self.shap_results.getFnull().get(i)
 
             visualizer_data_frame = pd.concat(
                 [
@@ -624,13 +624,13 @@ class SHAPExplainer:
     """
 
     def __init__(
-        self,
-        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
-        samples=None,
-        batch_size=20,
-        seed=0,
-        perturbations=0,
-        link_type: Optional[_ShapConfig.LinkType] = None,
+            self,
+            background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
+            samples=None,
+            batch_size=20,
+            seed=0,
+            perturbations=0,
+            link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 
