@@ -26,13 +26,13 @@ jobs:
       - name: Install dependencies
         run: |
           git clone https://github.com/trustyai-explainability/trustyai-explainability.git
-          mvn clean install package -DskipTests -f trustyai-explainability/explainability-core/pom.xml -Pshaded
-          mvn clean compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
+          mvn install package -DskipTests -f trustyai-explainability/explainability-core/pom.xml -Pshaded
+          mv trustyai-explainability/explainability-core/target/explainability-core-2.0.0-SNAPSHOT.jar trustyai/dep/org/trustyai/
+          mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
           mv java_sources/trusty-ai-arrow/target/arrow-converters-0.0.1.jar trustyai/dep/org/trustyai/
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          python setup.py build install
+          pip install . --force --no-binary :trustyai:
       - name: Lint
         run: |
           pylint --ignore-imports=yes $(find trustyai -type f -name "*.py")

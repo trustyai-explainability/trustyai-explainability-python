@@ -35,8 +35,7 @@ setup(
         "": ["*.jar"],
         "trustyai": [
             "dep/org/trustyai/arrow-converters-0.0.1.jar",
-            "dep/org/trustyai/explainability-core-2.0.0-SNAPSHOT.jar",
-            "dep/org/trustyai/explainability-core-2.0.0-SNAPSHOT-tests.jar",
+            "dep/org/trustyai/explainability-core-2.0.0-SNAPSHOT.jar"
         ],
     },
     packages=[
