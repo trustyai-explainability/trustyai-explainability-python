@@ -1,5 +1,6 @@
 # pylint: disable = import-error, invalid-name
 """General model classes"""
+from trustyai import _default_initializer
 from org.kie.kogito.explainability.utils import (
     ExplainabilityMetrics as _ExplainabilityMetrics,
 )
