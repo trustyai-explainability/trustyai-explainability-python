@@ -23,15 +23,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Build exp-core
+        uses: ./.github/actions/build-core
       - name: Install dependencies
         run: |
-          git clone https://github.com/trustyai-explainability/trustyai-explainability.git
-          mvn install package -DskipTests -f trustyai-explainability/explainability-core/pom.xml -Pshaded
-          mv trustyai-explainability/explainability-core/target/explainability-core-2.0.0-SNAPSHOT.jar trustyai/dep/org/trustyai/
-          mv trustyai-explainability/explainability-core/target/explainability-core-2.0.0-SNAPSHOT-tests.jar trustyai/dep/org/trustyai/
           mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
           mv java_sources/trusty-ai-arrow/target/arrow-converters-0.0.1.jar trustyai/dep/org/trustyai/
-          python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
           pip install . --force --no-binary :trustyai:
       - name: Lint
