@@ -6,6 +6,7 @@ import pandas as pd
 import pyarrow as pa
 import numpy as np
 
+from trustyai import _default_initializer
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
 from jpype import JImplements, JOverride, _jcustomizer, _jclass, JByte, JArray, JLong

@@ -6,7 +6,10 @@ import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
+import os
 from jpype import JInt
+
+from trustyai import _default_initializer
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult as _CounterfactualResult,
@@ -165,15 +168,15 @@ class CounterfactualExplainer:
         )
         self._solver_config = (
             SolverConfigBuilder.builder()
-            .withTerminationConfig(self._termination_config)
-            .build()
+                .withTerminationConfig(self._termination_config)
+                .build()
         )
         self._cf_config = CounterfactualConfig().withSolverConfig(self._solver_config)
 
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
-        self, prediction: CounterfactualPrediction, model: PredictionProvider
+            self, prediction: CounterfactualPrediction, model: PredictionProvider
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a :class:`~CounterfactualPrediction` and a
         :class:`~PredictionProvider`
@@ -269,7 +272,7 @@ class LimeResults(ExplanationVisualiser):
         with mpl.rc_context(drcp):
             dictionary = {}
             for feature_importance in self._saliencies.get(
-                decision
+                    decision
             ).getPerFeatureImportance():
                 dictionary[
                     feature_importance.getFeature().name
@@ -303,12 +306,12 @@ class LimeExplainer:
     """
 
     def __init__(
-        self,
-        perturbations=1,
-        seed=0,
-        samples=10,
-        penalise_sparse_balance=True,
-        normalise_weights=True,
+            self,
+            perturbations=1,
+            seed=0,
+            samples=10,
+            penalise_sparse_balance=True,
+            normalise_weights=True,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -332,12 +335,12 @@ class LimeExplainer:
 
         self._lime_config = (
             LimeConfig()
-            .withNormalizeWeights(normalise_weights)
-            .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
-            .withSamples(samples)
-            .withEncodingParams(EncodingParams(0.07, 0.3))
-            .withAdaptiveVariance(True)
-            .withPenalizeBalanceSparse(penalise_sparse_balance)
+                .withNormalizeWeights(normalise_weights)
+                .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
+                .withSamples(samples)
+                .withEncodingParams(EncodingParams(0.07, 0.3))
+                .withAdaptiveVariance(True)
+                .withPenalizeBalanceSparse(penalise_sparse_balance)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
@@ -403,8 +406,9 @@ class SHAPResults(ExplanationVisualiser):
 
         Returns
         -------
-        pandas.DataFrame
-            DataFrame containing the results of the SHAP explanation. For each model output,
+        Dict[String, pandas.DataFrame]
+            Dictionary of dataFrame containing the results of the SHAP explanation, keyed by the
+             model output named. For each model output,
             the table will contain the following columns, indexed by feature name:
 
             * ``Mean Background Value``: The mean value this feature took in the background
@@ -412,7 +416,7 @@ class SHAPResults(ExplanationVisualiser):
             * ``SHAP Value``: The found SHAP value of this feature.
         """
 
-        visualizer_data_frame = pd.DataFrame()
+        frames = {}
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             background_mean_feature_values = np.mean(
                 [
@@ -444,14 +448,10 @@ class SHAPResults(ExplanationVisualiser):
                         [["-", "-", fnull]], index=["Background"], columns=columns
                     ),
                     visualizer_data_frame,
-                    pd.DataFrame(
-                        [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
-                        index=["Prediction"],
-                        columns=columns,
-                    ),
                 ]
             )
-            return visualizer_data_frame
+            frames[saliency.getOutput().getName()] = visualizer_data_frame
+        return frames
 
     def as_html(self) -> pd.io.formats.style.Styler:
         """
@@ -459,9 +459,10 @@ class SHAPResults(ExplanationVisualiser):
 
         Returns
         -------
-        pandas.Styler
-            Styler containing the results of the SHAP explanation, in the same
-            schema as in :func:`as_dataframe`. This will:
+        Dict[String, pandas.Styler]
+            Dictionary containing the styled results of the SHAP explanation, keyed by the name
+            of each output. The styled results will be displayed in the same
+            schema as in :func:`as_dataframe`, and are styled as follows:
 
             * Color each ``Feature Value`` based on how it compares to the corresponding
               ``Mean Background Value``.
@@ -480,7 +481,7 @@ class SHAPResults(ExplanationVisualiser):
                     formats.append(None)
             return [None] + formats + [None]
 
-        visualizer_data_frame = pd.DataFrame()
+        frames = {}
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             background_mean_feature_values = np.mean(
                 [
@@ -519,6 +520,7 @@ class SHAPResults(ExplanationVisualiser):
                     ),
                 ]
             )
+
             style = visualizer_data_frame.style.background_gradient(
                 LinearSegmentedColormap.from_list(
                     name="rwg",
@@ -533,12 +535,13 @@ class SHAPResults(ExplanationVisualiser):
                 vmax=max(np.abs(shap_values)),
             )
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            return style.apply(
+            frames[saliency.getOutput().getName()] = style.apply(
                 _color_feature_values,
                 background_vals=background_mean_feature_values,
                 subset="Feature Value",
                 axis=0,
             )
+        return frames
 
     def candlestick_plot(self) -> None:
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
@@ -624,13 +627,13 @@ class SHAPExplainer:
     """
 
     def __init__(
-        self,
-        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
-        samples=None,
-        batch_size=20,
-        seed=0,
-        perturbations=0,
-        link_type: Optional[_ShapConfig.LinkType] = None,
+            self,
+            background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
+            samples=None,
+            batch_size=20,
+            seed=0,
+            perturbations=0,
+            link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 
@@ -683,10 +686,10 @@ class SHAPExplainer:
 
         self._configbuilder = (
             _ShapConfig.builder()
-            .withLink(link_type)
-            .withBatchSize(batch_size)
-            .withPC(perturbation_context)
-            .withBackground(self.background)
+                .withLink(link_type)
+                .withBatchSize(batch_size)
+                .withPC(perturbation_context)
+                .withBackground(self.background)
         )
         if samples is not None:
             self._configbuilder.withNSamples(JInt(samples))
