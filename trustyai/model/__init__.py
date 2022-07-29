@@ -512,7 +512,7 @@ class Model:
         return self.predict_fun(inputs)
 
 
-@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
+@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Output")
 # pylint: disable=no-member
 class _JOutput:
     """Java Output implicit methods"""
