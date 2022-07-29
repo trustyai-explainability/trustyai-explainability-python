@@ -83,5 +83,3 @@ def setup(app):
     trustyai.init()
     import trustyai.model
     trustyai.model.Model.__name__ = "Model"
-    trustyai.model.ArrowModel.__name__ = "ArrowModel"
-    trustyai.model.Prediction.__name__ = "Prediction"

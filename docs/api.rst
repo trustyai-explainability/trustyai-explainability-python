@@ -5,15 +5,6 @@ API Reference
 This page contains the API reference for public objects and function within TrustyAI. See the
 (example notebooks) for usage guides and tutorials.
 
-trustyai
---------
-.. currentmodule:: trustyai
-.. trustyai:
-.. autosummary::
-	:toctree: generated/
-
-	trustyai.init
-
 trustyai.model
 --------------
 Feature and Output Objects
@@ -42,7 +33,6 @@ Model Classes
 	:toctree: generated/
 
 	Model
-	ArrowModel
 
 trustyai.explainers
 -------------------
