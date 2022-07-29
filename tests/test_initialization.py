@@ -41,6 +41,7 @@ functions = [
     default_initializer_process_mod
 ]
 
+
 # test that manually initializing also works
 @pytest.mark.parametrize("function",functions)
 def test_initialization(function):
