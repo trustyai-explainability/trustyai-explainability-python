@@ -1,0 +1,9 @@
+name: Build arrow-converter JAR
+runs:
+  using: "composite"
+  steps:
+    - name: Build arrow-converter
+      shell: bash
+      run: |
+          mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
+          mv java_sources/trusty-ai-arrow/target/arrow-converters-0.0.1.jar trustyai/dep/org/trustyai/

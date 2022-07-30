@@ -23,12 +23,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Build exp-core
+      - name: Build explainability-core
         uses: ./.github/actions/build-core
-      - name: Install dependencies
+      - name: Build arrow-converter
+        uses: ./.github/actions/build-arrow-converter
+      - name: Install TrustyAI Python package
         run: |
-          mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
-          mv java_sources/trusty-ai-arrow/target/arrow-converters-0.0.1.jar trustyai/dep/org/trustyai/
           pip install -r requirements-dev.txt
           pip install . --force --no-binary :trustyai:
       - name: Lint
