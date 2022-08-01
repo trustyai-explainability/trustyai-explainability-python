@@ -18,6 +18,9 @@ logging.basicConfig(level=_LOGGING_LEVEL)
 
 
 def init():
+    """Deprecated manual initializer for the JVM. This function has been replaced by
+    automatic initialization when importing the components of the module that require
+    JVM access, or by manual user initialization via :func:`trustyai`initializer.init`."""
     warnings.warn(
         "trustyai.init() is now deprecated; the trustyai library will now "
         + "automatically initialize. For manual initialization options, see "
