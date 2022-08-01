@@ -7,7 +7,7 @@ import logging
 # set initialized env variable to 0
 import warnings
 
-os.environ["TRUSTYAI_IS_INITIALIZED"] = "0"
+TRUSTYAI_IS_INITIALIZED = False
 
 if os.getenv("PYTHON_TRUSTY_DEBUG") == "1":
     _LOGGING_LEVEL = logging.DEBUG
