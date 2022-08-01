@@ -5,6 +5,8 @@ import os
 import logging
 
 # set initialized env variable to 0
+import warnings
+
 os.environ["TRUSTYAI_IS_INITIALIZED"] = "0"
 
 if os.getenv("PYTHON_TRUSTY_DEBUG") == "1":
@@ -13,3 +15,9 @@ else:
     _LOGGING_LEVEL = logging.WARN
 
 logging.basicConfig(level=_LOGGING_LEVEL)
+
+
+def init():
+    warnings.warn("trustyai.init() is now deprecated; the trustyai library will now " +
+                  "automatically initialize. For manual initialization options, see " +
+                  "trustyai.initializer.init()")

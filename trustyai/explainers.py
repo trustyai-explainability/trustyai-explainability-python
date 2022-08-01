@@ -407,9 +407,8 @@ class SHAPResults(ExplanationVisualiser):
 
         Returns
         -------
-        Dict[String, pandas.DataFrame]
-            Dictionary of dataFrame containing the results of the SHAP explanation, keyed by the
-             model output named. For each model output,
+        pandas.DataFrame
+            DataFrame containing the results of the SHAP explanation. For each model output,
             the table will contain the following columns, indexed by feature name:
 
             * ``Mean Background Value``: The mean value this feature took in the background
