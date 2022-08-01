@@ -18,6 +18,8 @@ logging.basicConfig(level=_LOGGING_LEVEL)
 
 
 def init():
-    warnings.warn("trustyai.init() is now deprecated; the trustyai library will now " +
-                  "automatically initialize. For manual initialization options, see " +
-                  "trustyai.initializer.init()")
+    warnings.warn(
+        "trustyai.init() is now deprecated; the trustyai library will now "
+        + "automatically initialize. For manual initialization options, see "
+        + "trustyai.initializer.init()"
+    )
