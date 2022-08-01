@@ -1,12 +1,11 @@
 """Explainers module"""
-# pylint: disable = import-error, wrong-import-order, unused-import, too-few-public-methods
+# pylint: disable = import-error, too-few-public-methods, wrong-import-order, unused-import
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
-import os
 from jpype import JInt
 
 from trustyai import _default_initializer
@@ -416,72 +415,7 @@ class SHAPResults(ExplanationVisualiser):
             * ``SHAP Value``: The found SHAP value of this feature.
         """
 
-        frames = {}
-        for i, saliency in enumerate(self.shap_results.getSaliencies()):
-            background_mean_feature_values = np.mean(
-                [
-                    [f.getValue().asNumber() for f in pi.getFeatures()]
-                    for pi in self.background
-                ],
-                0,
-            ).tolist()
-            feature_values = [
-                pfi.getFeature().getValue().asNumber()
-                for pfi in saliency.getPerFeatureImportance()
-            ]
-            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
-            feature_names = [
-                str(pfi.getFeature().getName())
-                for pfi in saliency.getPerFeatureImportance()
-            ]
-            columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
-            visualizer_data_frame = pd.DataFrame(
-                [background_mean_feature_values, feature_values, shap_values],
-                index=columns,
-                columns=feature_names,
-            ).T
-            fnull = self.shap_results.getFnull().getEntry(i)
-
-            visualizer_data_frame = pd.concat(
-                [
-                    pd.DataFrame(
-                        [["-", "-", fnull]], index=["Background"], columns=columns
-                    ),
-                    visualizer_data_frame,
-                ]
-            )
-            frames[saliency.getOutput().getName()] = visualizer_data_frame
-        return frames
-
-    def as_html(self) -> pd.io.formats.style.Styler:
-        """
-        Return the SHAP result as a Pandas Styler object.
-
-        Returns
-        -------
-        Dict[String, pandas.Styler]
-            Dictionary containing the styled results of the SHAP explanation, keyed by the name
-            of each output. The styled results will be displayed in the same
-            schema as in :func:`as_dataframe`, and are styled as follows:
-
-            * Color each ``Feature Value`` based on how it compares to the corresponding
-              ``Mean Background Value``.
-            * Color each ``SHAP Value`` based on how their magnitude.
-        """
-
-        def _color_feature_values(feature_values, background_vals):
-            """Internal function for the dataframe visualization"""
-            formats = []
-            for i, feature_value in enumerate(feature_values[1:-1]):
-                if feature_value < background_vals[i]:
-                    formats.append(f"background-color:{ds['negative_primary_colour']}")
-                elif feature_value > background_vals[i]:
-                    formats.append(f"background-color:{ds['positive_primary_colour']}")
-                else:
-                    formats.append(None)
-            return [None] + formats + [None]
-
-        frames = {}
+        visualizer_data_frame = pd.DataFrame()
         for i, saliency in enumerate(self.shap_results.getSaliencies()):
             background_mean_feature_values = np.mean(
                 [
@@ -520,7 +454,74 @@ class SHAPResults(ExplanationVisualiser):
                     ),
                 ]
             )
+            return visualizer_data_frame
 
+    def as_html(self) -> pd.io.formats.style.Styler:
+        """
+        Return the SHAP result as a Pandas Styler object.
+
+        Returns
+        -------
+        pandas.Styler
+            Styler containing the results of the SHAP explanation, in the same
+            schema as in :func:`as_dataframe`. This will:
+
+            * Color each ``Feature Value`` based on how it compares to the corresponding
+              ``Mean Background Value``.
+            * Color each ``SHAP Value`` based on how their magnitude.
+        """
+
+        def _color_feature_values(feature_values, background_vals):
+            """Internal function for the dataframe visualization"""
+            formats = []
+            for i, feature_value in enumerate(feature_values[1:-1]):
+                if feature_value < background_vals[i]:
+                    formats.append(f"background-color:{ds['negative_primary_colour']}")
+                elif feature_value > background_vals[i]:
+                    formats.append(f"background-color:{ds['positive_primary_colour']}")
+                else:
+                    formats.append(None)
+            return [None] + formats + [None]
+
+        visualizer_data_frame = pd.DataFrame()
+        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+            background_mean_feature_values = np.mean(
+                [
+                    [f.getValue().asNumber() for f in pi.getFeatures()]
+                    for pi in self.background
+                ],
+                0,
+            ).tolist()
+            feature_values = [
+                pfi.getFeature().getValue().asNumber()
+                for pfi in saliency.getPerFeatureImportance()
+            ]
+            shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+            feature_names = [
+                str(pfi.getFeature().getName())
+                for pfi in saliency.getPerFeatureImportance()
+            ]
+            columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
+            visualizer_data_frame = pd.DataFrame(
+                [background_mean_feature_values, feature_values, shap_values],
+                index=columns,
+                columns=feature_names,
+            ).T
+            fnull = self.shap_results.getFnull().getEntry(i)
+
+            visualizer_data_frame = pd.concat(
+                [
+                    pd.DataFrame(
+                        [["-", "-", fnull]], index=["Background"], columns=columns
+                    ),
+                    visualizer_data_frame,
+                    pd.DataFrame(
+                        [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
+                        index=["Prediction"],
+                        columns=columns,
+                    ),
+                ]
+            )
             style = visualizer_data_frame.style.background_gradient(
                 LinearSegmentedColormap.from_list(
                     name="rwg",
@@ -535,13 +536,12 @@ class SHAPResults(ExplanationVisualiser):
                 vmax=max(np.abs(shap_values)),
             )
             style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
-            frames[saliency.getOutput().getName()] = style.apply(
+            return style.apply(
                 _color_feature_values,
                 background_vals=background_mean_feature_values,
                 subset="Feature Value",
                 axis=0,
             )
-        return frames
 
     def candlestick_plot(self) -> None:
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
