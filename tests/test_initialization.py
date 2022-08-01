@@ -9,31 +9,34 @@ import sys
 # slightly hacky functions to make sure the test process does not see the trustyai initialization
 # from commons.py
 def manual_initializer_process(initial_state, final_state):
+    import trustyai
     from trustyai import initializer
-    initial_state.value = int(os.environ.get("TRUSTYAI_IS_INITIALIZED", "0"))
+    initial_state.value = int(trustyai.TRUSTYAI_IS_INITIALIZED)
     initializer.init(path=initializer._get_default_path()[0])
 
     # test imports work
     from trustyai.explainers import SHAPExplainer
 
     # test initialization is set
-    final_state.value = int(os.environ["TRUSTYAI_IS_INITIALIZED"])
+    final_state.value = int(trustyai.TRUSTYAI_IS_INITIALIZED)
 
 
 def default_initializer_process_mod(initial_state, final_state):
-    initial_state.value = int(os.environ.get("TRUSTYAI_IS_INITIALIZED", "0"))
+    import trustyai
+    initial_state.value = int(trustyai.TRUSTYAI_IS_INITIALIZED)
     import trustyai.model
 
     # test initialization is set
-    final_state.value = int(os.environ["TRUSTYAI_IS_INITIALIZED"])
+    final_state.value = int(trustyai.TRUSTYAI_IS_INITIALIZED)
 
 
 def default_initializer_process_exp(initial_state, final_state):
-    initial_state.value = int(os.environ.get("TRUSTYAI_IS_INITIALIZED", "0"))
+    import trustyai
+    initial_state.value = int(trustyai.TRUSTYAI_IS_INITIALIZED)
     import trustyai.explainers
 
     # test initialization is set
-    final_state.value = int(os.environ["TRUSTYAI_IS_INITIALIZED"])
+    final_state.value = int(trustyai.TRUSTYAI_IS_INITIALIZED)
 
 functions = [
     manual_initializer_process,
