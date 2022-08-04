@@ -388,10 +388,11 @@ class SHAPResults(ExplanationVisualiser):
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
         saliencies = self.shap_results.getSaliencies()
-        if type(saliencies) is dict:
-            return saliencies
+        if isinstance(saliencies, dict):
+            output = saliencies
         else:
-            return {s.getOutput().getName(): s for s in saliencies}
+            output = {s.getOutput().getName(): s for s in saliencies}
+        return output
 
     def get_fnull(self):
         """
@@ -420,7 +421,7 @@ class SHAPResults(ExplanationVisualiser):
         """
 
         visualizer_data_frame = pd.DataFrame()
-        for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
+        for i, (_, saliency) in enumerate(self.get_saliencies().items()):
             background_mean_feature_values = np.mean(
                 [
                     [f.getValue().asNumber() for f in pi.getFeatures()]
