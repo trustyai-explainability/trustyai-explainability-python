@@ -1,5 +1,5 @@
 """Explainers module"""
-# pylint: disable = import-error, too-few-public-methods
+# pylint: disable = import-error, too-few-public-methods, wrong-import-order, unused-import
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -7,6 +7,15 @@ from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
 from jpype import JInt
+
+from trustyai import _default_initializer
+from trustyai.utils._visualisation import (
+    ExplanationVisualiser,
+    DEFAULT_STYLE as ds,
+    DEFAULT_RC_PARAMS as drcp,
+)
+from trustyai.model import feature, Dataset, PredictionInput
+
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult as _CounterfactualResult,
@@ -31,12 +40,6 @@ from org.kie.kogito.explainability.model import (
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
-from trustyai.utils._visualisation import (
-    ExplanationVisualiser,
-    DEFAULT_STYLE as ds,
-    DEFAULT_RC_PARAMS as drcp,
-)
-from trustyai.model import feature, Dataset, PredictionInput
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig

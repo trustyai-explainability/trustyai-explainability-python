@@ -1,7 +1,8 @@
-# pylint: disable = import-error, invalid-name
+# pylint: disable = import-error, invalid-name, wrong-import-order
 """General model classes"""
 
 from jpype._jproxy import _createJProxy, _createJProxyDeferred
+from trustyai import _default_initializer
 
 from org.kie.kogito.explainability import (
     TestUtils as _TestUtils,
