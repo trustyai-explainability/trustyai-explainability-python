@@ -18,20 +18,19 @@ Installation
 ============
 ``pip install trustyai``
 
-Examples
-========
-For usage examples and tutorials, see the example notebooks:
+Tutorial and Examples
+=====================
+To get started, check out the :ref:`tutorial`. For more usage examples, see the example notebooks:
 
-`LIME <https://github.com/trustyai-explainability/trustyai-explainability-python-examples/blob/main/examples/Lime.ipynb>`_
-
-`SHAP <https://github.com/trustyai-explainability/trustyai-explainability-python-examples/blob/main/examples/SHAP.ipynb>`_
-
-`Counterfactuals <https://github.com/trustyai-explainability/trustyai-explainability-python-examples/blob/main/examples/Counterfactuals.ipynb>`_
+* `LIME <https://github.com/trustyai-explainability/trustyai-explainability-python-examples/blob/main/examples/Lime.ipynb>`_
+* `SHAP <https://github.com/trustyai-explainability/trustyai-explainability-python-examples/blob/main/examples/SHAP.ipynb>`_
+* `Counterfactuals <https://github.com/trustyai-explainability/trustyai-explainability-python-examples/blob/main/examples/Counterfactuals.ipynb>`_
 
 GitHub Repos
 ============
-`TrustyAI Python <https://github.com/trustyai-explainability/trustyai-explainability-python>`_
-`TrustyAI Java <https://github.com/trustyai-explainability/trustyai-explainability>`_
+* `TrustyAI Python <https://github.com/trustyai-explainability/trustyai-explainability-python>`_
+* `TrustyAI Python Examples <https://github.com/trustyai-explainability/trustyai-explainability-python-examples>`_
+* `TrustyAI Java <https://github.com/trustyai-explainability/trustyai-explainability>`_
 
 Paper
 =====
@@ -40,6 +39,7 @@ Paper
 Contents
 ========
 .. toctree::
+   tutorial
    api
 
 Indices and tables
