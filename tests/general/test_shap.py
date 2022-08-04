@@ -1,4 +1,4 @@
-# pylint: disable=import-error, wrong-import-position, wrong-import-order, duplicate-code
+# pylint: disable=import-error, wrong-import-position, wrong-import-order, duplicate-code, unused-import
 """SHAP explainer test suite"""
 
 from common import *
@@ -28,7 +28,7 @@ def test_no_variance_one_output():
     explanations = [shap_explainer.explain(prediction, model) for prediction in predictions]
 
     for explanation in explanations:
-        for output_name, saliency in explanation.get_saliencies().items():
+        for _, saliency in explanation.get_saliencies().items():
             for feature_importance in saliency.getPerFeatureImportance():
                 assert feature_importance.getScore() == 0.0
 
