@@ -378,16 +378,20 @@ class SHAPResults(ExplanationVisualiser):
         self.shap_results = shap_results
         self.background = background
 
-    def get_saliencies(self) -> List[Saliency]:
+    def get_saliencies(self) -> Dict[str, Saliency]:
         """
-        Return the list of the found saliencies.
+        Return a dictionary of found saliencies.
 
         Returns
         -------
-        List[Saliency]
-             A list of :class:`~trustyai.model.Saliency` objects, in the order of the model outputs.
+        Dict[str, Saliency]
+             A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        return self.shap_results.getSaliencies()
+        saliencies = self.shap_results.getSaliencies()
+        if type(saliencies) is dict:
+            return saliencies
+        else:
+            return {s.getOutput().getName(): s for s in saliencies}
 
     def get_fnull(self):
         """
@@ -416,7 +420,7 @@ class SHAPResults(ExplanationVisualiser):
         """
 
         visualizer_data_frame = pd.DataFrame()
-        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+        for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
             background_mean_feature_values = np.mean(
                 [
                     [f.getValue().asNumber() for f in pi.getFeatures()]
@@ -484,7 +488,7 @@ class SHAPResults(ExplanationVisualiser):
             return [None] + formats + [None]
 
         visualizer_data_frame = pd.DataFrame()
-        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+        for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
             background_mean_feature_values = np.mean(
                 [
                     [f.getValue().asNumber() for f in pi.getFeatures()]
@@ -535,7 +539,7 @@ class SHAPResults(ExplanationVisualiser):
                 vmin=-1 * max(np.abs(shap_values)),
                 vmax=max(np.abs(shap_values)),
             )
-            style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
+            style.set_caption(f"Explanation of {output_name}")
             return style.apply(
                 _color_feature_values,
                 background_vals=background_mean_feature_values,
@@ -547,7 +551,7 @@ class SHAPResults(ExplanationVisualiser):
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
         one per output."""
         with mpl.rc_context(drcp):
-            for i, saliency in enumerate(self.shap_results.getSaliencies()):
+            for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
                 shap_values = [
                     pfi.getScore() for pfi in saliency.getPerFeatureImportance()
                 ]
@@ -596,7 +600,7 @@ class SHAPResults(ExplanationVisualiser):
                 plt.xticks(np.arange(len(feature_names)), feature_names)
                 plt.ylabel(saliency.getOutput().getName())
                 plt.xlabel("Feature SHAP Value")
-                plt.title(f"Explanation of {saliency.getOutput().getName()}")
+                plt.title(f"Explanation of {output_name}")
                 plt.show()
 
 
