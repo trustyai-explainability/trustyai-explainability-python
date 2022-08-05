@@ -6,7 +6,7 @@ library.
 
 Setup
 -----
-First, we'll need to import Numpy:
+First, we'll need to import Numpy, which is what our example model and data will use.
 
 .. code-block:: python
 	:linenos:
@@ -120,7 +120,7 @@ The process of generating a SHAP explanations looks very similar to LIME, with o
 For SHAP, we need to define a *background dataset*, a set of representative datapoints to the model
 that describe the model's *default* behavior. All explanations are then produced as comparisons
 against this background dataset; i.e., how did the model perform differently for *this* datapoint
-compared to the background dataset? In this case, we'll choose our background dataset to be all
+compared to the *background* dataset? In this case, we'll choose our background dataset to be all
 zeros, as that provides the clearest baseline comparison against our desired explanation point.
 We'll then pass the background when creating the :class:`~trustyai.explainers.SHAPExplainer`:
 
@@ -198,8 +198,8 @@ search to feature values between -10 and 10:
 
 Now, we use the :func:`~trustyai.model.counterfactual_prediction` function to wrap these features
 with a counterfactual *goal*: the desired output we want to model to produce. Here, we'll select
-``1`` as our goal, meaning the counterfactual explainer will try and find a set of inputs that
-produce a model output of 1 ± 1%.
+``1.0`` as our goal, meaning the counterfactual explainer will try and find a set of inputs that
+produce a model output of 1.0 ± 1%.
 
 .. code-block:: python
 	:linenos:
@@ -209,7 +209,7 @@ produce a model output of 1 ± 1%.
 
 	prediction = counterfactual_prediction(
 	    input_features=features,
-	    outputs=np.array([[1.]])
+	    outputs=np.array([[1.0]])
 	)
 
 We can now initialize the :class:`~trustyai.explainers.CounterfactualExplainer` and produce
@@ -222,7 +222,7 @@ results at the cost of compute time.
 	:lineno-start: 35
 
 	explainer = CounterfactualExplainer(steps=10_000)
-	explanation = explainer.explain(cf_prediction, model)
+	explanation = explainer.explain(prediction, model)
 	print(explanation.as_dataframe())
 
 .. code-block:: console
@@ -249,4 +249,4 @@ model output:
 
 	[1.0072685]
 
-And indeed we've found a new input that produces an output of 1 ± 1%.
+And indeed we've found a new input that produces an output of 1.0 ± 1%.
