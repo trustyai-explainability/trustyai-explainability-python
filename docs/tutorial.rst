@@ -6,7 +6,7 @@ library.
 
 Setup
 -----
-First, we'll need to import Numpy, which is what our example model and data will use.
+First, we'll need to import Numpy, which is what our example model and data will use. 
 
 .. code-block:: python
 	:linenos:
