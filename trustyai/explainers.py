@@ -764,7 +764,12 @@ class SHAPExplainer:
         self._config = self._configbuilder.build()
         self._explainer = _ShapKernelExplainer(self._config)
 
-    def explain(self, prediction, model: PredictionProvider) -> SHAPResults:
+    def explain(
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
+    ) -> SHAPResults:
         """Produce a SHAP explanation.
 
         Parameters
@@ -782,6 +787,7 @@ class SHAPExplainer:
         :class:`~SHAPResults`
             Object containing the results of the SHAP explanation.
         """
+        _prediction = simple_prediction(inputs, outputs)
         return SHAPResults(
-            self._explainer.explainAsync(prediction, model).get(), self.background
+            self._explainer.explainAsync(_prediction, model).get(), self.background
         )
