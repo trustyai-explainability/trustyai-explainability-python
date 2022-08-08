@@ -15,7 +15,13 @@ from trustyai.utils._visualisation import (
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
 )
-from trustyai.model import counterfactual_prediction, feature, Dataset, PredictionInput
+from trustyai.model import (
+    counterfactual_prediction,
+    feature,
+    Dataset,
+    PredictionInput,
+    simple_prediction,
+)
 
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
@@ -383,7 +389,12 @@ class LimeExplainer:
 
         self._explainer = _LimeExplainer(self._lime_config)
 
-    def explain(self, prediction, model: PredictionProvider) -> LimeResults:
+    def explain(
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
+    ) -> LimeResults:
         """Produce a LIME explanation.
 
         Parameters
@@ -401,7 +412,8 @@ class LimeExplainer:
         :class:`~LimeResults`
             Object containing the results of the LIME explanation.
         """
-        return LimeResults(self._explainer.explainAsync(prediction, model).get())
+        _prediction = simple_prediction(inputs, outputs)
+        return LimeResults(self._explainer.explainAsync(_prediction, model).get())
 
 
 # pylint: disable=invalid-name
