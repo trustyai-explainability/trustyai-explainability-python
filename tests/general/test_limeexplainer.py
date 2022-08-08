@@ -24,9 +24,8 @@ def test_empty_prediction():
     inputs = []
     model = TestUtils.getSumSkipModel(0)
     outputs = model.predict([inputs])[0].outputs
-    prediction = simple_prediction(input_features=inputs, outputs=outputs)
     with pytest.raises(LocalExplanationException):
-        lime_explainer.explain(prediction, model)
+        lime_explainer.explain(inputs=inputs, outputs=outputs, model=model)
 
 
 def test_non_empty_input():
@@ -36,8 +35,7 @@ def test_non_empty_input():
 
     model = TestUtils.getSumSkipModel(0)
     outputs = model.predict([features])[0].outputs
-    prediction = simple_prediction(input_features=features, outputs=outputs)
-    saliency_map = lime_explainer.explain(prediction, model)
+    saliency_map = lime_explainer.explain(inputs=features, outputs=outputs, model=model)
     assert saliency_map is not None
 
 
@@ -50,10 +48,9 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
 
         model = TestUtils.getSumSkipModel(0)
         outputs = model.predict([features])[0].outputs
-        prediction = simple_prediction(input_features=features, outputs=outputs)
 
         saliency_map_no_penalty = lime_explainer_no_penalty.explain(
-            prediction, model
+            inputs=features, outputs=outputs, model=model
         ).map()
 
         assert saliency_map_no_penalty is not None
@@ -63,7 +60,7 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
 
         lime_explainer = LimeExplainer(samples=100, penalise_sparse_balance=True)
 
-        saliency_map = lime_explainer.explain(prediction, model).map()
+        saliency_map = lime_explainer.explain(inputs=features, outputs=outputs, model=model).map()
         assert saliency_map is not None
 
         saliency = saliency_map.get(decision_name)
@@ -83,9 +80,8 @@ def test_normalized_weights():
     features = mock_features(n_features)
     model = TestUtils.getSumSkipModel(0)
     outputs = model.predict([features])[0].outputs
-    prediction = simple_prediction(input_features=features, outputs=outputs)
 
-    saliency_map = lime_explainer.explain(prediction, model).map()
+    saliency_map = lime_explainer.explain(inputs=features, outputs=outputs, model=model).map()
     assert saliency_map is not None
 
     decision_name = "sum-but0"
@@ -102,9 +98,8 @@ def test_lime_plots():
     features = mock_features(n_features)
     model = TestUtils.getSumSkipModel(0)
     outputs = model.predict([features])[0].outputs
-    prediction = simple_prediction(input_features=features, outputs=outputs)
 
-    lime_results = lime_explainer.explain(prediction, model)
+    lime_results = lime_explainer.explain(inputs=features, outputs=outputs, model=model)
     lime_results.plot("sum-but0")
 
 
@@ -115,9 +110,8 @@ def test_lime_v2():
     predict_function = lambda x: np.dot(x.values, model_weights)
 
     model = Model(predict_function, dataframe=True, arrow=True)
-    prediction = simple_prediction(input_features=data, outputs=model(data))
     explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
-    explanation = explainer.explain(prediction, model)
+    explanation = explainer.explain(inputs=data, outputs=model(data), model=model)
     for score in explanation.as_dataframe()["output-0_score"]:
         assert score > 0
 
