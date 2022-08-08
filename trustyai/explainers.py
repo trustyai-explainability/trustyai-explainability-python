@@ -1,5 +1,5 @@
 """Explainers module"""
-# pylint: disable = import-error, too-few-public-methods, wrong-import-order, unused-import
+# pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -9,7 +9,7 @@ import numpy as np
 from jpype import JInt
 import uuid as _uuid
 
-from trustyai import _default_initializer
+from trustyai import _default_initializer  # pylint: disable=unused-import
 from trustyai.utils._visualisation import (
     ExplanationVisualiser,
     DEFAULT_STYLE as ds,
@@ -185,6 +185,7 @@ class CounterfactualExplainer:
 
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
+    # pylint: disable=too-many-arguments
     def explain(
         self,
         inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
