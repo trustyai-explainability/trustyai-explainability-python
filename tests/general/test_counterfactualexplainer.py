@@ -30,7 +30,7 @@ def test_non_empty_input():
     model = TestUtils.getSumSkipModel(0)
 
     counterfactual_result = explainer.explain(
-        original_features=features,
+        inputs=features,
         goal=goal,
         model=model)
     for entity in counterfactual_result._result.entities:
@@ -53,7 +53,7 @@ def test_counterfactual_match():
 
     model = TestUtils.getSumThresholdModel(center, epsilon)
     result = explainer.explain(
-        original_features=features,
+        inputs=features,
         goal=goal,
         model=model)
 
@@ -84,7 +84,7 @@ def test_counterfactual_match_python_model():
     model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
 
     result = explainer.explain(
-        original_features=features,
+        inputs=features,
         goal=goal,
         model=model)
 
@@ -105,7 +105,7 @@ def test_counterfactual_plot():
     model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
 
     result = explainer.explain(
-        original_features=features,
+        inputs=features,
         goal=goal,
         model=model)
     
@@ -123,7 +123,7 @@ def test_counterfactual_v2():
     goal = np.array([[0]])
     explainer = CounterfactualExplainer(steps=10_000)
     explanation = explainer.explain(
-        original_features=features,
+        inputs=features,
         goal=goal,
         model=model)
     result_output = model(explanation.proposed_features_dataframe)
