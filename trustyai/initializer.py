@@ -59,10 +59,11 @@ def _get_default_path():
 def init(*args, path=None):
     """init(*args, path=JAVA_DEPENDENCIES)
 
-    If you would like to manually specify the Java libraries to be imported, for example if you
-    want to use a different version of the Trusty Explainability library than is bundled by default,
-    you can do so by calling :func:`init`. If this is not manually called, trustyai will use
-    the default set of libraries and automatically initialize itself when necessary.
+    Manually initialize the JVM. If you would like to manually specify the Java libraries to be
+    imported, for example if you want to use a different version of the Trusty Explainability
+    library than is bundled by default, you can do so by calling :func:`init`. If this is not
+    manually called, trustyai will use the default set of libraries and automatically initialize
+    itself when necessary.
 
     Parameters
     ----------

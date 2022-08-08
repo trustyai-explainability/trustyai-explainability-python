@@ -780,8 +780,10 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
         type will be taken as a generic object.
     value : Any
         The value of this feature.
-    domain : :class:`FeatureDomain`
-        A TrustyAI :class:`FeatureDomain` that defines the range of valid values for this feature.
+    domain : Union[tuple, list]
+        A tuple or list that defines the feature domain. A tuple will define a numeric range
+        from ``[tuple[0], tuple[1])``, while a list defines the valid values for
+        a categorical feature.
 
     Returns
     -------
