@@ -21,13 +21,11 @@ def test_no_variance_one_output():
 
     background = np.array([[1.0, 2.0, 3.0] for _ in range(2)])
     prediction_outputs = model.predictAsync(Dataset.numpy_to_prediction_object(background, feature)).get()
-    predictions = [simple_prediction(input_features=background[i], outputs=prediction_outputs[i].outputs) for i
-                   in
-                   range(2)]
-    shap_explainer = SHAPExplainer(background=background)
-    explanations = [shap_explainer.explain(prediction, model) for prediction in predictions]
 
-    for explanation in explanations:
+    shap_explainer = SHAPExplainer(background=background)
+    for i in range(2):
+        explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
+
         for _, saliency in explanation.get_saliencies().items():
             for feature_importance in saliency.getPerFeatureImportance():
                 assert feature_importance.getScore() == 0.0
@@ -43,12 +41,11 @@ def test_shap_arrow():
     predict_function = lambda x: np.dot(x.values, model_weights)
 
     model = Model(predict_function, dataframe=True, arrow=True)
-    prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
     shap_explainer = SHAPExplainer(background=background)
-    explanation = shap_explainer.explain(prediction, model)
+    explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
-    for output_name, saliency in explanation.get_saliencies().items():
+    for _, saliency in explanation.get_saliencies().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
             assert answers[i]-1e-2 <= feature_importance.getScore() <= answers[i]+1e-2
 
@@ -63,9 +60,8 @@ def test_shap_plots():
     predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2*np.dot(x.values, model_weights)], -1)
 
     model = Model(predict_function, dataframe=True, arrow=False)
-    prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
     shap_explainer = SHAPExplainer(background=background)
-    explanation = shap_explainer.explain(prediction, model)
+    explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     print(explanation.as_dataframe())
     explanation.candlestick_plot()
