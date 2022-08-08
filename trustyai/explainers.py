@@ -7,6 +7,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
 from jpype import JInt
+import uuid as _uuid
 
 from trustyai import _default_initializer
 from trustyai.utils._visualisation import (
@@ -14,7 +15,7 @@ from trustyai.utils._visualisation import (
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
 )
-from trustyai.model import feature, Dataset, PredictionInput
+from trustyai.model import counterfactual_prediction, feature, Dataset, PredictionInput
 
 from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
@@ -31,8 +32,11 @@ from org.kie.kogito.explainability.local.shap import (
     ShapKernelExplainer as _ShapKernelExplainer,
 )
 from org.kie.kogito.explainability.model import (
-    CounterfactualPrediction,
+    DataDistribution,
     EncodingParams,
+    Feature,
+    Output,
+    PredictionOutput,
     PredictionProvider,
     Saliency,
     PerturbationContext,
@@ -176,7 +180,15 @@ class CounterfactualExplainer:
         self._explainer = _CounterfactualExplainer(self._cf_config)
 
     def explain(
-        self, prediction: CounterfactualPrediction, model: PredictionProvider
+        self,
+        original_features: Union[
+            np.ndarray, pd.DataFrame, List[Feature], PredictionInput
+        ],
+        goal: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
+        data_distribution: Optional[DataDistribution] = None,
+        uuid: Optional[_uuid.UUID] = None,
+        timeout: Optional[float] = None,
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a :class:`~CounterfactualPrediction` and a
         :class:`~PredictionProvider`
@@ -196,8 +208,15 @@ class CounterfactualExplainer:
         :class:`~CounterfactualResult`
             Object containing the results of the counterfactual explanation.
         """
+        _counterfactual_prediction = counterfactual_prediction(
+            input_features=original_features,
+            outputs=goal,
+            data_distribution=data_distribution,
+            uuid=uuid,
+            timeout=timeout,
+        )
         return CounterfactualResult(
-            self._explainer.explainAsync(prediction, model).get()
+            self._explainer.explainAsync(_counterfactual_prediction, model).get()
         )
 
 
