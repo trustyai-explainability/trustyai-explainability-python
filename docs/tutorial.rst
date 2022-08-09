@@ -44,25 +44,17 @@ argument, indicating what function we are trying to explain:
 	from trustyai.model import Model
 	model = Model(predict_fun=linear_model)
 
-Finally, we'll establish the data point we are explaining by using the TrustyAI
-:func:`~trustyai.model.simple_prediction` function. This wraps the input and output of our
-model into a :class:`Prediction` object, which is what TrustyAI uses to produce explanations:
+Finally, we'll establish the data point we are explaining by using the the input and output of our
+model, which is what TrustyAI uses to produce explanations:
 
 .. code-block:: python
 	:linenos:
 	:lineno-start: 9
 
-	from trustyai.model import simple_prediction
-
 	model_input = np.random.rand(1, 5)
 	model_output = model(model_input)
-	prediction = simple_prediction(model_input, model_output)
 
 The above steps will look the same for nearly any desired use-case for any model and data.
-In summary, we:
-
-1) Wrapped the predict function into a :class:`~trustyai.model.Model`
-2) Wrapped the desired prediction-to-be-explained into a :class:`Prediction`
 
 LIME
 ----
@@ -89,7 +81,10 @@ Now we can produce and display the explanations:
 	:linenos:
 	:lineno-start: 17
 
-	lime_explanation = lime_explainer.explain(prediction, model)
+	lime_explanation = lime_explainer.explain(
+		inputs=model_input
+		outputs=model_output, 
+		model=model)
 	print(lime_explanation.as_dataframe())
 
 .. code-block:: console
@@ -138,7 +133,10 @@ Now we can produce and display the explanations:
 	:linenos:
 	:lineno-start: 22
 
-	explanation = explainer.explain(prediction, model)
+	explanation = explainer.explain(
+		inputs=model_input,
+		outputs=model_output, 
+		model=model)
 	print(explanation.as_dataframe())
 
 .. code-block:: console
@@ -196,8 +194,7 @@ search to feature values between -10 and 10:
 	for i, value in enumerate(model_input.reshape(-1)):
 	    features.append(feature("Feature_{}".format(i), "number", value, domain=(-10., 10.))
 
-Now, we use the :func:`~trustyai.model.counterfactual_prediction` function to wrap these features
-with a counterfactual *goal*: the desired output we want to model to produce. Here, we'll select
+Next, we define a counterfactual *goal*: the desired output we want to model to produce. Here, we'll select
 ``1.0`` as our goal, meaning the counterfactual explainer will try and find a set of inputs that
 produce a model output of 1.0 ± 1%.
 
@@ -205,12 +202,7 @@ produce a model output of 1.0 ± 1%.
 	:linenos:
 	:lineno-start: 29
 
-	from trustyai.model import counterfactual_prediction
-
-	prediction = counterfactual_prediction(
-	    input_features=features,
-	    outputs=np.array([[1.0]])
-	)
+	goal = np.array([[1.0]])
 
 We can now initialize the :class:`~trustyai.explainers.CounterfactualExplainer` and produce
 explanations. We'll set ``steps`` to 10,000 in the explainer; this defines how many candidate
@@ -222,7 +214,10 @@ results at the cost of compute time.
 	:lineno-start: 35
 
 	explainer = CounterfactualExplainer(steps=10_000)
-	explanation = explainer.explain(prediction, model)
+	explanation = explainer.explain(
+		inputs=features,
+		goal=goal, 
+		model=model)
 	print(explanation.as_dataframe())
 
 .. code-block:: console
