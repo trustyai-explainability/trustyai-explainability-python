@@ -82,9 +82,9 @@ Now we can produce and display the explanations:
 	:lineno-start: 17
 
 	lime_explanation = lime_explainer.explain(
-		inputs=model_input
-		outputs=model_output, 
-		model=model)
+		inputs = model_input
+		outputs = model_output, 
+		model = model)
 	print(lime_explanation.as_dataframe())
 
 .. code-block:: console
@@ -134,9 +134,9 @@ Now we can produce and display the explanations:
 	:lineno-start: 22
 
 	explanation = explainer.explain(
-		inputs=model_input,
-		outputs=model_output, 
-		model=model)
+		inputs = model_input,
+		outputs = model_output, 
+		model = model)
 	print(explanation.as_dataframe())
 
 .. code-block:: console
@@ -215,9 +215,9 @@ results at the cost of compute time.
 
 	explainer = CounterfactualExplainer(steps=10_000)
 	explanation = explainer.explain(
-		inputs=features,
-		goal=goal, 
-		model=model)
+		inputs = features,
+		goal = goal, 
+		model = model)
 	print(explanation.as_dataframe())
 
 .. code-block:: console
