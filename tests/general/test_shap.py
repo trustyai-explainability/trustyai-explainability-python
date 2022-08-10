@@ -8,8 +8,6 @@ import numpy as np
 
 np.random.seed(0)
 
-import pytest
-
 from trustyai.explainers import SHAPExplainer
 from trustyai.model import feature, simple_prediction, Model, Dataset
 from trustyai.utils import TestUtils
@@ -34,13 +32,16 @@ def test_no_variance_one_output():
 
 
 def test_shap_arrow():
+    """Basic SHAP/Arrow test"""
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
     background = data.iloc[:100]
     to_explain = data.iloc[100:101]
 
     model_weights = np.random.rand(5)
-    predict_function = lambda x: np.dot(x.values, model_weights)
+
+    def predict_function(inputs):
+        return np.dot(inputs.values, model_weights)
 
     model = Model(predict_function, dataframe=True, arrow=True)
     prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
@@ -48,19 +49,22 @@ def test_shap_arrow():
     explanation = shap_explainer.explain(prediction, model)
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
-    for output_name, saliency in explanation.get_saliencies().items():
+    for _, saliency in explanation.get_saliencies().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
 
 def test_shap_plots():
+    """Test SHAP plots"""
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
     background = data.iloc[:100]
     to_explain = data.iloc[100:101]
 
     model_weights = np.random.rand(5)
-    predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2*np.dot(x.values, model_weights)], -1)
+
+    def predict_function(inputs):
+        return np.stack([np.dot(inputs.values, model_weights), 2 * np.dot(inputs.values, model_weights)], -1)
 
     model = Model(predict_function, dataframe=True, arrow=False)
     prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
