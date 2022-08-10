@@ -5,13 +5,10 @@ import sys
 from typing import List
 
 myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../")
+sys.path.insert(0, myPath + "/../../")
 
-import trustyai
-trustyai.init()
 import numpy as np
 import pandas as pd
-
 from trustyai.model import (
     FeatureFactory,
     PredictionOutput,
@@ -26,4 +23,4 @@ def mock_feature(value, name='f-num'):
 
 def sum_skip_model(inputs: np.ndarray) -> np.ndarray:
     """SumSkip test model"""
-    return np.sum(inputs[:,[i for i in range(inputs.shape[1]) if i != 5]], 1)
+    return np.sum(inputs[:, [i for i in range(inputs.shape[1]) if i != 5]], 1)
