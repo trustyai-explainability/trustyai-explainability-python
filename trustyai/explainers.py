@@ -16,7 +16,7 @@ from trustyai.utils._visualisation import (
 )
 from trustyai.model import feature, Dataset, PredictionInput
 
-from org.kie.kogito.explainability.local.counterfactual import (
+from org.kie.trustyai.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult as _CounterfactualResult,
     SolverConfigBuilder as _SolverConfigBuilder,
@@ -387,12 +387,7 @@ class SHAPResults(ExplanationVisualiser):
         Dict[str, Saliency]
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        saliencies = self.shap_results.getSaliencies()
-        if isinstance(saliencies, dict):
-            output = saliencies
-        else:
-            output = {s.getOutput().getName(): s for s in saliencies}
-        return output
+        return dict(self.shap_results.getSaliencies())
 
     def get_fnull(self):
         """
@@ -444,7 +439,8 @@ class SHAPResults(ExplanationVisualiser):
                 index=columns,
                 columns=feature_names,
             ).T
-            fnull = self.shap_results.getFnull().getEntry(i)
+            print(self.shap_results.getFnull())
+            fnull = self.shap_results.getFnull()[str(i)]
 
             visualizer_data_frame = pd.concat(
                 [
@@ -560,7 +556,7 @@ class SHAPResults(ExplanationVisualiser):
                     str(pfi.getFeature().getName())
                     for pfi in saliency.getPerFeatureImportance()
                 ]
-                fnull = self.shap_results.getFnull().getEntry(i)
+                fnull = self.shap_results.getFnull()[str(i)]
                 prediction = fnull + sum(shap_values)
                 plt.figure()
                 pos = fnull
