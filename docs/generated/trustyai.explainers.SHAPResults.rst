@@ -17,8 +17,8 @@
       ~SHAPResults.as_dataframe
       ~SHAPResults.as_html
       ~SHAPResults.candlestick_plot
-      ~SHAPResults.getFnull
-      ~SHAPResults.getSaliencies
+      ~SHAPResults.get_fnull
+      ~SHAPResults.get_saliencies
    
    
 

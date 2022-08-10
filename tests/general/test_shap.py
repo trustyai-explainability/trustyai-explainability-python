@@ -1,4 +1,4 @@
-# pylint: disable=import-error, wrong-import-position, wrong-import-order, duplicate-code
+# pylint: disable=import-error, wrong-import-position, wrong-import-order, duplicate-code, unused-import
 """SHAP explainer test suite"""
 
 from common import *
@@ -28,7 +28,7 @@ def test_no_variance_one_output():
     explanations = [shap_explainer.explain(prediction, model) for prediction in predictions]
 
     for explanation in explanations:
-        for saliency in explanation.get_saliencies().values():
+        for _, saliency in explanation.get_saliencies().items():
             for feature_importance in saliency.getPerFeatureImportance():
                 assert feature_importance.getScore() == 0.0
 
@@ -48,12 +48,11 @@ def test_shap_arrow():
     explanation = shap_explainer.explain(prediction, model)
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
-    for saliency in explanation.get_saliencies().values():
+    for output_name, saliency in explanation.get_saliencies().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
 
-@pytest.mark.skip(reason="disable")
 def test_shap_plots():
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
@@ -61,7 +60,7 @@ def test_shap_plots():
     to_explain = data.iloc[100:101]
 
     model_weights = np.random.rand(5)
-    predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2 * np.dot(x.values, model_weights)], -1)
+    predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2*np.dot(x.values, model_weights)], -1)
 
     model = Model(predict_function, dataframe=True, arrow=False)
     prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))

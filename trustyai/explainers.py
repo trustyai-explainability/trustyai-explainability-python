@@ -1,5 +1,5 @@
 """Explainers module"""
-# pylint: disable = import-error, too-few-public-methods
+# pylint: disable = import-error, too-few-public-methods, wrong-import-order, unused-import
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -7,7 +7,16 @@ from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
 from jpype import JInt
-from org.kie.trustyai.explainability.local.counterfactual import (
+
+from trustyai import _default_initializer
+from trustyai.utils._visualisation import (
+    ExplanationVisualiser,
+    DEFAULT_STYLE as ds,
+    DEFAULT_RC_PARAMS as drcp,
+)
+from trustyai.model import feature, Dataset, PredictionInput
+
+from org.kie.kogito.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult as _CounterfactualResult,
     SolverConfigBuilder as _SolverConfigBuilder,
@@ -31,12 +40,6 @@ from org.kie.trustyai.explainability.model import (
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
 from java.util import Random
-from trustyai.utils._visualisation import (
-    ExplanationVisualiser,
-    DEFAULT_STYLE as ds,
-    DEFAULT_RC_PARAMS as drcp,
-)
-from trustyai.model import feature, Dataset, PredictionInput
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -375,16 +378,21 @@ class SHAPResults(ExplanationVisualiser):
         self.shap_results = shap_results
         self.background = background
 
-    def get_saliencies(self) -> List[Saliency]:
+    def get_saliencies(self) -> Dict[str, Saliency]:
         """
-        Return the list of the found saliencies.
+        Return a dictionary of found saliencies.
 
         Returns
         -------
-        List[Saliency]
-             A list of :class:`~trustyai.model.Saliency` objects, in the order of the model outputs.
+        Dict[str, Saliency]
+             A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        return self.shap_results.getSaliencies()
+        saliencies = self.shap_results.getSaliencies()
+        if isinstance(saliencies, dict):
+            output = saliencies
+        else:
+            output = {s.getOutput().getName(): s for s in saliencies}
+        return output
 
     def get_fnull(self):
         """
@@ -413,7 +421,7 @@ class SHAPResults(ExplanationVisualiser):
         """
 
         visualizer_data_frame = pd.DataFrame()
-        for i, saliency in enumerate(self.shap_results.getSaliencies().values()):
+        for i, (_, saliency) in enumerate(self.get_saliencies().items()):
             background_mean_feature_values = np.mean(
                 [
                     [f.getValue().asNumber() for f in pi.getFeatures()]
@@ -436,7 +444,7 @@ class SHAPResults(ExplanationVisualiser):
                 index=columns,
                 columns=feature_names,
             ).T
-            fnull = self.shap_results.getFnull().get(i)
+            fnull = self.shap_results.getFnull().getEntry(i)
 
             visualizer_data_frame = pd.concat(
                 [
@@ -481,7 +489,7 @@ class SHAPResults(ExplanationVisualiser):
             return [None] + formats + [None]
 
         visualizer_data_frame = pd.DataFrame()
-        for i, saliency in enumerate(self.shap_results.getSaliencies()):
+        for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
             background_mean_feature_values = np.mean(
                 [
                     [f.getValue().asNumber() for f in pi.getFeatures()]
@@ -532,7 +540,7 @@ class SHAPResults(ExplanationVisualiser):
                 vmin=-1 * max(np.abs(shap_values)),
                 vmax=max(np.abs(shap_values)),
             )
-            style.set_caption(f"Explanation of {saliency.getOutput().getName()}")
+            style.set_caption(f"Explanation of {output_name}")
             return style.apply(
                 _color_feature_values,
                 background_vals=background_mean_feature_values,
@@ -544,7 +552,7 @@ class SHAPResults(ExplanationVisualiser):
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
         one per output."""
         with mpl.rc_context(drcp):
-            for i, saliency in enumerate(self.shap_results.getSaliencies()):
+            for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
                 shap_values = [
                     pfi.getScore() for pfi in saliency.getPerFeatureImportance()
                 ]
@@ -593,7 +601,7 @@ class SHAPResults(ExplanationVisualiser):
                 plt.xticks(np.arange(len(feature_names)), feature_names)
                 plt.ylabel(saliency.getOutput().getName())
                 plt.xlabel("Feature SHAP Value")
-                plt.title(f"Explanation of {saliency.getOutput().getName()}")
+                plt.title(f"Explanation of {output_name}")
                 plt.show()
 
 

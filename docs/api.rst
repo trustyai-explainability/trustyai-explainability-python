@@ -5,6 +5,18 @@ API Reference
 This page contains the API reference for public objects and function within TrustyAI. See the
 (example notebooks) for usage guides and tutorials.
 
+trustyai.initializer
+--------------------
+Initializing The JVM
+##########################
+.. currentmodule:: trustyai.initializer
+.. model_api:
+.. autosummary::
+	:toctree: generated/
+
+	init
+
+
 trustyai.model
 --------------
 Feature and Output Objects
