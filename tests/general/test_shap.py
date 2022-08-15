@@ -60,12 +60,30 @@ def test_shap_plots():
     to_explain = data.iloc[100:101]
 
     model_weights = np.random.rand(5)
-    predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2*np.dot(x.values, model_weights)], -1)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2*np.dot(x, model_weights)], -1)
 
-    model = Model(predict_function, dataframe=True, arrow=False)
+    model = Model(predict_function, arrow=False)
     prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(prediction, model)
 
-    print(explanation.as_dataframe())
     explanation.candlestick_plot()
+
+def test_shap_as_df():
+    np.random.seed(0)
+    data = pd.DataFrame(np.random.rand(101, 5))
+    background = data.iloc[:100]
+    to_explain = data.iloc[100:101]
+
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2*np.dot(x, model_weights)], -1)
+
+    model = Model(predict_function, arrow=False)
+    prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
+    shap_explainer = SHAPExplainer(background=background)
+    explanation = shap_explainer.explain(prediction, model)
+
+    for out_name, df in explanation.as_dataframe().items():
+        assert "Mean Background Value" in df
+        assert "output" in out_name
+        assert all([x in str(df) for x in "01234"])
