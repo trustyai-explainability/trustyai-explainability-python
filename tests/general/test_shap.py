@@ -11,7 +11,7 @@ np.random.seed(0)
 import pytest
 
 from trustyai.explainers import SHAPExplainer
-from trustyai.model import feature,  simple_prediction, Model, Dataset
+from trustyai.model import feature, simple_prediction, Model, Dataset
 from trustyai.utils import TestUtils
 
 
@@ -49,7 +49,7 @@ def test_shap_arrow():
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
     for _, saliency in explanation.get_saliencies().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
-            assert answers[i]-1e-2 <= feature_importance.getScore() <= answers[i]+1e-2
+            assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
 
 def test_shap_plots():
@@ -59,13 +59,14 @@ def test_shap_plots():
     to_explain = data.iloc[100:101]
 
     model_weights = np.random.rand(5)
-    predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2*np.dot(x.values, model_weights)], -1)
+    predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2 * np.dot(x.values, model_weights)], -1)
 
     model = Model(predict_function, dataframe=True, arrow=False)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     explanation.candlestick_plot()
+
 
 def test_shap_as_df():
     np.random.seed(0)
@@ -74,12 +75,11 @@ def test_shap_as_df():
     to_explain = data.iloc[100:101]
 
     model_weights = np.random.rand(5)
-    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2*np.dot(x, model_weights)], -1)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
 
     model = Model(predict_function, arrow=False)
-    prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
     shap_explainer = SHAPExplainer(background=background)
-    explanation = shap_explainer.explain(prediction, model)
+    explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     for out_name, df in explanation.as_dataframe().items():
         assert "Mean Background Value" in df
