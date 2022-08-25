@@ -21,7 +21,9 @@ def test_no_variance_one_output():
 
     background = np.array([[1.0, 2.0, 3.0] for _ in range(2)])
     prediction_outputs = model.predictAsync(Dataset.numpy_to_prediction_object(background, feature)).get()
-
+    predictions = [simple_prediction(input_features=background[i], outputs=prediction_outputs[i].outputs) for i
+                   in
+                   range(2)]
     shap_explainer = SHAPExplainer(background=background)
     for i in range(2):
         explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
@@ -63,5 +65,23 @@ def test_shap_plots():
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
-    print(explanation.as_dataframe())
     explanation.candlestick_plot()
+
+def test_shap_as_df():
+    np.random.seed(0)
+    data = pd.DataFrame(np.random.rand(101, 5))
+    background = data.iloc[:100]
+    to_explain = data.iloc[100:101]
+
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2*np.dot(x, model_weights)], -1)
+
+    model = Model(predict_function, arrow=False)
+    prediction = simple_prediction(input_features=to_explain, outputs=model(to_explain))
+    shap_explainer = SHAPExplainer(background=background)
+    explanation = shap_explainer.explain(prediction, model)
+
+    for out_name, df in explanation.as_dataframe().items():
+        assert "Mean Background Value" in df
+        assert "output" in out_name
+        assert all([x in str(df) for x in "01234"])
