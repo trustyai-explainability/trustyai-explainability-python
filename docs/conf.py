@@ -21,8 +21,8 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # -- Project information -----------------------------------------------------
 
 project = 'TrustyAI'
-copyright = '2022, Rob Geada, Tommaso Teofili, Rui Viera, Rebecca Whitworth, Daniele Zonca'
-author = 'Rob Geada, Tommaso Teofili, Rui Viera, Rebecca Whitworth, Daniele Zonca'
+copyright = '2022, Rob Geada, Tommaso Teofili, Rui Vieira, Rebecca Whitworth, Daniele Zonca'
+author = 'Rob Geada, Tommaso Teofili, Rui Vieira, Rebecca Whitworth, Daniele Zonca'
 
 
 # -- General configuration ---------------------------------------------------
