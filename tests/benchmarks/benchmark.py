@@ -20,7 +20,7 @@ def test_counterfactual_match(benchmark):
 
 
 @pytest.mark.benchmark(
-    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True
+    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True, name="Non-empty input"
 )
 def test_non_empty_input(benchmark):
     """Counterfactual non-empty input"""
