@@ -31,7 +31,7 @@ jobs:
           python setup.py build install
       - name: Run benchmark
         run: |
-          pytest tests/benchmarks/benchmark.py --benchmark-json output.json
+          pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/output.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
