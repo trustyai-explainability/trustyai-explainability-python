@@ -54,5 +54,5 @@ jobs:
           alert-threshold: '200%'
           fail-on-alert: false
       - name: Push benchmark result
-        run: git push 'https://ruivieira:${{ secrets.GITHUB_TOKEN }}@github.com/ruivieiratrustyai-explainability-python-benchmark-results.git' gh-pages:gh-pages
+        run: git push 'https://ruivieira:${{ secrets.GITHUB_TOKEN }}@github.com/ruivieira/trustyai-explainability-python-benchmark-results.git' gh-pages:gh-pages
 
