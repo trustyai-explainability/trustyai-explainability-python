@@ -12,7 +12,7 @@ import test_counterfactualexplainer as tcf
 
 
 @pytest.mark.benchmark(
-    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True
+    group="counterfactuals", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
 def test_counterfactual_match(benchmark):
     """Counterfactual match"""
@@ -20,7 +20,7 @@ def test_counterfactual_match(benchmark):
 
 
 @pytest.mark.benchmark(
-    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True, name="Non-empty input"
+    group="counterfactuals", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
 def test_non_empty_input(benchmark):
     """Counterfactual non-empty input"""
@@ -28,7 +28,7 @@ def test_non_empty_input(benchmark):
 
 
 @pytest.mark.benchmark(
-    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True
+    group="counterfactuals", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
 def test_counterfactual_match_python_model(benchmark):
     """Counterfactual match (Python model)"""
