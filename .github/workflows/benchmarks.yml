@@ -31,13 +31,13 @@ jobs:
           python setup.py build install
       - name: Run benchmark
         run: |
-          pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/output.json
+          pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: TrustyAI continuous benchmarks
           tool: 'pytest'
-          output-file-path: tests/benchmarks/output.json
+          output-file-path: tests/benchmarks/results.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
           alert-threshold: '200%'
