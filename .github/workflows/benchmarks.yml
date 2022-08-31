@@ -32,27 +32,15 @@ jobs:
       - name: Run benchmark
         run: |
           pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json
-      # - name: Store benchmark result
-      #   uses: benchmark-action/github-action-benchmark@v1
-      #   with:
-      #     name: TrustyAI continuous benchmarks
-      #     tool: 'pytest'
-      #     output-file-path: tests/benchmarks/results.json
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     auto-push: true
-      #     alert-threshold: '200%'
-      #     comment-on-alert: true
-      #     fail-on-alert: true
-      #     alert-comment-cc-users: '@ruivieira'
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: TrustyAI continuous benchmarks
           tool: 'pytest'
           output-file-path: tests/benchmarks/results.json
-          auto-push: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
           alert-threshold: '200%'
-          fail-on-alert: false
-      - name: Push benchmark result
-        run: git push 'https://ruivieira:${{ secrets.GITHUB_TOKEN }}@github.com/ruivieira/trustyai-explainability-python-benchmark-results.git' gh-pages:gh-pages
-
+          comment-on-alert: true
+          fail-on-alert: true
+          alert-comment-cc-users: '@ruivieira'
