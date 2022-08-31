@@ -5,6 +5,8 @@ on: [ push, pull_request ]
 permissions:
   contents: write
   deployments: write
+  pages: write
+  pull-requests: write
 
 jobs:
   benchmark:
