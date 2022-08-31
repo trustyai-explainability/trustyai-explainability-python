@@ -10,13 +10,26 @@ sys.path.insert(0, myPath + "/../general/")
 
 import test_counterfactualexplainer as tcf
 
+
 @pytest.mark.benchmark(
-    group="counterfactuals",
-    min_rounds=5,
-    timer=time.time,
-    disable_gc=True,
-    warmup=True
+    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True
 )
 def test_counterfactual_match(benchmark):
     """Counterfactual match"""
     benchmark(tcf.test_counterfactual_match)
+
+
+@pytest.mark.benchmark(
+    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True
+)
+def test_non_empty_input(benchmark):
+    """Counterfactual non-empty input"""
+    benchmark(tcf.test_non_empty_input)
+
+
+@pytest.mark.benchmark(
+    group="counterfactuals", min_rounds=5, timer=time.time, disable_gc=True, warmup=True
+)
+def test_counterfactual_match_python_model(benchmark):
+    """Counterfactual match (Python model)"""
+    benchmark(tcf.test_counterfactual_match_python_model)
