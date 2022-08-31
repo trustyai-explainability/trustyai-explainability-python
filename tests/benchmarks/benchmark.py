@@ -154,5 +154,5 @@ def counterfactual_v2():
     assert result_output > -0.01
 
 
-def test_fib_10(benchmark):
+def test_counterfactual_match(benchmark):
     benchmark(counterfactual_match)
