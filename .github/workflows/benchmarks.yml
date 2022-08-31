@@ -52,7 +52,7 @@ jobs:
           output-file-path: tests/benchmarks/results.json
           auto-push: false
           alert-threshold: '200%'
-          fail-on-alert: true
+          fail-on-alert: false
       - name: Push benchmark result
         run: git push 'https://ruivieira:${{ secrets.GITHUB_TOKEN }}@github.com/ruivieiratrustyai-explainability-python-benchmark-results.git' gh-pages:gh-pages
 
