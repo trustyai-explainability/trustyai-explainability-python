@@ -7,5 +7,5 @@ runs:
       run: |
         git clone https://github.com/trustyai-explainability/trustyai-explainability.git
         mvn install package -DskipTests -f trustyai-explainability/explainability-core/pom.xml -Pshaded
-        mv trustyai-explainability/explainability-core/target/explainability-core-2.0.0-SNAPSHOT.jar trustyai/dep/org/trustyai/
-        mv trustyai-explainability/explainability-core/target/explainability-core-2.0.0-SNAPSHOT-tests.jar trustyai/dep/org/trustyai/
+        mv trustyai-explainability/explainability-core/target/explainability-core-*.jar trustyai/dep/org/trustyai/
+        
