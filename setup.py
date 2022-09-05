@@ -33,10 +33,7 @@ setup(
     ],
     package_data={
         "": ["*.jar"],
-        "trustyai": [
-            "dep/org/trustyai/arrow-converters-0.0.1.jar",
-            "dep/org/trustyai/explainability-core-2.0.0-SNAPSHOT.jar"
-        ],
+        "trustyai": ["dep/org/trustyai/*.jar"],
     },
     packages=[
         "trustyai",
@@ -46,5 +43,5 @@ setup(
         "trustyai.metrics",
     ],
     include_package_data=True,
-    install_requires=['Jpype1', 'pyarrow'],
+    install_requires=["Jpype1", "pyarrow"],
 )
