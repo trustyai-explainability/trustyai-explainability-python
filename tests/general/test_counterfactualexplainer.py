@@ -8,7 +8,6 @@ from pytest import approx
 
 from trustyai.explainers import CounterfactualExplainer
 from trustyai.model import (
-    counterfactual_prediction,
     output, Model, feature,
 )
 from trustyai.utils import TestUtils
@@ -30,12 +29,10 @@ def test_non_empty_input():
 
     model = TestUtils.getSumSkipModel(0)
 
-    prediction = counterfactual_prediction(
-        input_features=features,
-        outputs=goal,
-    )
-
-    counterfactual_result = explainer.explain(prediction, model)
+    counterfactual_result = explainer.explain(
+        inputs=features,
+        goal=goal,
+        model=model)
     for entity in counterfactual_result._result.entities:
         print(entity)
         assert entity is not None
@@ -54,12 +51,11 @@ def test_counterfactual_match():
 
     explainer = CounterfactualExplainer(steps=10000)
 
-    prediction = counterfactual_prediction(
-        input_features=features,
-        outputs=goal,
-    )
     model = TestUtils.getSumThresholdModel(center, epsilon)
-    result = explainer.explain(prediction, model)
+    result = explainer.explain(
+        inputs=features,
+        goal=goal,
+        model=model)
 
     total_sum = 0
     for entity in result._result.entities:
@@ -84,12 +80,14 @@ def test_counterfactual_match_python_model():
         feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(n_features)
     ]
     explainer = CounterfactualExplainer(steps=1000)
-    prediction = counterfactual_prediction(
-        input_features=features,
-        outputs=goal,
-    )
+
     model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
-    result = explainer.explain(prediction, model)
+
+    result = explainer.explain(
+        inputs=features,
+        goal=goal,
+        model=model)
+
     assert sum([entity.as_feature().value.as_number() for entity in result._result.entities]) == approx(GOAL_VALUE, rel=3)
 
 
@@ -104,14 +102,13 @@ def test_counterfactual_plot():
     ]
     explainer = CounterfactualExplainer(steps=1000)
 
-    prediction = counterfactual_prediction(
-        input_features=features,
-        outputs=goal,
-    )
-
     model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
 
-    result = explainer.explain(prediction, model)
+    result = explainer.explain(
+        inputs=features,
+        goal=goal,
+        model=model)
+
     result.plot()
 
 
@@ -124,9 +121,11 @@ def test_counterfactual_v2():
 
     model = Model(predict_function, dataframe=True)
     goal = np.array([[0]])
-    prediction = counterfactual_prediction(input_features=features, outputs=goal)
-    explainer = CounterfactualExplainer(steps=100_000)
-    explanation = explainer.explain(prediction, model)
+    explainer = CounterfactualExplainer(steps=10_000)
+    explanation = explainer.explain(
+        inputs=features,
+        goal=goal,
+        model=model)
     result_output = model(explanation.proposed_features_dataframe)
     assert result_output<.01
     assert result_output>-.01
