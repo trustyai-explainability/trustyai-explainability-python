@@ -449,12 +449,7 @@ class SHAPResults(ExplanationVisualiser):
         Dict[str, Saliency]
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        saliencies = self.shap_results.getSaliencies()
-        if isinstance(saliencies, dict):
-            output = saliencies
-        else:
-            output = {s.getOutput().getName(): s for s in saliencies}
-        return output
+        return dict(self.shap_results.getSaliencies())
 
     def get_fnull(self):
         """
@@ -490,7 +485,7 @@ class SHAPResults(ExplanationVisualiser):
             index=columns,
             columns=feature_names,
         ).T
-        fnull = self.shap_results.getFnull().getEntry(output_idx)
+        fnull = self.shap_results.getFnull()[str(output_idx)]
 
         return (
             pd.concat(
@@ -601,7 +596,7 @@ class SHAPResults(ExplanationVisualiser):
                     str(pfi.getFeature().getName())
                     for pfi in saliency.getPerFeatureImportance()
                 ]
-                fnull = self.shap_results.getFnull().getEntry(i)
+                fnull = self.shap_results.getFnull()[str(i)]
                 prediction = fnull + sum(shap_values)
                 plt.figure()
                 pos = fnull

@@ -11,7 +11,7 @@ np.random.seed(0)
 import pytest
 
 from trustyai.explainers import SHAPExplainer
-from trustyai.model import feature,  simple_prediction, Model, Dataset
+from trustyai.model import feature, Model, Dataset
 from trustyai.utils import TestUtils
 
 
@@ -21,9 +21,6 @@ def test_no_variance_one_output():
 
     background = np.array([[1.0, 2.0, 3.0] for _ in range(2)])
     prediction_outputs = model.predictAsync(Dataset.numpy_to_prediction_object(background, feature)).get()
-    predictions = [simple_prediction(input_features=background[i], outputs=prediction_outputs[i].outputs) for i
-                   in
-                   range(2)]
     shap_explainer = SHAPExplainer(background=background)
     for i in range(2):
         explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
