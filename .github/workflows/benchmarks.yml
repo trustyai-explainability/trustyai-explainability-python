@@ -1,6 +1,11 @@
 name: TrustyAI Python benchmarks
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches:
+      - '*'
+      - '!master'
+  pull_request:
 
 permissions:
   contents: write
@@ -41,9 +46,10 @@ jobs:
           tool: 'pytest'
           output-file-path: tests/benchmarks/results.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          gh-pages-branch: gh-pages
           auto-push: false
           alert-threshold: '200%'
           comment-on-alert: true
+          comment-always: true
           fail-on-alert: false
+          save-data-file: false
           alert-comment-cc-users: '@ruivieira'
