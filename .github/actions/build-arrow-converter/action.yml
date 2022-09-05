@@ -6,4 +6,4 @@ runs:
       shell: bash
       run: |
           mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
-          mv java_sources/trusty-ai-arrow/target/arrow-converters-0.0.1.jar trustyai/dep/org/trustyai/
+          mv java_sources/trusty-ai-arrow/target/arrow-converters-*.jar trustyai/dep/org/trustyai/
