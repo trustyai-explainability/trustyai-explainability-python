@@ -604,7 +604,7 @@ class SHAPResults(ExplanationVisualiser):
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
         one per output."""
         with mpl.rc_context(drcp):
-            for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
+            for output_name, saliency in enumerate(self.get_saliencies().items()):
                 shap_values = [
                     pfi.getScore() for pfi in saliency.getPerFeatureImportance()
                 ]
