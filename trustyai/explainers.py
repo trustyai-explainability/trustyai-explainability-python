@@ -49,7 +49,7 @@ from org.kie.kogito.explainability.model import (
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
-from java.util import Random
+from java.util import Random, HashMap
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -450,7 +450,7 @@ class SHAPResults(ExplanationVisualiser):
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
         saliencies = self.shap_results.getSaliencies()
-        if isinstance(saliencies, dict):
+        if isinstance(saliencies, HashMap):
             output = saliencies
         else:
             output = {s.getOutput().getName(): s for s in saliencies}
