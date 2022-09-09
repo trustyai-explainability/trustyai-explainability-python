@@ -469,10 +469,16 @@ class SHAPResults(ExplanationVisualiser):
         """
         saliencies = self.shap_results.getSaliencies()
         if isinstance(saliencies, HashMap):
-            fnull = {output_name: saliency[-1].getValue() for output_name,saliency in dict(saliencies).items()}
+            fnull = {
+                output_name: saliency[-1].getValue()
+                for output_name, saliency in dict(saliencies).items()
+            }
         else:
             self.old_saliency_method = True
-            fnull = {s.getOutput().getName(): self.shap_results.getFnull().getEntry(i) for i, s in enumerate(saliencies)}
+            fnull = {
+                s.getOutput().getName(): self.shap_results.getFnull().getEntry(i)
+                for i, s in enumerate(saliencies)
+            }
         return fnull
 
     def _saliency_to_dataframe(self, saliency, output_name):
