@@ -451,7 +451,7 @@ class SHAPResults(ExplanationVisualiser):
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
         saliencies = self.shap_results.getSaliencies()
-        if isinstance(saliencies, dict):
+        if isinstance(saliencies, HashMap):
             output = saliencies
         else:
             self.old_saliency_method = True
