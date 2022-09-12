@@ -698,7 +698,6 @@ class SHAPExplainer:
         samples=None,
         batch_size=20,
         seed=0,
-        perturbations=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
@@ -720,8 +719,6 @@ class SHAPExplainer:
             performance gains.
         seed: int
             The random seed to be used when generating explanations.
-        perturbations: int
-            This argument has no effect and will be removed shortly, ignore.
         link_type : :obj:`~_ShapConfig.LinkType`
             A choice of either ``trustyai.explainers._ShapConfig.LinkType.IDENTITY``
             or ``trustyai.explainers._ShapConfig.LinkType.LOGIT``. If the model output is a
@@ -737,7 +734,7 @@ class SHAPExplainer:
             link_type = _ShapConfig.LinkType.IDENTITY
         self._jrandom = Random()
         self._jrandom.setSeed(seed)
-        perturbation_context = PerturbationContext(self._jrandom, perturbations)
+        perturbation_context = PerturbationContext(self._jrandom, 0)
 
         if isinstance(background, np.ndarray):
             self.background = Dataset.numpy_to_prediction_object(background, feature)
