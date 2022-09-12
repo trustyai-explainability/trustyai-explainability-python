@@ -49,7 +49,7 @@ from org.kie.trustyai.explainability.model import (
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
-from java.util import Random
+from java.util import Random, HashMap
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -439,6 +439,7 @@ class SHAPResults(ExplanationVisualiser):
         manually."""
         self.shap_results = shap_results
         self.background = background
+        self.old_saliency_method = False
 
     def get_saliencies(self) -> Dict[str, Saliency]:
         """
@@ -449,7 +450,13 @@ class SHAPResults(ExplanationVisualiser):
         Dict[str, Saliency]
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        return dict(self.shap_results.getSaliencies())
+        saliencies = self.shap_results.getSaliencies()
+        if isinstance(saliencies, HashMap):
+            output = saliencies
+        else:
+            self.old_saliency_method = True
+            output = {s.getOutput().getName(): s for s in saliencies}
+        return output
 
     def get_fnull(self):
         """
@@ -460,9 +467,21 @@ class SHAPResults(ExplanationVisualiser):
         Array[float]
              An array of the y-intercepts, in order of the model outputs.
         """
-        return self.shap_results.getFnull()
+        saliencies = self.shap_results.getSaliencies()
+        if isinstance(saliencies, HashMap):
+            fnull = {
+                output_name: saliency[-1].getValue()
+                for output_name, saliency in dict(saliencies).items()
+            }
+        else:
+            self.old_saliency_method = True
+            fnull = {
+                s.getOutput().getName(): self.shap_results.getFnull().getEntry(i)
+                for i, s in enumerate(saliencies)
+            }
+        return fnull
 
-    def _saliency_to_dataframe(self, saliency, output_idx):
+    def _saliency_to_dataframe(self, saliency, output_name):
         background_mean_feature_values = np.mean(
             [
                 [f.getValue().asNumber() for f in pi.getFeatures()]
@@ -479,13 +498,16 @@ class SHAPResults(ExplanationVisualiser):
             str(pfi.getFeature().getName())
             for pfi in saliency.getPerFeatureImportance()
         ]
+        if not self.old_saliency_method:
+            shap_values = shap_values[:-1]
+            feature_names = feature_names[:-1]
         columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
         visualizer_data_frame = pd.DataFrame(
             [background_mean_feature_values, feature_values, shap_values],
             index=columns,
             columns=feature_names,
         ).T
-        fnull = self.shap_results.getFnull()[str(output_idx)]
+        fnull = self.get_fnull()[output_name]
 
         return (
             pd.concat(
@@ -522,8 +544,8 @@ class SHAPResults(ExplanationVisualiser):
             * ``SHAP Value``: The found SHAP value of this feature.
         """
         df_dict = {}
-        for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
-            df_dict[output_name] = self._saliency_to_dataframe(saliency, i)[0]
+        for output_name, saliency in self.get_saliencies().items():
+            df_dict[output_name] = self._saliency_to_dataframe(saliency, output_name)[0]
         return df_dict
 
     def as_html(self) -> Dict[str, pd.io.formats.style.Styler]:
@@ -588,7 +610,7 @@ class SHAPResults(ExplanationVisualiser):
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
         one per output."""
         with mpl.rc_context(drcp):
-            for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
+            for output_name, saliency in self.get_saliencies().items():
                 shap_values = [
                     pfi.getScore() for pfi in saliency.getPerFeatureImportance()
                 ]
@@ -596,7 +618,10 @@ class SHAPResults(ExplanationVisualiser):
                     str(pfi.getFeature().getName())
                     for pfi in saliency.getPerFeatureImportance()
                 ]
-                fnull = self.shap_results.getFnull()[str(i)]
+                if not self.old_saliency_method:
+                    shap_values = shap_values[:-1]
+                    feature_names = feature_names[:-1]
+                fnull = self.get_fnull()[output_name]
                 prediction = fnull + sum(shap_values)
                 plt.figure()
                 pos = fnull
@@ -673,7 +698,6 @@ class SHAPExplainer:
         samples=None,
         batch_size=20,
         seed=0,
-        perturbations=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
@@ -695,8 +719,6 @@ class SHAPExplainer:
             performance gains.
         seed: int
             The random seed to be used when generating explanations.
-        perturbations: int
-            This argument has no effect and will be removed shortly, ignore.
         link_type : :obj:`~_ShapConfig.LinkType`
             A choice of either ``trustyai.explainers._ShapConfig.LinkType.IDENTITY``
             or ``trustyai.explainers._ShapConfig.LinkType.LOGIT``. If the model output is a
@@ -712,7 +734,7 @@ class SHAPExplainer:
             link_type = _ShapConfig.LinkType.IDENTITY
         self._jrandom = Random()
         self._jrandom.setSeed(seed)
-        perturbation_context = PerturbationContext(self._jrandom, perturbations)
+        perturbation_context = PerturbationContext(self._jrandom, 0)
 
         if isinstance(background, np.ndarray):
             self.background = Dataset.numpy_to_prediction_object(background, feature)
