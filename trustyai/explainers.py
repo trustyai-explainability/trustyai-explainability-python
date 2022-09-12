@@ -23,21 +23,21 @@ from trustyai.model import (
     simple_prediction,
 )
 
-from org.kie.kogito.explainability.local.counterfactual import (
+from org.kie.trustyai.explainability.local.counterfactual import (
     CounterfactualExplainer as _CounterfactualExplainer,
     CounterfactualResult as _CounterfactualResult,
     SolverConfigBuilder as _SolverConfigBuilder,
     CounterfactualConfig as _CounterfactualConfig,
 )
-from org.kie.kogito.explainability.local.lime import (
+from org.kie.trustyai.explainability.local.lime import (
     LimeConfig as _LimeConfig,
     LimeExplainer as _LimeExplainer,
 )
-from org.kie.kogito.explainability.local.shap import (
+from org.kie.trustyai.explainability.local.shap import (
     ShapConfig as _ShapConfig,
     ShapKernelExplainer as _ShapKernelExplainer,
 )
-from org.kie.kogito.explainability.model import (
+from org.kie.trustyai.explainability.model import (
     DataDistribution,
     EncodingParams,
     Feature,
@@ -452,7 +452,7 @@ class SHAPResults(ExplanationVisualiser):
         """
         saliencies = self.shap_results.getSaliencies()
         if isinstance(saliencies, HashMap):
-            output = saliencies
+            output = {entry.getKey():entry.getValue() for entry in saliencies.entrySet()}
         else:
             self.old_saliency_method = True
             output = {s.getOutput().getName(): s for s in saliencies}
@@ -470,8 +470,8 @@ class SHAPResults(ExplanationVisualiser):
         saliencies = self.shap_results.getSaliencies()
         if isinstance(saliencies, HashMap):
             fnull = {
-                output_name: saliency[-1].getValue()
-                for output_name, saliency in dict(saliencies).items()
+                output_name: saliency.getPerFeatureImportance()[-1].getScore()
+                for output_name, saliency in self.get_saliencies().items()
             }
         else:
             self.old_saliency_method = True
@@ -499,6 +499,7 @@ class SHAPResults(ExplanationVisualiser):
             for pfi in saliency.getPerFeatureImportance()
         ]
         if not self.old_saliency_method:
+            feature_values = feature_values[:-1]
             shap_values = shap_values[:-1]
             feature_names = feature_names[:-1]
         columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
