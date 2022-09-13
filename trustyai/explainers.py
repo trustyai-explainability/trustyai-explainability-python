@@ -452,7 +452,9 @@ class SHAPResults(ExplanationVisualiser):
         """
         saliencies = self.shap_results.getSaliencies()
         if isinstance(saliencies, HashMap):
-            output = {entry.getKey():entry.getValue() for entry in saliencies.entrySet()}
+            output = {
+                entry.getKey(): entry.getValue() for entry in saliencies.entrySet()
+            }
         else:
             self.old_saliency_method = True
             output = {s.getOutput().getName(): s for s in saliencies}
