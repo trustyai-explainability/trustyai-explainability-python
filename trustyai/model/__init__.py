@@ -36,7 +36,7 @@ from org.kie.kogito.explainability.model import (
 )
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
-from org.kogito.arrowconverters import ArrowConverters, PPAWrapper
+from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
 from org.kie.kogito.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
