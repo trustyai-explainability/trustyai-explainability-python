@@ -388,7 +388,6 @@ class PredictionProviderArrow:
         :obj:`CompletableFuture`
             A Java :obj:`CompletableFuture` containing the model outputs.
         """
-        print("predicting arrow")
         return CompletableFuture.completedFuture(self.predict(inbound_bytearray))
 
     def get_as_prediction_provider(self, prototype_prediction_input):
@@ -473,22 +472,9 @@ class Model:
                 )
 
     def _cast_outputs(self, output_array):
-        if isinstance(output_array, np.ndarray):
-            if self.output_names is None:
-                columns = ["output-{}".format(i) for i in range(output_array.shape[1])]
-            else:
-                columns = self.output_names
-            dataframe = pd.DataFrame(output_array, columns=columns)
-            objs = Dataset.df_to_prediction_object(dataframe, output)
-        elif isinstance(output_array, pd.DataFrame):
-            objs = Dataset.df_to_prediction_object(output_array, output)
-        else:
-            raise ValueError(
-                "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
-                    type(output_array)
-                )
-            )
-        return objs
+        return Dataset.df_to_prediction_object(
+            self._cast_outputs_to_dataframe(output_array),
+            output)
 
     def _cast_outputs_to_dataframe(self, output_array):
         if isinstance(output_array, pd.DataFrame):
