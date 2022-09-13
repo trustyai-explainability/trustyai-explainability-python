@@ -421,7 +421,9 @@ class Model:
     predictive model to interface with the TrustyAI Java library.
     """
 
-    def __init__(self, predict_fun, dataframe_input=False, output_names=None, arrow=False):
+    def __init__(
+        self, predict_fun, dataframe_input=False, output_names=None, arrow=False
+    ):
         """
         Wrap the model as a TrustyAI :obj:`PredictionProvider` Java class.
 
@@ -473,9 +475,10 @@ class Model:
     def _cast_outputs(self, output_array):
         if isinstance(output_array, np.ndarray):
             if self.output_names is None:
-                dataframe = pd.DataFrame(output_array, columns=["output-{}".format(i) for i in range(output_array.shape[1])])
+                columns = ["output-{}".format(i) for i in range(output_array.shape[1])]
             else:
-                dataframe = pd.DataFrame(output_array, columns=self.output_names)
+                columns = self.output_names
+            dataframe = pd.DataFrame(output_array, columns=columns)
             objs = Dataset.df_to_prediction_object(dataframe, output)
         elif isinstance(output_array, pd.DataFrame):
             objs = Dataset.df_to_prediction_object(output_array, output)
@@ -488,24 +491,26 @@ class Model:
         return objs
 
     def _cast_outputs_to_dataframe(self, output_array):
-        print("casting output", type(output_array))
         if isinstance(output_array, pd.DataFrame):
-            return output_array
+            out = output_array
         elif isinstance(output_array, np.ndarray):
             if self.output_names is None:
                 if len(output_array.shape) == 1:
                     columns = ["output-0"]
                 else:
-                    columns = ["output-{}".format(i) for i in range(output_array.shape[1])]
+                    columns = [
+                        "output-{}".format(i) for i in range(output_array.shape[1])
+                    ]
             else:
                 columns = self.output_names
-            return pd.DataFrame(output_array, columns=columns)
+            out = pd.DataFrame(output_array, columns=columns)
         else:
             raise ValueError(
                 "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
                     type(output_array)
                 )
             )
+        return out
 
     @JOverride
     def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
@@ -573,7 +578,9 @@ class _JOutput:
         return self.__str__()
 
 
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.PredictionOutput")
+@_jcustomizer.JImplementationFor(
+    "org.kie.trustyai.explainability.model.PredictionOutput"
+)
 # pylint: disable=no-member
 class _JPredictionOutput:
     """Java PredictionOutput implicit methods"""
@@ -588,7 +595,9 @@ class _JPredictionOutput:
         return self.getByName(name)
 
 
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.PredictionInput")
+@_jcustomizer.JImplementationFor(
+    "org.kie.trustyai.explainability.model.PredictionInput"
+)
 # pylint: disable=no-member
 class _JPredictionInput:
     """Java PredictionInput implicit methods"""
