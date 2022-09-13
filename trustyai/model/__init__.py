@@ -332,7 +332,7 @@ class PredictionProvider:
 
 
 @JImplementsWithDocstring(
-    "org.kogito.arrowconverters.PredictionProviderArrow", deferred=False
+    "org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False
 )
 class PredictionProviderArrow:
     """PredictionProviderArrow(pandas_predict_fun)
