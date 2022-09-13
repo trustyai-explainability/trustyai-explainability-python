@@ -17,7 +17,7 @@ from jpype import JImplements, JOverride, _jcustomizer, _jclass, JByte, JArray, 
 from org.kie.trustyai.explainability.local.counterfactual.entities import (
     CounterfactualEntity,
 )
-from org.kie.trustyai.explainability.model import (
+from org.kie.kogito.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDistribution,
     DataDomain as _DataDomain,
@@ -37,7 +37,7 @@ from org.kie.trustyai.explainability.model import (
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
 from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
-from org.kie.trustyai.explainability.model.domain import (
+from org.kie.kogito.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
 
