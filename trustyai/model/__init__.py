@@ -36,7 +36,7 @@ from org.kie.kogito.explainability.model import (
 )
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
-from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
+from org.kogito.arrowconverters import ArrowConverters, PPAWrapper
 from org.kie.kogito.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
@@ -59,7 +59,7 @@ trusty_type_map = {"i": "number", "O": "categorical", "f": "number", "b": "bool"
 
 
 # pylint: disable = no-member
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Dataset")
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Dataset")
 class Dataset:
     """Wrapper class for TrustyAI Datasets."""
 
@@ -283,7 +283,7 @@ class Dataset:
 
 
 @JImplementsWithDocstring(
-    "org.kie.trustyai.explainability.model.PredictionProvider", deferred=False
+    "org.kie.kogito.explainability.model.PredictionProvider", deferred=False
 )
 class PredictionProvider:
     """PredictionProvider(predict_fun)
@@ -332,7 +332,7 @@ class PredictionProvider:
 
 
 @JImplementsWithDocstring(
-    "org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False
+    "org.kogito.arrowconverters.PredictionProviderArrow", deferred=False
 )
 class PredictionProviderArrow:
     """PredictionProviderArrow(pandas_predict_fun)
@@ -412,7 +412,7 @@ class PredictionProviderArrow:
 
 
 @JImplementsWithDocstring(
-    "org.kie.trustyai.explainability.model.PredictionProvider", deferred=False
+    "org.kie.kogito.explainability.model.PredictionProvider", deferred=False
 )
 class Model:
     """Model(predict_fun, pandas=False, arrow=False)
@@ -546,7 +546,7 @@ class Model:
         return self.predict_fun(inputs)
 
 
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Output")
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Output")
 # pylint: disable=no-member
 class _JOutput:
     """Java Output implicit methods"""
@@ -579,7 +579,7 @@ class _JOutput:
 
 
 @_jcustomizer.JImplementationFor(
-    "org.kie.trustyai.explainability.model.PredictionOutput"
+    "org.kie.kogito.explainability.model.PredictionOutput"
 )
 # pylint: disable=no-member
 class _JPredictionOutput:
@@ -596,7 +596,7 @@ class _JPredictionOutput:
 
 
 @_jcustomizer.JImplementationFor(
-    "org.kie.trustyai.explainability.model.PredictionInput"
+    "org.kie.kogito.explainability.model.PredictionInput"
 )
 # pylint: disable=no-member
 class _JPredictionInput:
@@ -610,7 +610,7 @@ class _JPredictionInput:
 
 # implicit conversion
 @_jcustomizer.JImplementationFor(
-    "org.kie.trustyai.explainability.local.counterfactual.CounterfactualResult"
+    "org.kie.kogito.explainability.local.counterfactual.CounterfactualResult"
 )
 # pylint: disable=no-member
 class _JCounterfactualResult:
@@ -628,7 +628,7 @@ class _JCounterfactualResult:
 
 
 @_jcustomizer.JImplementationFor(
-    "org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity"
+    "org.kie.kogito.explainability.local.counterfactual.entities.CounterfactualEntity"
 )
 # pylint: disable=no-member, too-few-public-methods
 class _JCounterfactualEntity:
@@ -639,7 +639,7 @@ class _JCounterfactualEntity:
         return self.asFeature()
 
 
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Feature")
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Feature")
 # pylint: disable=no-member
 class _JFeature:
     """Java Feature implicit methods"""
@@ -673,7 +673,7 @@ class _JFeature:
         return self.isConstrained()
 
 
-@_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Value")
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.Value")
 # pylint: disable=no-member
 class _JValue:
     """Java Value implicit methods"""
@@ -695,7 +695,7 @@ class _JValue:
 
 
 @_jcustomizer.JImplementationFor(
-    "org.kie.trustyai.explainability.model.PredictionProvider"
+    "org.kie.kogito.explainability.model.PredictionProvider"
 )
 # pylint: disable=no-member, too-few-public-methods
 class _JPredictionProvider:
@@ -708,7 +708,7 @@ class _JPredictionProvider:
 
 
 @_jcustomizer.JImplementationFor(
-    "org.kie.trustyai.explainability.model.CounterfactualPrediction"
+    "org.kie.kogito.explainability.model.CounterfactualPrediction"
 )
 # pylint: disable=no-member, too-few-public-methods
 class _JCounterfactualPrediction:
@@ -741,7 +741,7 @@ class _JCounterfactualPrediction:
 
 
 @_jcustomizer.JImplementationFor(
-    "org.kie.trustyai.explainability.model.PredictionFeatureDomain"
+    "org.kie.kogito.explainability.model.PredictionFeatureDomain"
 )
 # pylint: disable=no-member
 class _JPredictionFeatureDomain:
