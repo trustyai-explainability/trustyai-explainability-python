@@ -473,8 +473,8 @@ class Model:
 
     def _cast_outputs(self, output_array):
         return Dataset.df_to_prediction_object(
-            self._cast_outputs_to_dataframe(output_array),
-            output)
+            self._cast_outputs_to_dataframe(output_array), output
+        )
 
     def _cast_outputs_to_dataframe(self, output_array):
         if isinstance(output_array, pd.DataFrame):
@@ -564,9 +564,7 @@ class _JOutput:
         return self.__str__()
 
 
-@_jcustomizer.JImplementationFor(
-    "org.kie.kogito.explainability.model.PredictionOutput"
-)
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.PredictionOutput")
 # pylint: disable=no-member
 class _JPredictionOutput:
     """Java PredictionOutput implicit methods"""
@@ -581,9 +579,7 @@ class _JPredictionOutput:
         return self.getByName(name)
 
 
-@_jcustomizer.JImplementationFor(
-    "org.kie.kogito.explainability.model.PredictionInput"
-)
+@_jcustomizer.JImplementationFor("org.kie.kogito.explainability.model.PredictionInput")
 # pylint: disable=no-member
 class _JPredictionInput:
     """Java PredictionInput implicit methods"""

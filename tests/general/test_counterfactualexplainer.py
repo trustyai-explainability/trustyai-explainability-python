@@ -108,7 +108,6 @@ def test_counterfactual_plot():
         inputs=features,
         goal=goal,
         model=model)
-    
     result.plot()
 
 
