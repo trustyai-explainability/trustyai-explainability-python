@@ -14,7 +14,7 @@ from trustyai.utils import JImplementsWithDocstring
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
 from jpype import JImplements, JOverride, _jcustomizer, _jclass, JByte, JArray, JLong
-from org.kie.trustyai.explainability.local.counterfactual.entities import (
+from org.kie.kogito.explainability.local.counterfactual.entities import (
     CounterfactualEntity,
 )
 from org.kie.kogito.explainability.model import (
