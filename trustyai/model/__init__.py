@@ -175,7 +175,7 @@ class Dataset:
 
     @staticmethod
     def numpy_to_prediction_object(
-        array: np.ndarray, func
+        array: np.ndarray, func, names=None
     ) -> Union[List[PredictionInput], List[PredictionOutput]]:
         """
         Convert a Numpy array into a list of TrustyAI
@@ -189,6 +189,8 @@ class Dataset:
             The function to use when converted the array. If ``feature``, the array
             will be wrapped into a :class:`PredictionInput`. If ``output``, the array
             will be wrapped into a :class:`PredictionOutput`.
+        names: list{str]
+            The names of the features/outputs in the created PredictionInput/PredictionOutput object
         """
         shape = array.shape
 
@@ -199,7 +201,8 @@ class Dataset:
         else:
             prefix = "output"
             wrapper = PredictionOutput
-        names = [f"{prefix}-{i}" for i in range(shape[1])]
+        if names is None:
+            names = [f"{prefix}-{i}" for i in range(shape[1])]
         types = [trusty_type_map[array[:, i].dtype.kind] for i in range(shape[1])]
         predictions = []
         for row_index in range(shape[0]):
@@ -362,8 +365,6 @@ class PredictionProviderArrow:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()
         outputs = self.predict_function(arr)
-        if isinstance(outputs, np.ndarray):
-            outputs = pd.DataFrame(data=outputs)
         record_batch = pa.RecordBatch.from_pandas(outputs)
         sink = pa.BufferOutputStream()
         with pa.ipc.new_file(sink, record_batch.schema) as writer:
@@ -419,7 +420,9 @@ class Model:
     predictive model to interface with the TrustyAI Java library.
     """
 
-    def __init__(self, predict_fun, dataframe=False, output_names=None, arrow=False):
+    def __init__(
+        self, predict_fun, dataframe_input=False, output_names=None, arrow=False
+    ):
         """
         Wrap the model as a TrustyAI :obj:`PredictionProvider` Java class.
 
@@ -429,7 +432,7 @@ class Model:
             A function that takes in a Numpy array or Pandas DataFrame as input and outputs a
             Pandas DataFrame or Numpy array. In general, the ``model.predict`` functions of
             sklearn-style models meet this requirement.
-        dataframe: bool
+        dataframe_input: bool
             Whether `predict_fun` expects a :class:`pandas.DataFrame` as input.
         output_names : List[String]:
             If the model outputs a numpy array, you can specify the names of the model outputs
@@ -445,15 +448,17 @@ class Model:
 
         if arrow:
             self.prediction_provider = None
-            if not dataframe:
+            if not dataframe_input:
                 self.prediction_provider_arrow = PredictionProviderArrow(
-                    lambda x: predict_fun(x.values)
+                    lambda x: self._cast_outputs_to_dataframe(predict_fun(x.values))
                 )
             else:
-                self.prediction_provider_arrow = PredictionProviderArrow(predict_fun)
+                self.prediction_provider_arrow = PredictionProviderArrow(
+                    lambda x: self._cast_outputs_to_dataframe(predict_fun(x))
+                )
         else:
             self.prediction_provider_arrow = None
-            if dataframe:
+            if dataframe_input:
                 self.prediction_provider = PredictionProvider(
                     lambda x: self._cast_outputs(
                         predict_fun(Dataset.prediction_object_to_pandas(x))
@@ -467,18 +472,31 @@ class Model:
                 )
 
     def _cast_outputs(self, output_array):
-        if isinstance(output_array, np.ndarray):
-            dataframe = pd.DataFrame(output_array, columns=self.output_names)
-            objs = Dataset.df_to_prediction_object(dataframe, output)
-        elif isinstance(output_array, pd.DataFrame):
-            objs = Dataset.df_to_prediction_object(output_array, output)
+        return Dataset.df_to_prediction_object(
+            self._cast_outputs_to_dataframe(output_array), output
+        )
+
+    def _cast_outputs_to_dataframe(self, output_array):
+        if isinstance(output_array, pd.DataFrame):
+            out = output_array
+        elif isinstance(output_array, np.ndarray):
+            if self.output_names is None:
+                if len(output_array.shape) == 1:
+                    columns = ["output-0"]
+                else:
+                    columns = [
+                        "output-{}".format(i) for i in range(output_array.shape[1])
+                    ]
+            else:
+                columns = self.output_names
+            out = pd.DataFrame(output_array, columns=columns)
         else:
             raise ValueError(
                 "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
                     type(output_array)
                 )
             )
-        return objs
+        return out
 
     @JOverride
     def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
@@ -500,8 +518,8 @@ class Model:
             self.prediction_provider = (
                 self.prediction_provider_arrow.get_as_prediction_provider(inputs[0])
             )
-
-        return self.prediction_provider.predictAsync(inputs)
+        out = self.prediction_provider.predictAsync(inputs)
+        return out
 
     def __call__(self, inputs):
         """

@@ -24,9 +24,8 @@ def test_no_variance_one_output():
     shap_explainer = SHAPExplainer(background=background)
     for i in range(2):
         explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
-
         for _, saliency in explanation.get_saliencies().items():
-            for feature_importance in saliency.getPerFeatureImportance():
+            for feature_importance in saliency.getPerFeatureImportance()[:-1]:
                 assert feature_importance.getScore() == 0.0
 
 
@@ -40,13 +39,13 @@ def test_shap_arrow():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
-    model = Model(predict_function, dataframe=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True, arrow=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
     for _, saliency in explanation.get_saliencies().items():
-        for i, feature_importance in enumerate(saliency.getPerFeatureImportance()):
+        for i, feature_importance in enumerate(saliency.getPerFeatureImportance()[:-1]):
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
 
@@ -59,8 +58,7 @@ def test_shap_plots():
 
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2 * np.dot(x.values, model_weights)], -1)
-
-    model = Model(predict_function, dataframe=True, arrow=False)
+    model = Model(predict_function, dataframe_input=True, arrow=False)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
@@ -70,13 +68,15 @@ def test_shap_plots():
 def test_shap_as_df():
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
-    background = data.iloc[:100]
-    to_explain = data.iloc[100:101]
+    background = data.iloc[:100].values
+    to_explain = data.iloc[100:101].values
 
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
 
     model = Model(predict_function, arrow=False)
+
+
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
