@@ -19,8 +19,8 @@ def test_basic_model():
 def test_cast_output():
     np2np = Model(lambda x: np.sum(x, 1), output_names=['sum'])
     np2df = Model(lambda x: pd.DataFrame(x))
-    df2np = Model(lambda x: x.sum(1).values, dataframe=True, output_names=['sum'])
-    df2df = Model(lambda x: x, dataframe=True)
+    df2np = Model(lambda x: x.sum(1).values, dataframe_input=True, output_names=['sum'])
+    df2df = Model(lambda x: x, dataframe_input=True)
     pis = Dataset.numpy_to_prediction_object(np.arange(0., 125.).reshape(25, 5), feature)
 
     output_val = np2np.predictAsync(pis).get()
@@ -39,8 +39,8 @@ def test_cast_output():
 def test_cast_output_arrow():
     np2np = Model(lambda x: np.sum(x, 1), output_names=['sum'], arrow=True)
     np2df = Model(lambda x: pd.DataFrame(x), arrow=True)
-    df2np = Model(lambda x: x.sum(1).values, dataframe=True, output_names=['sum'], arrow=True)
-    df2df = Model(lambda x: x, dataframe=True, arrow=True)
+    df2np = Model(lambda x: x.sum(1).values, dataframe_input=True, output_names=['sum'], arrow=True)
+    df2df = Model(lambda x: x, dataframe_input=True, arrow=True)
     pis = Dataset.numpy_to_prediction_object(np.arange(0., 125.).reshape(25, 5), feature)
 
     output_val = np2np.predictAsync(pis).get()

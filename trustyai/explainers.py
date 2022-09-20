@@ -452,7 +452,9 @@ class SHAPResults(ExplanationVisualiser):
         """
         saliencies = self.shap_results.getSaliencies()
         if isinstance(saliencies, HashMap):
-            output = saliencies
+            output = {
+                entry.getKey(): entry.getValue() for entry in saliencies.entrySet()
+            }
         else:
             self.old_saliency_method = True
             output = {s.getOutput().getName(): s for s in saliencies}
@@ -470,8 +472,8 @@ class SHAPResults(ExplanationVisualiser):
         saliencies = self.shap_results.getSaliencies()
         if isinstance(saliencies, HashMap):
             fnull = {
-                output_name: saliency[-1].getValue()
-                for output_name, saliency in dict(saliencies).items()
+                output_name: saliency.getPerFeatureImportance()[-1].getScore()
+                for output_name, saliency in self.get_saliencies().items()
             }
         else:
             self.old_saliency_method = True
@@ -499,6 +501,7 @@ class SHAPResults(ExplanationVisualiser):
             for pfi in saliency.getPerFeatureImportance()
         ]
         if not self.old_saliency_method:
+            feature_values = feature_values[:-1]
             shap_values = shap_values[:-1]
             feature_names = feature_names[:-1]
         columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
