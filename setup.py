@@ -1,8 +1,6 @@
 import os
+
 from setuptools import setup
-from setuptools.command.install import install
-from distutils.sysconfig import get_python_lib
-import site
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
