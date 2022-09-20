@@ -15,7 +15,7 @@ def test_all_explainers():
     data = pd.DataFrame(np.random.rand(1, 5))
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
-    model = Model(predict_function, dataframe=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True, arrow=True)
     prediction = simple_prediction(input_features=data, outputs=model(data))
 
     # SHAP =========================================================================================

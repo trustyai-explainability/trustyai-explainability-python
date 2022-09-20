@@ -81,7 +81,7 @@ def test_counterfactual_match_python_model():
     ]
     explainer = CounterfactualExplainer(steps=1000)
 
-    model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
+    model = Model(sum_skip_model, dataframe_input=False, output_names=['sum-but-5'])
 
     result = explainer.explain(
         inputs=features,
@@ -102,13 +102,12 @@ def test_counterfactual_plot():
     ]
     explainer = CounterfactualExplainer(steps=1000)
 
-    model = Model(sum_skip_model, dataframe=False, output_names=['sum-but-5'])
+    model = Model(sum_skip_model, dataframe_input=False, output_names=['sum-but-5'])
 
     result = explainer.explain(
         inputs=features,
         goal=goal,
         model=model)
-    
     result.plot()
 
 
@@ -119,7 +118,7 @@ def test_counterfactual_v2():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
-    model = Model(predict_function, dataframe=True)
+    model = Model(predict_function, dataframe_input=True)
     goal = np.array([[0]])
     explainer = CounterfactualExplainer(steps=10_000)
     explanation = explainer.explain(
