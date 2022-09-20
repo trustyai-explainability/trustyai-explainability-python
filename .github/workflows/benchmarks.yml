@@ -1,0 +1,55 @@
+name: TrustyAI Python benchmarks
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!main'
+  pull_request:
+
+permissions:
+  contents: write
+  deployments: write
+  pages: write
+  pull-requests: write
+
+jobs:
+  benchmark:
+    name: Run pytest-benchmark benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - uses: actions/setup-java@v2
+        with:
+          distribution: "adopt"
+          java-version: "11"
+          check-latest: true
+      - uses: stCarolas/setup-maven@v4
+        with:
+          maven-version: 3.5.4
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          python setup.py build install
+      - name: Run benchmark
+        run: |
+          pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: TrustyAI continuous benchmarks
+          tool: 'pytest'
+          output-file-path: tests/benchmarks/results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '200%'
+          comment-on-alert: true
+          comment-always: true
+          fail-on-alert: false
+          save-data-file: false
+          alert-comment-cc-users: '@ruivieira'
