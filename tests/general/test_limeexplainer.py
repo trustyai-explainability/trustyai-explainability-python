@@ -129,7 +129,7 @@ def test_impact_score():
     saliency = list(explanation.map().values())[0]
     top_features_t = saliency.getTopFeatures(2)
     impact = ExplainabilityMetrics.impactScore(model, pred, top_features_t)
-    print(impact)
+    assert impact > 0
     return impact
 
 
