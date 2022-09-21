@@ -35,9 +35,10 @@ def test_counterfactual_match_python_model(benchmark):
     """Counterfactual match (Python model)"""
     benchmark(tcf.test_counterfactual_match_python_model)
 
-# @pytest.mark.benchmark(
-#     group="lime", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
-# )
-# def test_non_empty_input(benchmark):
-#     """Counterfactual match (Python model)"""
-#     benchmark(tlime.test_non_empty_input)
+
+@pytest.mark.benchmark(
+    group="lime", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
+)
+def test_impact_score(benchmark):
+    benchmark.extra_info['impact_score'] = tlime.test_impact_score()
+    benchmark(tlime.test_impact_score)
