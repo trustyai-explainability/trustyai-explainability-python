@@ -45,29 +45,21 @@ def test_counterfactual_match_python_model(benchmark):
 @pytest.mark.benchmark(
     group="lime", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
-def test_lime_impact_score(benchmark):
-    benchmark.extra_info['impact_score'] = tlime.test_impact_score()
-    benchmark(tlime.test_impact_score)
-
-
-@pytest.mark.benchmark(
-    group="lime", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
-)
-def test_sumskip_lime_impact_score(benchmark):
+def test_sumskip_lime_impact_score_at_2(benchmark):
     np.random.seed(0)
     explainer = LimeExplainer()
     model = TestUtils.getSumSkipModel(0)
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(4)])
-    benchmark.extra_info['impact_score'] = mean_impact_score(explainer, model, data)
+    benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)
 
 
 @pytest.mark.benchmark(
     group="shap", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
-def test_sumskip_shap_impact_score(benchmark):
+def test_sumskip_shap_impact_score_at_2(benchmark):
     np.random.seed(0)
     background = []
     for i in range(10):
@@ -77,14 +69,14 @@ def test_sumskip_shap_impact_score(benchmark):
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(4)])
-    benchmark.extra_info['impact_score'] = mean_impact_score(explainer, model, data)
+    benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)
 
 
 @pytest.mark.benchmark(
     group="lime", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
-def test_sumthreshold_lime_impact_score(benchmark):
+def test_sumthreshold_lime_impact_score_at_2(benchmark):
     np.random.seed(0)
     explainer = LimeExplainer()
     center = 100.0
@@ -93,14 +85,14 @@ def test_sumthreshold_lime_impact_score(benchmark):
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(4)])
-    benchmark.extra_info['impact_score'] = mean_impact_score(explainer, model, data)
+    benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)
 
 
 @pytest.mark.benchmark(
     group="shap", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
-def test_sumthreshold_shap_impact_score(benchmark):
+def test_sumthreshold_shap_impact_score_at_2(benchmark):
     np.random.seed(0)
     background = []
     for i in range(100):
@@ -112,5 +104,5 @@ def test_sumthreshold_shap_impact_score(benchmark):
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(4)])
-    benchmark.extra_info['impact_score'] = mean_impact_score(explainer, model, data)
+    benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)
