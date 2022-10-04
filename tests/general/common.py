@@ -2,17 +2,14 @@
 """Common methods and models for tests"""
 import os
 import sys
-from typing import List
+import numpy as np
+import pandas as pd  # pylint: disable=unused-import
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../../")
 
-import numpy as np
-import pandas as pd
 from trustyai.model import (
     FeatureFactory,
-    PredictionOutput,
-    output,
 )
 
 

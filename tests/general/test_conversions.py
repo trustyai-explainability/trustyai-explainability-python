@@ -7,7 +7,7 @@ from jpype import _jclass
 
 from trustyai.model import feature
 from trustyai.model.domain import feature_domain
-from org.kie.kogito.explainability.model import Type
+from org.kie.trustyai.explainability.model import Type
 
 
 def test_list_python_to_java():
