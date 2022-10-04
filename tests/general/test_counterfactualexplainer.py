@@ -10,7 +10,7 @@ from trustyai.explainers import CounterfactualExplainer
 from trustyai.model import (
     output, Model, feature,
 )
-from trustyai.utils import TestUtils
+from trustyai.utils import TestModels
 
 jrandom = Random()
 jrandom.setSeed(0)
@@ -27,7 +27,7 @@ def test_non_empty_input():
         for i in range(n_features)
     ]
 
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
 
     counterfactual_result = explainer.explain(
         inputs=features,
@@ -51,7 +51,7 @@ def test_counterfactual_match():
 
     explainer = CounterfactualExplainer(steps=10000)
 
-    model = TestUtils.getSumThresholdModel(center, epsilon)
+    model = TestModels.getSumThresholdModel(center, epsilon)
     result = explainer.explain(
         inputs=features,
         goal=goal,
@@ -88,7 +88,8 @@ def test_counterfactual_match_python_model():
         goal=goal,
         model=model)
 
-    assert sum([entity.as_feature().value.as_number() for entity in result._result.entities]) == approx(GOAL_VALUE, rel=3)
+    assert sum([entity.as_feature().value.as_number() for entity in result._result.entities]) == approx(GOAL_VALUE,
+                                                                                                        rel=3)
 
 
 def test_counterfactual_plot():
@@ -127,5 +128,5 @@ def test_counterfactual_v2():
         goal=goal,
         model=model)
     result_output = model(explanation.proposed_features_dataframe)
-    assert result_output<.01
-    assert result_output>-.01
+    assert result_output < .01
+    assert result_output > -.01

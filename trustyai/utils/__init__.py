@@ -5,10 +5,9 @@ from jpype._jproxy import _createJProxy, _createJProxyDeferred
 from trustyai import _default_initializer
 
 from org.kie.trustyai.explainability import Config as _Config
-from org.kie.trustyai.explainability import TestUtils as _TestUtils
+from org.kie.trustyai.explainability.utils.models import TestModels as _TestModels
 
-
-TestUtils = _TestUtils
+TestModels = _TestModels
 Config = _Config
 
 

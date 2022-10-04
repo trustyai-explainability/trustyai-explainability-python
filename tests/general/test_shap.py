@@ -12,12 +12,12 @@ import pytest
 
 from trustyai.explainers import SHAPExplainer
 from trustyai.model import feature, Model, Dataset
-from trustyai.utils import TestUtils
+from trustyai.utils import TestModels
 
 
 def test_no_variance_one_output():
     """Check if the explanation returned is not null"""
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
 
     background = np.array([[1.0, 2.0, 3.0] for _ in range(2)])
     prediction_outputs = model.predictAsync(Dataset.numpy_to_prediction_object(background, feature)).get()
@@ -75,7 +75,6 @@ def test_shap_as_df():
     predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
 
     model = Model(predict_function, arrow=False)
-
 
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
