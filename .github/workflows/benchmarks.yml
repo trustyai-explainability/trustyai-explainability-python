@@ -1,11 +1,9 @@
-name: TrustyAI Python benchmarks
+name: Benchmarks (PR)
 
 on:
-  push:
-    branches:
-      - '*'
-      - '!main'
   pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
