@@ -39,7 +39,7 @@ jobs:
       - name: Run benchmark
         run: |
           pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json
-      - name: Store benchmark result
+      - name: Benchmark result comment
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: TrustyAI continuous benchmarks
@@ -51,5 +51,5 @@ jobs:
           comment-on-alert: true
           comment-always: true
           fail-on-alert: false
-          save-data-file: false
+          save-data-file: true
           alert-comment-cc-users: '@ruivieira'
