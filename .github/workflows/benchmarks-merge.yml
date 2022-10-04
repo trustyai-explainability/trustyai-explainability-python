@@ -29,12 +29,14 @@ jobs:
       - uses: stCarolas/setup-maven@v4
         with:
           maven-version: 3.5.4
-      - name: Install dependencies
+      - name: Build explainability-core
+        uses: ./.github/actions/build-core
+      - name: Build arrow-converter
+        uses: ./.github/actions/build-arrow-converter
+      - name: Install TrustyAI Python package
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          python setup.py build install
+          pip install . --force --no-binary :trustyai:
       - name: Run benchmark
         run: |
           pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json
