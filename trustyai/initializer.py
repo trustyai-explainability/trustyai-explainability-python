@@ -16,41 +16,18 @@ from jpype import _jcustomizer, _jclass
 
 
 def _get_default_path():
-    trusty_version = "1.22.1.Final"
-
     try:
         default_dep_path = os.path.join(site.getsitepackages()[0], "trustyai", "dep")
     except AttributeError:
         default_dep_path = os.path.join(get_python_lib(), "trustyai", "dep")
 
     core_deps = [
-        f"{default_dep_path}/org/kie/kogito/explainability-core/{trusty_version}/*",
-        f"{default_dep_path}/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
-        f"{default_dep_path}/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
-        f"{default_dep_path}/org/optaplanner/optaplanner-core-impl/8.22.1.Final/"
-        f"optaplanner-core-impl-8.22.1.Final.jar",
-        f"{default_dep_path}/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar",
-        f"{default_dep_path}/org/kie/kie-api/8.22.1.Beta/kie-api-8.22.1.Beta.jar",
-        f"{default_dep_path}/io/micrometer/micrometer-core/1.8.6/micrometer-core-1.8.6.jar",
+        f"{default_dep_path}/org/trustyai/explainability-core-2.0.0-SNAPSHOT.jar",
+        f"{default_dep_path}/org/trustyai/explainability-core-2.0.0-SNAPSHOT-tests.jar",
     ]
 
     arrow_deps = [
-        f"{default_dep_path}/io/netty/netty-buffer/4.1.68.Final/netty-buffer-4.1.68.Final.jar",
-        f"{default_dep_path}/io/netty/netty-common/4.1.68.Final/netty-common-4.1.68.Final.jar",
-        f"{default_dep_path}/org/apache/arrow/arrow-format/7.0.0/arrow-format-7.0.0.jar",
-        f"{default_dep_path}/org/apache/arrow/arrow-memory-core/7.0.0/arrow-memory-core-7.0.0.jar",
-        f"{default_dep_path}/org/apache/arrow/arrow-memory-netty/7.0.0/"
-        f"arrow-memory-netty-7.0.0.jar",
-        f"{default_dep_path}/org/apache/arrow/arrow-vector/7.0.0/arrow-vector-7.0.0.jar",
         f"{default_dep_path}/org/trustyai/arrow-converters-0.0.1.jar",
-        f"{default_dep_path}/com/google/flatbuffers/flatbuffers-java/1.12.0/"
-        f"flatbuffers-java-1.12.0.jar",
-        f"{default_dep_path}/com/fasterxml/jackson/core/jackson-core/2.13.3/"
-        f"jackson-core-2.13.3.jar",
-        f"{default_dep_path}/com/fasterxml/jackson/core/jackson-databind/2.13.3/"
-        f"jackson-databind-2.13.3.jar",
-        f"{default_dep_path}/com/fasterxml/jackson/core/jackson-annotations/2.13.3/"
-        f"jackson-annotations-2.13.3.jar",
     ]
 
     return core_deps + arrow_deps, default_dep_path
