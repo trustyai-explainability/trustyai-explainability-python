@@ -6,11 +6,11 @@ from common import *
 import pytest
 
 from trustyai.explainers import LimeExplainer
-from trustyai.utils import TestUtils
-from trustyai.model import feature, simple_prediction, Model
+from trustyai.utils import TestModels
+from trustyai.model import feature, Model, simple_prediction
 from trustyai.metrics import ExplainabilityMetrics
 
-from org.kie.kogito.explainability.local import (
+from org.kie.trustyai.explainability.local import (
     LocalExplanationException,
 )
 
@@ -23,7 +23,7 @@ def test_empty_prediction():
     """Check if the explanation returned is not null"""
     lime_explainer = LimeExplainer(seed=0, samples=10, perturbations=1)
     inputs = []
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
     outputs = model.predict([inputs])[0].outputs
     with pytest.raises(LocalExplanationException):
         lime_explainer.explain(inputs=inputs, outputs=outputs, model=model)
@@ -34,7 +34,7 @@ def test_non_empty_input():
     lime_explainer = LimeExplainer(seed=0, samples=10, perturbations=1)
     features = [feature(name=f"f-num{i}", value=i, dtype="number") for i in range(4)]
 
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
     outputs = model.predict([features])[0].outputs
     saliency_map = lime_explainer.explain(inputs=features, outputs=outputs, model=model)
     assert saliency_map is not None
@@ -47,7 +47,7 @@ def test_sparse_balance():  # pylint: disable=too-many-locals
 
         features = mock_features(n_features)
 
-        model = TestUtils.getSumSkipModel(0)
+        model = TestModels.getSumSkipModel(0)
         outputs = model.predict([features])[0].outputs
 
         saliency_map_no_penalty = lime_explainer_no_penalty.explain(
@@ -79,7 +79,7 @@ def test_normalized_weights():
     lime_explainer = LimeExplainer(normalise_weights=True, perturbations=2, samples=10)
     n_features = 4
     features = mock_features(n_features)
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
     outputs = model.predict([features])[0].outputs
 
     saliency_map = lime_explainer.explain(inputs=features, outputs=outputs, model=model).map()
@@ -97,7 +97,7 @@ def test_lime_plots():
     lime_explainer = LimeExplainer(normalise_weights=False, perturbations=2, samples=10)
     n_features = 15
     features = mock_features(n_features)
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
     outputs = model.predict([features])[0].outputs
 
     lime_results = lime_explainer.explain(inputs=features, outputs=outputs, model=model)
@@ -114,7 +114,7 @@ def test_lime_v2():
     explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
     explanation = explainer.explain(inputs=data, outputs=model(data), model=model)
     for score in explanation.as_dataframe()["output-0_score"]:
-        assert score > 0
+        assert score != 0
 
 def test_impact_score():
     np.random.seed(0)
@@ -131,6 +131,3 @@ def test_impact_score():
     impact = ExplainabilityMetrics.impactScore(model, pred, top_features_t)
     assert impact > 0
     return impact
-
-
-

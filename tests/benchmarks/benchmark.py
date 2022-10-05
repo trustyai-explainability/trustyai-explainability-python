@@ -46,12 +46,13 @@ def test_counterfactual_match_python_model(benchmark):
     group="lime", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
 def test_sumskip_lime_impact_score_at_2(benchmark):
+    no_of_features = 10
     np.random.seed(0)
     explainer = LimeExplainer()
     model = TestUtils.getSumSkipModel(0)
     data = []
     for i in range(100):
-        data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(4)])
+        data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(no_of_features)])
     benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)
 
@@ -60,15 +61,16 @@ def test_sumskip_lime_impact_score_at_2(benchmark):
     group="shap", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
 def test_sumskip_shap_impact_score_at_2(benchmark):
+    no_of_features = 10
     np.random.seed(0)
     background = []
     for i in range(10):
-        background.append(PredictionInput([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(4)]))
-    explainer = SHAPExplainer(background)
+        background.append(PredictionInput([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(no_of_features)]))
+    explainer = SHAPExplainer(background, samples=10000)
     model = TestUtils.getSumSkipModel(0)
     data = []
     for i in range(100):
-        data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(4)])
+        data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(no_of_features)])
     benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)
 
@@ -77,6 +79,7 @@ def test_sumskip_shap_impact_score_at_2(benchmark):
     group="lime", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
 def test_sumthreshold_lime_impact_score_at_2(benchmark):
+    no_of_features = 10
     np.random.seed(0)
     explainer = LimeExplainer()
     center = 100.0
@@ -84,7 +87,7 @@ def test_sumthreshold_lime_impact_score_at_2(benchmark):
     model = TestUtils.getSumThresholdModel(center, epsilon)
     data = []
     for i in range(100):
-        data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(4)])
+        data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(no_of_features)])
     benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)
 
@@ -93,16 +96,17 @@ def test_sumthreshold_lime_impact_score_at_2(benchmark):
     group="shap", min_rounds=10, timer=time.time, disable_gc=True, warmup=True
 )
 def test_sumthreshold_shap_impact_score_at_2(benchmark):
+    no_of_features = 10
     np.random.seed(0)
     background = []
     for i in range(100):
-        background.append(PredictionInput([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(4)]))
-    explainer = SHAPExplainer(background)
+        background.append(PredictionInput([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(no_of_features)]))
+    explainer = SHAPExplainer(background, samples=10000)
     center = 100.0
     epsilon = 10.0
     model = TestUtils.getSumThresholdModel(center, epsilon)
     data = []
     for i in range(100):
-        data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(4)])
+        data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(no_of_features)])
     benchmark.extra_info['metric'] = mean_impact_score(explainer, model, data)
     benchmark(mean_impact_score, explainer, model, data)

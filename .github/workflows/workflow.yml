@@ -18,17 +18,19 @@ jobs:
           check-latest: true
       - uses: stCarolas/setup-maven@v4
         with:
-          maven-version: 3.5.4
+          maven-version: 3.8.1
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Build explainability-core
+        uses: ./.github/actions/build-core
+      - name: Build arrow-converter
+        uses: ./.github/actions/build-arrow-converter
+      - name: Install TrustyAI Python package
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          python setup.py build install
+          pip install . --force --no-binary :trustyai:
       - name: Lint
         run: |
           pylint --ignore-imports=yes $(find trustyai -type f -name "*.py")

@@ -11,19 +11,16 @@ np.random.seed(0)
 import pytest
 
 from trustyai.explainers import SHAPExplainer
-from trustyai.model import feature, simple_prediction, Model, Dataset
-from trustyai.utils import TestUtils
+from trustyai.model import feature, Model, Dataset
+from trustyai.utils import TestModels
 
 
 def test_no_variance_one_output():
     """Check if the explanation returned is not null"""
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
 
     background = np.array([[1.0, 2.0, 3.0] for _ in range(2)])
     prediction_outputs = model.predictAsync(Dataset.numpy_to_prediction_object(background, feature)).get()
-    predictions = [simple_prediction(input_features=background[i], outputs=prediction_outputs[i].outputs) for i
-                   in
-                   range(2)]
     shap_explainer = SHAPExplainer(background=background)
     for i in range(2):
         explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
@@ -33,6 +30,7 @@ def test_no_variance_one_output():
 
 
 def test_shap_arrow():
+    """Basic SHAP/Arrow test"""
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
     background = data.iloc[:100]
@@ -52,6 +50,7 @@ def test_shap_arrow():
 
 
 def test_shap_plots():
+    """Test SHAP plots"""
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
     background = data.iloc[:100]
@@ -76,7 +75,6 @@ def test_shap_as_df():
     predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
 
     model = Model(predict_function, arrow=False)
-
 
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
