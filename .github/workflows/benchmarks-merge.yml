@@ -34,7 +34,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          python setup.py build install
+          pip install .
       - name: Run benchmark
         run: |
           pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json
