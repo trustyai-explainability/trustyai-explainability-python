@@ -5,5 +5,5 @@ runs:
     - name: Build arrow-converter
       shell: bash
       run: |
-          mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
-          mv java_sources/trusty-ai-arrow/target/arrow-converters-*.jar trustyai/dep/org/trustyai/
+        mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
+        mv java_sources/trusty-ai-arrow/target/arrow-converters-*.jar src/trustyai/dep/org/trustyai/
