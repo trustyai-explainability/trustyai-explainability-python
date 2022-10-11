@@ -1,1 +1,6 @@
-include trustyai/dep/org/trustyai/*.jar
+graft src
+prune tests
+prune java_sources
+prune docs
+
+global-exclude *~ *.py[cod] *.so *.sh

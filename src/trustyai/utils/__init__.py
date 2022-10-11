@@ -2,7 +2,6 @@
 """General model classes"""
 
 from jpype._jproxy import _createJProxy, _createJProxyDeferred
-from trustyai import _default_initializer
 
 from org.kie.trustyai.explainability import Config as _Config
 from org.kie.trustyai.explainability.utils.models import TestModels as _TestModels
