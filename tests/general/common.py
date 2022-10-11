@@ -5,9 +5,6 @@ import sys
 import numpy as np
 import pandas as pd  # pylint: disable=unused-import
 
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../../")
-
 from trustyai.model import (
     FeatureFactory,
 )

@@ -9,6 +9,7 @@ import numpy as np
 from jpype import JInt
 import uuid as _uuid
 
+from trustyai import _default_initializer  # pylint: disable=unused-import
 from trustyai.utils._visualisation import (
     ExplanationVisualiser,
     DEFAULT_STYLE as ds,
@@ -186,13 +187,13 @@ class CounterfactualExplainer:
 
     # pylint: disable=too-many-arguments
     def explain(
-            self,
-            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-            goal: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-            model: PredictionProvider,
-            data_distribution: Optional[DataDistribution] = None,
-            uuid: Optional[_uuid.UUID] = None,
-            timeout: Optional[float] = None,
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        goal: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
+        data_distribution: Optional[DataDistribution] = None,
+        uuid: Optional[_uuid.UUID] = None,
+        timeout: Optional[float] = None,
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a list of features, goals and a
         :class:`~PredictionProvider`
@@ -314,7 +315,7 @@ class LimeResults(ExplanationVisualiser):
         with mpl.rc_context(drcp):
             dictionary = {}
             for feature_importance in self._saliencies.get(
-                    decision
+                decision
             ).getPerFeatureImportance():
                 dictionary[
                     feature_importance.getFeature().name
@@ -348,12 +349,12 @@ class LimeExplainer:
     """
 
     def __init__(
-            self,
-            perturbations=1,
-            seed=0,
-            samples=10,
-            penalise_sparse_balance=True,
-            normalise_weights=True,
+        self,
+        perturbations=1,
+        seed=0,
+        samples=10,
+        penalise_sparse_balance=True,
+        normalise_weights=True,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -388,10 +389,10 @@ class LimeExplainer:
         self._explainer = _LimeExplainer(self._lime_config)
 
     def explain(
-            self,
-            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-            outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-            model: PredictionProvider,
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
     ) -> LimeResults:
         """Produce a LIME explanation.
 
@@ -695,12 +696,12 @@ class SHAPExplainer:
     """
 
     def __init__(
-            self,
-            background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
-            samples=None,
-            batch_size=20,
-            seed=0,
-            link_type: Optional[_ShapConfig.LinkType] = None,
+        self,
+        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
+        samples=None,
+        batch_size=20,
+        seed=0,
+        link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 
@@ -762,10 +763,10 @@ class SHAPExplainer:
         self._explainer = _ShapKernelExplainer(self._config)
 
     def explain(
-            self,
-            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-            outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-            model: PredictionProvider,
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
     ) -> SHAPResults:
         """Produce a SHAP explanation.
 
