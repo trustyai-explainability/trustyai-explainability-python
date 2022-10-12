@@ -12,10 +12,11 @@
 #
 import os
 import sys
-import re
-sys.path.insert(0, os.path.abspath('../trustyai/'))
+
+sys.path.insert(0, os.path.abspath('../src/trustyai/'))
 
 import sphinx_rtd_theme
+
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # -- Project information -----------------------------------------------------
@@ -23,7 +24,6 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 project = 'TrustyAI'
 copyright = '2022, Rob Geada, Tommaso Teofili, Rui Vieira, Rebecca Whitworth, Daniele Zonca'
 author = 'Rob Geada, Tommaso Teofili, Rui Vieira, Rebecca Whitworth, Daniele Zonca'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -53,7 +53,6 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -74,11 +73,10 @@ html_css_files = ['css/custom.css']
 
 html_favicon = '_static/artwork/trustyai_favicon.png'
 html_logo = '_static/artwork/trustyai_placeholder_logo.png'
-#numpydoc settings
-numpydoc_show_class_members=False
+# numpydoc settings
+numpydoc_show_class_members = False
 
 
 def setup(app):
-    import trustyai
-    import trustyai.model
+    from src import trustyai
     trustyai.model.Model.__name__ = "Model"

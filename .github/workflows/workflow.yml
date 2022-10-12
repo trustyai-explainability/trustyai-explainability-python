@@ -30,14 +30,14 @@ jobs:
       - name: Install TrustyAI Python package
         run: |
           pip install -r requirements-dev.txt
-          pip install . --force --no-binary :trustyai:
+          pip install .
       - name: Lint
         run: |
-          pylint --ignore-imports=yes $(find trustyai -type f -name "*.py")
+          pylint --ignore-imports=yes $(find src/trustyai -type f -name "*.py")
       - name: Test with pytest
         run: |
           pytest -v -s tests/general
           pytest -v -s tests/initialization --forked
       - name: Style
         run: |
-          black --check $(find trustyai -type f -name "*.py")
+          black --check $(find src/trustyai -type f -name "*.py")
