@@ -12,7 +12,7 @@ import test_limeexplainer as tlime
 
 from trustyai.explainers import LimeExplainer, SHAPExplainer
 from trustyai.model import feature, PredictionInput
-from trustyai.utils import TestUtils
+from trustyai.utils import TestModels
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../general/")
@@ -49,7 +49,7 @@ def test_sumskip_lime_impact_score_at_2(benchmark):
     no_of_features = 10
     np.random.seed(0)
     explainer = LimeExplainer()
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(no_of_features)])
@@ -67,7 +67,7 @@ def test_sumskip_shap_impact_score_at_2(benchmark):
     for i in range(10):
         background.append(PredictionInput([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(no_of_features)]))
     explainer = SHAPExplainer(background, samples=10000)
-    model = TestUtils.getSumSkipModel(0)
+    model = TestModels.getSumSkipModel(0)
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-10, 10), dtype="number") for i in range(no_of_features)])
@@ -84,7 +84,7 @@ def test_sumthreshold_lime_impact_score_at_2(benchmark):
     explainer = LimeExplainer()
     center = 100.0
     epsilon = 10.0
-    model = TestUtils.getSumThresholdModel(center, epsilon)
+    model = TestModels.getSumThresholdModel(center, epsilon)
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(no_of_features)])
@@ -104,7 +104,7 @@ def test_sumthreshold_shap_impact_score_at_2(benchmark):
     explainer = SHAPExplainer(background, samples=10000)
     center = 100.0
     epsilon = 10.0
-    model = TestUtils.getSumThresholdModel(center, epsilon)
+    model = TestModels.getSumThresholdModel(center, epsilon)
     data = []
     for i in range(100):
         data.append([feature(name=f"f-num{i}", value=np.random.randint(-100, 100), dtype="number") for i in range(no_of_features)])
