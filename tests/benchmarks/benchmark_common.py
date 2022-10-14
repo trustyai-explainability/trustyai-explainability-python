@@ -27,4 +27,4 @@ def mean_impact_score(explainer, model, data, is_model_callable=False):
     m_is = 0
     for features in data:
         m_is += saliency_impact_score_benchmark(model, features, explainer, is_model_callable=is_model_callable)
-    return m_is
+    return m_is/len(data)
