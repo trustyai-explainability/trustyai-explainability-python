@@ -27,7 +27,7 @@ then
   git clone --branch main https://github.com/${EXP_CORE}/${EXP_CORE}.git "${EXP_CORE_DEST}"
   echo "Copying JARs from ${EXP_CORE_DEST} into ${ROOT_DIR}/dep/org/trustyai/"
   mvn install package -DskipTests -f "${EXP_CORE_DEST}"/explainability-core/pom.xml -Pshaded
-  mv "${EXP_CORE_DEST}"/explainability-core/target/explainability-core-*-SNAPSHOT.jar ../src/trustyai/dep/org/trustyai/
+  mv "${EXP_CORE_DEST}"/explainability-core/target/explainability-core-*-SNAPSHOT.jar "${ROOT_DIR}"/src/trustyai/dep/org/trustyai/
 else
     echo "Directory ${EXP_CORE_DEST} already exists. Please delete it or move it."
     exit 1
