@@ -1,4 +1,4 @@
-# pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code,
+# pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code, too-many-lines
 # pylint: disable = unused-import, wrong-import-order
 """General model classes"""
 import uuid as _uuid
@@ -152,7 +152,7 @@ class Dataset:
     # pylint: disable=comparison-with-callable
     @staticmethod
     def df_to_prediction_object(
-        df: pd.DataFrame, func
+            df: pd.DataFrame, func
     ) -> Union[List[PredictionInput], List[PredictionOutput]]:
         """
         Convert a Pandas DataFrame into a list of TrustyAI
@@ -186,7 +186,7 @@ class Dataset:
 
     @staticmethod
     def numpy_to_prediction_object(
-        array: np.ndarray, func, names=None
+            array: np.ndarray, func, names=None
     ) -> Union[List[PredictionInput], List[PredictionOutput]]:
         """
         Convert a Numpy array into a list of TrustyAI
@@ -230,7 +230,7 @@ class Dataset:
 
     @staticmethod
     def prediction_object_to_numpy(
-        objects: Union[List[PredictionInput], List[PredictionOutput]]
+            objects: Union[List[PredictionInput], List[PredictionOutput]]
     ) -> np.array:
         """
         Convert a list of TrustyAI
@@ -259,7 +259,7 @@ class Dataset:
 
     @staticmethod
     def prediction_object_to_pandas(
-        objects: Union[List[PredictionInput], List[PredictionOutput]]
+            objects: Union[List[PredictionInput], List[PredictionOutput]]
     ) -> pd.DataFrame:
         """
         Convert a list of TrustyAI
@@ -306,7 +306,7 @@ class PredictionProvider:
     """
 
     def __init__(
-        self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
+            self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
     ):
         """
         Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
@@ -432,7 +432,7 @@ class Model:
     """
 
     def __init__(
-        self, predict_fun, dataframe_input=False, output_names=None, arrow=False
+            self, predict_fun, dataframe_input=False, output_names=None, arrow=False
     ):
         """
         Wrap the model as a TrustyAI :obj:`PredictionProvider` Java class.
@@ -872,8 +872,8 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
 
 # pylint: disable=line-too-long
 def simple_prediction(
-    input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-    outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
 ) -> SimplePrediction:
     """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
     this function will bundle them into Prediction objects for use with the LIME and SHAP
@@ -927,11 +927,11 @@ def simple_prediction(
 
 # pylint: disable=too-many-arguments
 def counterfactual_prediction(
-    input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-    outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-    data_distribution: Optional[DataDistribution] = None,
-    uuid: Optional[_uuid.UUID] = None,
-    timeout: Optional[float] = None,
+        input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        data_distribution: Optional[DataDistribution] = None,
+        uuid: Optional[_uuid.UUID] = None,
+        timeout: Optional[float] = None,
 ) -> CounterfactualPrediction:
     """Wrap features and outputs into a CounterfactualPrediction. Given a list of features and
     outputs, this function will bundle them into Prediction objects for use with the
