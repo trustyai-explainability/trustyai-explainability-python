@@ -45,6 +45,7 @@ from org.kie.trustyai.explainability.model import (
     PredictionOutput,
     PredictionProvider,
     Saliency,
+    SaliencyResults,
     PerturbationContext,
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
@@ -187,13 +188,13 @@ class CounterfactualExplainer:
 
     # pylint: disable=too-many-arguments
     def explain(
-        self,
-        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-        goal: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-        model: PredictionProvider,
-        data_distribution: Optional[DataDistribution] = None,
-        uuid: Optional[_uuid.UUID] = None,
-        timeout: Optional[float] = None,
+            self,
+            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+            goal: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+            model: PredictionProvider,
+            data_distribution: Optional[DataDistribution] = None,
+            uuid: Optional[_uuid.UUID] = None,
+            timeout: Optional[float] = None,
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a list of features, goals and a
         :class:`~PredictionProvider`
@@ -249,7 +250,7 @@ class LimeResults(ExplanationVisualiser):
     and provides a variety of methods to visualize and interact with the explanation.
     """
 
-    def __init__(self, saliencies: Dict[str, Saliency]):
+    def __init__(self, saliencies: SaliencyResults):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
         self._saliencies = saliencies
@@ -269,11 +270,11 @@ class LimeResults(ExplanationVisualiser):
             * ``${output_name}_value``: The original value of each feature.
             * ``${output_name}_confidence``: The confidence of the reported saliency.
         """
-        outputs = self._saliencies.keys()
+        outputs = self._saliencies.saliencies.keys()
 
         data = {}
         for output in outputs:
-            pfis = self._saliencies.get(output).getPerFeatureImportance()
+            pfis = self._saliencies.saliencies.get(output).getPerFeatureImportance()
             data[f"{output}_features"] = [
                 f"{pfi.getFeature().getName()}" for pfi in pfis
             ]
@@ -308,14 +309,14 @@ class LimeResults(ExplanationVisualiser):
              A dictionary keyed by output name, and the values will be the corresponding
               :class:`~trustyai.model.Saliency` object.
         """
-        return self._saliencies
+        return self._saliencies.saliencies
 
     def plot(self, decision: str) -> None:
         """Plot the LIME saliencies."""
         with mpl.rc_context(drcp):
             dictionary = {}
-            for feature_importance in self._saliencies.get(
-                decision
+            for feature_importance in self._saliencies.saliencies.get(
+                    decision
             ).getPerFeatureImportance():
                 dictionary[
                     feature_importance.getFeature().name
@@ -349,12 +350,12 @@ class LimeExplainer:
     """
 
     def __init__(
-        self,
-        perturbations=1,
-        seed=0,
-        samples=10,
-        penalise_sparse_balance=True,
-        normalise_weights=True,
+            self,
+            perturbations=1,
+            seed=0,
+            samples=10,
+            penalise_sparse_balance=True,
+            normalise_weights=True,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -389,10 +390,10 @@ class LimeExplainer:
         self._explainer = _LimeExplainer(self._lime_config)
 
     def explain(
-        self,
-        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-        model: PredictionProvider,
+            self,
+            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+            outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+            model: PredictionProvider,
     ) -> LimeResults:
         """Produce a LIME explanation.
 
@@ -434,7 +435,7 @@ class SHAPResults(ExplanationVisualiser):
     and provides a variety of methods to visualize and interact with the explanation.
     """
 
-    def __init__(self, shap_results, background):
+    def __init__(self, shap_results: SaliencyResults, background):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
         self.shap_results = shap_results
@@ -450,7 +451,7 @@ class SHAPResults(ExplanationVisualiser):
         Dict[str, Saliency]
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        saliencies = self.shap_results.getSaliencies()
+        saliencies = self.shap_results.saliencies
         if isinstance(saliencies, HashMap):
             output = {
                 entry.getKey(): entry.getValue() for entry in saliencies.entrySet()
@@ -469,7 +470,7 @@ class SHAPResults(ExplanationVisualiser):
         Array[float]
              An array of the y-intercepts, in order of the model outputs.
         """
-        saliencies = self.shap_results.getSaliencies()
+        saliencies = self.shap_results.saliencies
         if isinstance(saliencies, HashMap):
             fnull = {
                 output_name: saliency.getPerFeatureImportance()[-1].getScore()
@@ -696,12 +697,12 @@ class SHAPExplainer:
     """
 
     def __init__(
-        self,
-        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
-        samples=None,
-        batch_size=20,
-        seed=0,
-        link_type: Optional[_ShapConfig.LinkType] = None,
+            self,
+            background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
+            samples=None,
+            batch_size=20,
+            seed=0,
+            link_type: Optional[_ShapConfig.LinkType] = None,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 
@@ -763,10 +764,10 @@ class SHAPExplainer:
         self._explainer = _ShapKernelExplainer(self._config)
 
     def explain(
-        self,
-        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-        model: PredictionProvider,
+            self,
+            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+            outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+            model: PredictionProvider,
     ) -> SHAPResults:
         """Produce a SHAP explanation.
 
