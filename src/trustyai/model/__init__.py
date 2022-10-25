@@ -29,6 +29,7 @@ from org.kie.trustyai.explainability.model import (
     PredictionOutput as _PredictionOutput,
     Prediction as _Prediction,
     Saliency as _Saliency,
+    SaliencyResults as _SaliencyResults,
     SimplePrediction as _SimplePrediction,
     Value as _Value,
     Type as _Type,
@@ -737,6 +738,27 @@ class _JPredictionFeatureDomain:
     def feature_domains(self):
         """Return feature domains"""
         return self.getFeatureDomains()
+
+
+@_jcustomizer.JImplementationFor(
+    "org.kie.trustyai.explainability.model.SaliencyResults"
+)
+# pylint: disable=no-member
+class SaliencyResults:
+    """Java PredictionFeatureDomain implicit methods"""
+
+    @property
+    def saliencies(self):
+        """Return saliencies"""
+        return self.getSaliencies()
+
+    def __sub__(self, other: _SaliencyResults):
+        """Overload SaliencyResults difference"""
+        return self.difference(other)
+
+    def __eq__(self, other: _SaliencyResults):
+        """Overload SaliencyResults equality"""
+        return self.equals(other)
 
 
 def output(name, dtype, value=None, score=1.0) -> _Output:
