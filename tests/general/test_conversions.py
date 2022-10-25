@@ -73,6 +73,11 @@ def test_feature_function():
     assert f3.value.as_string() == "foo"
     assert f3.type == Type.CATEGORICAL
 
+    f4 = feature(name="f-4", value=5, dtype="categorical")
+    assert f4.name == "f-4"
+    assert f4.value.as_number() == 5
+    assert f4.type == Type.CATEGORICAL
+
 
 def test_feature_domains():
     """Test domains"""
