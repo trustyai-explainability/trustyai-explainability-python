@@ -14,5 +14,5 @@ pyarrow==7.0.0
 numpydoc
 matplotlib==3.5.1
 pandas==1.2.5
-pytest-xdist
+pytest-xdist==2.5.0
 pytest-benchmark
