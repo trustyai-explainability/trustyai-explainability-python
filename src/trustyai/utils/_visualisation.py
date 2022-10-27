@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import pandas as pd
 from pandas.io.formats.style import Styler
 
+
 # pylint: disable=too-few-public-methods
 class ExplanationVisualiser(ABC):
     """Abstract class for explanation visualisers"""
@@ -15,22 +16,32 @@ class ExplanationVisualiser(ABC):
     def as_html(self) -> Styler:
         """Visualise the styled dataframe"""
 
+
 # HTML FORMAT FUNCTIONS ============================================================================
 def bold_green_html(content):
-    return '<b style="color:{};">{}</b>'.format(DEFAULT_STYLE["positive_primary_colour"], content)
+    """Format the content string as a bold, green html object"""
+    return '<b style="color:{};">{}</b>'.format(
+        DEFAULT_STYLE["positive_primary_colour"], content
+    )
 
 
 def bold_red_html(content):
-    return '<b style="color:{};">{}</b>'.format(DEFAULT_STYLE["negative_primary_colour"], content)
+    """Format the content string as a bold, red html object"""
+    return '<b style="color:{};">{}</b>'.format(
+        DEFAULT_STYLE["negative_primary_colour"], content
+    )
 
 
 def output_html(content):
-      return '<b style="color:#a64d79;background-color:#fff;">{}</b>'.format(content)
+    """Format the content string as a bold object in TrustyAI purple, used for
+    Tyrus output displays"""
+    return '<b style="color:#a64d79;background-color:#fff;">{}</b>'.format(content)
 
 
 def feature_html(content):
+    """Format the content string as a bold object in black, used for
+    Tyrus feature displays"""
     return '<b style="color:#000000;background-color:#fff;">{}</b>'.format(content)
-
 
 
 DEFAULT_STYLE = {
@@ -40,8 +51,6 @@ DEFAULT_STYLE = {
     "negative_primary_colour_faded": "#f67f7f",
     "neutral_primary_colour": "#ffffff",
 }
-
-
 
 
 DEFAULT_RC_PARAMS = {

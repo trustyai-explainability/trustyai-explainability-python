@@ -1,4 +1,6 @@
+"""Info text used in Tyrus visualization explainer info"""
 from trustyai.utils._visualisation import bold_red_html, bold_green_html
+
 
 LIME_TEXT = """
 <div style="padding: 10px">
@@ -19,7 +21,9 @@ LIME_TEXT = """
     To see how TrustyAI's LIME works, check out the <a href="https://trustyai-explainability-python.readthedocs.io/en/latest/generated/trustyai.explainers.LimeExplainer.html#trustyai.explainers.LimeExplainer"  target="_blank" rel="noopener noreferrer">documentation</a>!
     </p>
 </div>
-""".format(bold_green_html("green"), bold_red_html("red"))
+""".format(
+    bold_green_html("green"), bold_red_html("red")
+)
 
 SHAP_TEXT = """
 <div style="padding: 10px">
@@ -47,7 +51,9 @@ SHAP_TEXT = """
     To see how TrustyAI's SHAP works, check out the <a href="https://trustyai-explainability-python.readthedocs.io/en/latest/generated/trustyai.explainers.SHAPExplainer.html#trustyai.explainers.SHAPExplainer"  target="_blank" rel="noopener noreferrer">documentation</a>!
     </p>
 </div>
-""".format(bold_green_html("adds"), bold_red_html("subtracts"))
+""".format(
+    bold_green_html("adds"), bold_red_html("subtracts")
+)
 
 CF_TEXT = """
 <div style="padding: 10px">

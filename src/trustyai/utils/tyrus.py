@@ -1,41 +1,51 @@
 """Tyrus module"""
+# pylint: disable = too-few-public-methods, wrong-import-order, protected-access, cell-var-from-loop
 import numpy as np
 import pandas as pd
 from bokeh.io import show, output_file, output_notebook
 from bokeh.layouts import column
-from bokeh.models import ColumnDataSource, LinearColorMapper, ColorBar, Tabs, Panel, Div, GridBox
+from bokeh.models import (
+    ColumnDataSource,
+    LinearColorMapper,
+    ColorBar,
+    Tabs,
+    Panel,
+    Div,
+    GridBox,
+)
 from bokeh.plotting import figure
 
 from trustyai.explainers import SHAPExplainer, LimeExplainer
 from trustyai.model import Dataset
 from trustyai.utils._visualisation import bold_red_html, bold_green_html, output_html
-from trustyai.utils.tyrus_info_text import LIME_TEXT, SHAP_TEXT, CF_TEXT
+from trustyai.utils._tyrus_info_text import LIME_TEXT, SHAP_TEXT, CF_TEXT
 
 import java.lang
 
 # tooltip format string constants ==================================================================
-TOOLTIP_TABLE_FORMAT = \
-    "<tr> <td><b>{}:&nbsp;</b> </td> <td>{}</td>" + \
-    " <td>&nbsp;&nbsp;to&nbsp;&nbsp;</td> <td>{}</td> </tr>"
+TOOLTIP_TABLE_FORMAT = (
+    "<tr> <td><b>{}:&nbsp;</b> </td> <td>{}</td>"
+    + " <td>&nbsp;&nbsp;to&nbsp;&nbsp;</td> <td>{}</td> </tr>"
+)
 
-ORIGINAL_FEATURE_TABLE_FORMAT = \
+ORIGINAL_FEATURE_TABLE_FORMAT = (
     "<tr> <td><b>{}:&nbsp;</b> </td> <td>{}</td> <td></td> <td></td> </tr>"
+)
 
 
 # === JAVA/PYTHON OBJECT FORMATTING ================================================================
-# round python and java floats to 2 decimal points
 def formatter(value):
+    """round python and java floats to 2 decimal points"""
     return "{:.2f}".format(value) if type(value) in [float, java.lang.Double] else value
 
 
 # === TOOLTIP FORMATTERS ===========================================================================
-# wrap the feature toolips into a full counterfactual tooltip
 def format_cf_tooltip(raw_tooltip, output_name, output_val, unchanged):
+    """Wrap the feature toolips into a full counterfactual tooltip"""
     if unchanged:
         tooltip = "<h3>Original Input</h3>"
         tooltip += "{}: {}".format(
-            output_name.split("from <b")[0].strip(),
-            formatter(output_val)
+            output_name.split("from <b")[0].strip(), formatter(output_val)
         )
         tooltip += "<table>"
         tooltip += raw_tooltip
@@ -43,8 +53,7 @@ def format_cf_tooltip(raw_tooltip, output_name, output_val, unchanged):
     else:
         tooltip = "<h3>Counterfactual</h3>"
         tooltip += "Change {} to {} by changing:".format(
-            output_name,
-            bold_green_html(formatter(output_val))
+            output_name, bold_green_html(formatter(output_val))
         )
         tooltip += "<table>"
         tooltip += raw_tooltip
@@ -61,13 +70,14 @@ class Tyrus:
     """
 
     def __init__(
-            self,
-            model,
-            inputs,
-            outputs,
-            background,
-            fraction_counterfactuals_to_display=.1,
-            notebook=False):
+        self,
+        model,
+        inputs,
+        outputs,
+        background,
+        fraction_counterfactuals_to_display=0.1,
+        notebook=False,
+    ):
         r"""Initialize the :class:`Tyrus` TrustyAI assistant and dashboard.
 
         Parameters
@@ -113,39 +123,35 @@ class Tyrus:
         self.cf_data_source = None
 
     # === TRUSTYAI AUTORUNNER ======================================================================
-    # generate lime and shap saliencies of provided prediction
     def _generate_saliencies(self):
-        shap_explainer = SHAPExplainer(background=self.background, track_counterfactuals=True)
+        """Generate lime and shap saliencies of provided prediction."""
+        shap_explainer = SHAPExplainer(
+            background=self.background, track_counterfactuals=True
+        )
         lime_explainer = LimeExplainer(
-            samples=1000,
-            normalise_weights=False,
-            track_counterfactuals=False
+            samples=1000, normalise_weights=False, track_counterfactuals=False
         )
         self.shap_saliencies = shap_explainer.explain(
-            inputs=self.original_inputs,
-            outputs=self.original_outputs,
-            model=self.model
+            inputs=self.original_inputs, outputs=self.original_outputs, model=self.model
         )
         self.lime_saliencies = lime_explainer.explain(
-            inputs=self.original_inputs,
-            outputs=self.original_outputs,
-            model=self.model
+            inputs=self.original_inputs, outputs=self.original_outputs, model=self.model
         )
 
         # extract found byproduct counterfactuals
-        shap_cfs = list(self.shap_saliencies._saliencyResults.getAvailableCFs())
-        lime_cfs = list(self.lime_saliencies._saliencyResults.getAvailableCFs())
+        shap_cfs = list(self.shap_saliencies._saliency_results.getAvailableCFs())
+        lime_cfs = list(self.lime_saliencies._saliency_results.getAvailableCFs())
 
         # randomly select some to filter as per self.fraction_counterfactuals_to_display
         # this is just to speed up plot rendering
         if len(shap_cfs) + len(lime_cfs) > self.fraction_counterfactuals_to_display:
             shap_cf_idxs = np.random.choice(
                 np.arange(0, len(shap_cfs)),
-                int(self.fraction_counterfactuals_to_display * len(shap_cfs))
+                int(self.fraction_counterfactuals_to_display * len(shap_cfs)),
             )
             lime_cf_idxs = np.random.choice(
                 np.arange(0, len(lime_cfs)),
-                int(self.fraction_counterfactuals_to_display * len(lime_cfs))
+                int(self.fraction_counterfactuals_to_display * len(lime_cfs)),
             )
             shap_cfs = [shap_cfs[i] for i in shap_cf_idxs]
             lime_cfs = [lime_cfs[i] for i in lime_cf_idxs]
@@ -154,69 +160,102 @@ class Tyrus:
         self.cfdict = {e.getKey(): ["SHAP", e.getValue()] for e in shap_cfs}
         self.cfdict.update({e.getKey(): ["LIME", e.getValue()] for e in lime_cfs})
 
-    # given the byproduct counterfactuals, format them into a bokeh ColumnDataSource for plotting
-    def _generate_counterfactual_datasource(self):
+    def _get_input_as_df(self):
+        """Get the Tyrus input as dataframe"""
         if isinstance(self.original_inputs, pd.DataFrame):
             self.original_inputs_df = self.original_inputs
         else:
-            self.original_inputs_df = Dataset.prediction_object_to_pandas(self.original_inputs)
+            self.original_inputs_df = Dataset.prediction_object_to_pandas(
+                self.original_inputs
+            )
+        return self.original_inputs_df
 
+    def _generate_counterfactual_datasource(self):
+        """Given the byproduct counterfactuals, format them into a Bokeh
+        ColumnDataSource for plotting"""
         rows = []
-        original_features = self.original_inputs_df.iloc[0].to_dict()
+        original_features = self._get_input_as_df().iloc[0].to_dict()
         formatted_features = {k: formatter(v) for k, v in original_features.items()}
-        original_output_values = {k: formatter(v) for k, v in self.original_outputs.iloc[0].to_dict().items()}
+        original_output_values = {
+            k: formatter(v) for k, v in self.original_outputs.iloc[0].to_dict().items()
+        }
 
-        for idx, (prediction, (source_explainer, preservation_mask)) in enumerate(self.cfdict.items()):
+        output_names, output_column_names = [], []
+        for idx, (prediction, (source_exp, preservation_mask)) in enumerate(
+            self.cfdict.items()
+        ):
             outputs = prediction.getOutput().getOutputs()
             if idx == 0:
                 output_names = [str(o.getName()) for o in outputs]
-                output_column_names = \
-                    ['{} from {}'.format(
-                        output_html(oname),
-                        bold_red_html(original_output_values[oname])
-                    ) for oname in output_names]
-            row = {output_column_names[i]: o.getValue().asNumber() for i, o in enumerate(outputs)}
+                output_column_names = [
+                    "{} from {}".format(
+                        output_html(oname), bold_red_html(original_output_values[oname])
+                    )
+                    for oname in output_names
+                ]
+            row = {
+                output_column_names[i]: o.getValue().asNumber()
+                for i, o in enumerate(outputs)
+            }
             raw_tooltip = []
             differences = 0
 
             original_tooltip = []
-            for i, f in enumerate(prediction.getInput().getFeatures()):
-                fname = str(f.getName())
-                fval = formatter(f.getValue().getUnderlyingObject())
+            for i, feature in enumerate(prediction.getInput().getFeatures()):
+                fname = str(feature.getName())
+                fval = formatter(feature.getValue().getUnderlyingObject())
                 if not preservation_mask[i]:
                     differences += 1
-                    raw_tooltip.append(TOOLTIP_TABLE_FORMAT
-                                       .format(fname, formatted_features[fname], fval))
+                    raw_tooltip.append(
+                        TOOLTIP_TABLE_FORMAT.format(
+                            fname, formatted_features[fname], fval
+                        )
+                    )
                 original_tooltip.append(
-                    ORIGINAL_FEATURE_TABLE_FORMAT.format(fname, formatted_features[fname], fval))
-            raw_tooltip.append(ORIGINAL_FEATURE_TABLE_FORMAT.format("Found by", source_explainer, "", ""))
-            row['Tooltip Raw'] = "".join(original_tooltip if differences == 0 else raw_tooltip)
-            row['Unchanged'] = differences == 0
+                    ORIGINAL_FEATURE_TABLE_FORMAT.format(
+                        fname, formatted_features[fname], fval
+                    )
+                )
+            raw_tooltip.append(
+                ORIGINAL_FEATURE_TABLE_FORMAT.format("Found by", source_exp, "", "")
+            )
+            row["Tooltip Raw"] = "".join(
+                original_tooltip if differences == 0 else raw_tooltip
+            )
+            row["Unchanged"] = differences == 0
             row["Diff"] = differences
             rows.append(row)
 
         data_source = pd.DataFrame(rows)
         data_source = data_source.drop_duplicates()
-        data_source["Diff Jittered"] = data_source['Diff'] + np.random.rand(len(data_source)) / 3
+        data_source["Diff Jittered"] = (
+            data_source["Diff"] + np.random.rand(len(data_source)) / 3
+        )
 
         for i, output_column_name in enumerate(output_column_names):
-            data_source["Tooltip " + output_names[i]] = \
-                data_source[["Tooltip Raw", output_column_name, "Unchanged"]].apply(
-                    lambda x: format_cf_tooltip(x[0], output_column_name, x[1], x[2]), 1)
+            data_source["Tooltip " + output_names[i]] = data_source[
+                ["Tooltip Raw", output_column_name, "Unchanged"]
+            ].apply(
+                lambda x: format_cf_tooltip(x[0], output_column_name, x[1], x[2]), 1
+            )
 
         self.cf_data_source = data_source
 
-    # create bokeh plot of all found byproduct counterfactuals
     def _get_byproduct_cf_plot(self):
-        ps = {}
+        """Create bokeh plot of all found byproduct counterfactuals"""
+        plots = {}
         for output_field in list(self.cfdict.keys())[0].getOutput().getOutputs():
             output_name = str(output_field.getName())
-            output_column_name = [x for x in list(self.cf_data_source) if output_name in x][0]
+            output_column_name = [
+                x for x in list(self.cf_data_source) if output_name in x
+            ][0]
             source = ColumnDataSource(self.cf_data_source)
-            p = figure(sizing_mode='stretch_both',
-                       title="Available Counterfactuals".format(output_name),
-                       tools=['crosshair'],
-                       tooltips='@{{Tooltip {}}}'.format(output_name))
+            p = figure(
+                sizing_mode="stretch_both",
+                title="Available Counterfactuals".format(output_name),
+                tools=["crosshair"],
+                tooltips="@{{Tooltip {}}}".format(output_name),
+            )
             p.xgrid.grid_line_color = None
             p.xaxis.axis_label = "Counterfactual House Value"
 
@@ -224,26 +263,29 @@ class Tyrus:
             p.yaxis.axis_label = "Features Changed from Original"
             exp_cmap = LinearColorMapper(
                 palette="Viridis256",
-                low=self.cf_data_source['Diff'].min(),
-                high=self.cf_data_source['Diff'].max()
+                low=self.cf_data_source["Diff"].min(),
+                high=self.cf_data_source["Diff"].max(),
             )
             color_bar = ColorBar(
                 color_mapper=exp_cmap,
                 label_standoff=12,
-                title="Counterfactual Distance"
+                title="Counterfactual Distance",
             )
-            p.add_layout(color_bar, 'right')
-            p.scatter(output_column_name, 'Diff Jittered',
-                      size=10,
-                      line_color={"field": 'Diff', "transform": exp_cmap},
-                      fill_color={"field": 'Diff', "transform": exp_cmap},
-                      source=source)
-            ps[output_name] = p
-        return ps
+            p.add_layout(color_bar, "right")
+            p.scatter(
+                output_column_name,
+                "Diff Jittered",
+                size=10,
+                line_color={"field": "Diff", "transform": exp_cmap},
+                fill_color={"field": "Diff", "transform": exp_cmap},
+                source=source,
+            )
+            plots[output_name] = p
+        return plots
 
     # === DASHBOARD ================================================================================
-    # grab all the plots and combine into one single Panel
     def _get_plots(self):
+        """Grab all the plots and combine into one single Panel"""
         cf_figures = self._get_byproduct_cf_plot()
         lime_figures = self.lime_saliencies._get_bokeh_plot_dict()
         shap_figures = self.shap_saliencies._get_bokeh_plot_dict()
@@ -251,34 +293,56 @@ class Tyrus:
         tabs = []
         for k in output_names:
             title = str(k)
-            lime_tabbed = Tabs(tabs=[
-                Panel(child=lime_figures[k], title="LIME"),
-                Panel(child=Div(text=LIME_TEXT.format(output_html(title))), title="About LIME")
-            ])
-            shap_tabbed = Tabs(tabs=[
-                Panel(child=shap_figures[k], title="SHAP"),
-                Panel(child=Div(text=SHAP_TEXT.format(output_html(title))), title="About SHAP")
-            ])
+            lime_tabbed = Tabs(
+                tabs=[
+                    Panel(child=lime_figures[k], title="LIME"),
+                    Panel(
+                        child=Div(text=LIME_TEXT.format(output_html(title))),
+                        title="About LIME",
+                    ),
+                ]
+            )
+            shap_tabbed = Tabs(
+                tabs=[
+                    Panel(child=shap_figures[k], title="SHAP"),
+                    Panel(
+                        child=Div(text=SHAP_TEXT.format(output_html(title))),
+                        title="About SHAP",
+                    ),
+                ]
+            )
 
-            cf_tabbed = Tabs(tabs=[
-                Panel(child=cf_figures[k], title="Available Counterfactuals"),
-                Panel(child=Div(
-                    text=CF_TEXT.format(output_html(title)),
-                ), title="About Counterfactuals")
-            ])
+            cf_tabbed = Tabs(
+                tabs=[
+                    Panel(child=cf_figures[k], title="Available Counterfactuals"),
+                    Panel(
+                        child=Div(
+                            text=CF_TEXT.format(output_html(title)),
+                        ),
+                        title="About Counterfactuals",
+                    ),
+                ]
+            )
 
-            trustyai_content = GridBox(children=[
-                (lime_tabbed, 0, 0, 1, 1),
-                (shap_tabbed, 1, 0, 1, 1),
-                (cf_tabbed, 0, 1, 2, 2),
-            ])
-            joint = column(Div(text="<h1>TrustyAI: Explaining {}</mark></h1>"
-                               .format(output_html(title))),
-                           trustyai_content,
-                           sizing_mode='scale_width')
+            trustyai_content = GridBox(
+                children=[
+                    (lime_tabbed, 0, 0, 1, 1),
+                    (shap_tabbed, 1, 0, 1, 1),
+                    (cf_tabbed, 0, 1, 2, 2),
+                ]
+            )
+            joint = column(
+                Div(
+                    text="<h1>TrustyAI: Explaining {}</mark></h1>".format(
+                        output_html(title)
+                    )
+                ),
+                trustyai_content,
+                sizing_mode="scale_width",
+            )
             tabs.append(Panel(child=joint, title=title))
 
-        full_dash = Tabs(tabs=tabs, sizing_mode='scale_width')
+        full_dash = Tabs(tabs=tabs, sizing_mode="scale_width")
         if not self.notebook:
             output_file(filename="trustyai_dashboard.html", title="TrustyAI Dashboard")
         return full_dash
