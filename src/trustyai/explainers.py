@@ -349,7 +349,7 @@ class LimeResults(ExplanationVisualiser):
             plt.show()
 
     def _get_bokeh_plot_dict(self):
-        ps = {}
+        plot_dict = {}
         for output_name, value in self.get_saliencies().items():
             lime_data_source = pd.DataFrame(
                 [
@@ -404,8 +404,8 @@ class LimeResults(ExplanationVisualiser):
             bokeh_plot.line([0, 0], [0, len(lime_data_source)], color="#000")
             bokeh_plot.xaxis.axis_label = "Saliency Value"
             bokeh_plot.yaxis.axis_label = "Feature"
-            ps[output_name] = bokeh_plot
-        return ps
+            plot_dict[output_name] = bokeh_plot
+        return plot_dict
 
 
 # pylint: disable=too-many-arguments
