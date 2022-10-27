@@ -251,17 +251,17 @@ class Tyrus:
                 x for x in list(self.cf_data_source) if output_name in x
             ][0]
             source = ColumnDataSource(self.cf_data_source)
-            p = figure(
+            plot = figure(
                 sizing_mode="stretch_both",
-                title="Available Counterfactuals".format(output_name),
+                title="Available Counterfactuals",
                 tools=["crosshair"],
                 tooltips="@{{Tooltip {}}}".format(output_name),
             )
-            p.xgrid.grid_line_color = None
-            p.xaxis.axis_label = "Counterfactual House Value"
+            plot.xgrid.grid_line_color = None
+            plot.xaxis.axis_label = "Counterfactual House Value"
 
-            p.yaxis.ticker = np.arange(0, len(self.original_inputs.iloc[0]))
-            p.yaxis.axis_label = "Features Changed from Original"
+            plot.yaxis.ticker = np.arange(0, len(self.original_inputs.iloc[0]))
+            plot.yaxis.axis_label = "Features Changed from Original"
             exp_cmap = LinearColorMapper(
                 palette="Viridis256",
                 low=self.cf_data_source["Diff"].min(),
@@ -272,8 +272,8 @@ class Tyrus:
                 label_standoff=12,
                 title="Counterfactual Distance",
             )
-            p.add_layout(color_bar, "right")
-            p.scatter(
+            plot.add_layout(color_bar, "right")
+            plot.scatter(
                 output_column_name,
                 "Diff Jittered",
                 size=10,
@@ -281,7 +281,7 @@ class Tyrus:
                 fill_color={"field": "Diff", "transform": exp_cmap},
                 source=source,
             )
-            plots[output_name] = p
+            plots[output_name] = plot
         return plots
 
     # === DASHBOARD ================================================================================
