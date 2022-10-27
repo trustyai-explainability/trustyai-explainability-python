@@ -670,15 +670,12 @@ class SHAPResults(ExplanationVisualiser):
         with mpl.rc_context(drcp):
             for output_name, saliency in self.get_saliencies().items():
                 shap_values = [
-                    pfi.getScore() for pfi in saliency.getPerFeatureImportance()
+                    pfi.getScore() for pfi in saliency.getPerFeatureImportance()[:-1]
                 ]
                 feature_names = [
                     str(pfi.getFeature().getName())
-                    for pfi in saliency.getPerFeatureImportance()
+                    for pfi in saliency.getPerFeatureImportance()[:-1]
                 ]
-                if not self.old_saliency_method:
-                    shap_values = shap_values[:-1]
-                    feature_names = feature_names[:-1]
                 fnull = self.get_fnull()[output_name]
                 prediction = fnull + sum(shap_values)
                 plt.figure()
@@ -724,7 +721,7 @@ class SHAPResults(ExplanationVisualiser):
                 plt.show()
 
     def _get_bokeh_plot_dict(self):
-        ps = {}
+        plots = {}
         for output_name, value in self.get_saliencies().items():
             fnull = self.get_fnull()[output_name]
 
@@ -861,8 +858,8 @@ class SHAPResults(ExplanationVisualiser):
                 source=data_source,
             )
             bokeh_plot.yaxis.axis_label = str(output_name)
-            ps[output_name] = bokeh_plot
-        return ps
+            plots[output_name] = bokeh_plot
+        return plots
 
 
 class SHAPExplainer:

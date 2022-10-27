@@ -1,5 +1,6 @@
 """Tyrus module"""
 # pylint: disable = too-few-public-methods, wrong-import-order, protected-access, cell-var-from-loop
+# pylint: disable = too-many-instance-attributes, import-error. too-many-locals
 import numpy as np
 import pandas as pd
 from bokeh.io import show, output_file, output_notebook
@@ -22,21 +23,28 @@ from trustyai.utils._tyrus_info_text import LIME_TEXT, SHAP_TEXT, CF_TEXT
 
 import java.lang
 
-# tooltip format string constants ==================================================================
-TOOLTIP_TABLE_FORMAT = (
-    "<tr> <td><b>{}:&nbsp;</b> </td> <td>{}</td>"
-    + " <td>&nbsp;&nbsp;to&nbsp;&nbsp;</td> <td>{}</td> </tr>"
-)
-
-ORIGINAL_FEATURE_TABLE_FORMAT = (
-    "<tr> <td><b>{}:&nbsp;</b> </td> <td>{}</td> <td></td> <td></td> </tr>"
-)
-
 
 # === JAVA/PYTHON OBJECT FORMATTING ================================================================
 def formatter(value):
     """round python and java floats to 2 decimal points"""
     return "{:.2f}".format(value) if type(value) in [float, java.lang.Double] else value
+
+
+def _tooltip_format(row_values):
+    """format counterfactual feature tooltips"""
+    return (
+        "<tr> <td><b>{}:".format(row_values[0])
+        + "&nbsp;</b> </td> <td>{}</td>".format(row_values[1])
+        + " <td>&nbsp;&nbsp;to&nbsp;&nbsp;</td> <td>{}</td> </tr>".format(row_values[2])
+    )
+
+
+def _original_feature_tooltip_format(row_values):
+    return (
+        "<tr> <td><b>{}:&nbsp;</b> </td> <td>{}</td> <td></td> <td></td> </tr>".format(
+            *row_values
+        )
+    )
 
 
 # === TOOLTIP FORMATTERS ===========================================================================
@@ -69,15 +77,7 @@ class Tyrus:
     a Bokeh dashboard displaying a LIME, SHAP, and various counterfactual explanations`.
     """
 
-    def __init__(
-        self,
-        model,
-        inputs,
-        outputs,
-        background,
-        fraction_counterfactuals_to_display=0.1,
-        notebook=False,
-    ):
+    def __init__(self, model, inputs, outputs, background, **kwargs):
         r"""Initialize the :class:`Tyrus` TrustyAI assistant and dashboard.
 
         Parameters
@@ -96,26 +96,29 @@ class Tyrus:
         background : :class:`Pandas.DataFrame`
             The set of background datapoints as a dataframe of shape
             ``[n_datapoints, n_features]``
-        fraction_counterfactuals_to_display : float
-            The fraction of found byproduct counterfactuals to display in the dashboard. This
-            defaults to 0.1, to display 10% of found counterfactuals. Choose a larger number
-            to see more, but this will make plot rendering more expensive
-        notebook: bool
-            If true, Tyrus will launch the visualizations inline in a Jupyter notebook. If false,
-            the visualizations will be saved as HTML and opened automatically in your default
-            browser.
+
+        Keyword Arguments:
+            * fraction_counterfactuals_to_display  : float
+                (Default=0.1) The fraction of found byproduct counterfactuals to display in the
+                dashboard, as a float between 0 and 1. Choose a larger number to see more,
+                but this will make plot rendering more expensive.
+            * notebook : bool
+                (Default=False) If true, Tyrus will launch the visualizations inline in a
+                Jupyter notebook. If false, the visualizations will be saved as HTML and opened
+                automatically in your default browser.
         """
         self.model = model
         self.original_inputs = inputs
         self.original_outputs = outputs
         self.background = background
-        self.fraction_counterfactuals_to_display = fraction_counterfactuals_to_display
-        self.notebook = notebook
+        self.fraction_counterfactuals_to_display = max(
+            0, min(1, kwargs.get("fraction_counterfactuals_to_display", 0.1))
+        )
+        self.notebook = kwargs.get("notebook", False)
 
         if self.notebook:
             output_notebook()
 
-        # created during tyrus run
         self.cfdict = None
         self.shap_saliencies = None
         self.lime_saliencies = None
@@ -207,17 +210,15 @@ class Tyrus:
                 if not preservation_mask[i]:
                     differences += 1
                     raw_tooltip.append(
-                        TOOLTIP_TABLE_FORMAT.format(
-                            fname, formatted_features[fname], fval
-                        )
+                        _tooltip_format([fname, formatted_features[fname], fval])
                     )
                 original_tooltip.append(
-                    ORIGINAL_FEATURE_TABLE_FORMAT.format(
-                        fname, formatted_features[fname], fval
+                    _original_feature_tooltip_format(
+                        [fname, formatted_features[fname], fval]
                     )
                 )
             raw_tooltip.append(
-                ORIGINAL_FEATURE_TABLE_FORMAT.format("Found by", source_exp, "", "")
+                _original_feature_tooltip_format(["Found by", source_exp, "", ""])
             )
             row["Tooltip Raw"] = "".join(
                 original_tooltip if differences == 0 else raw_tooltip
