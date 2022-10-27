@@ -19,7 +19,7 @@ from trustyai.utils._visualisation import (
     bold_red_html,
     bold_green_html,
     output_html,
-    feature_html
+    feature_html,
 )
 
 from trustyai.model import (
@@ -57,7 +57,7 @@ from org.kie.trustyai.explainability.model import (
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
-from java.util import Random, HashMap
+from java.util import Random
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -186,8 +186,8 @@ class CounterfactualExplainer:
         )
         self._solver_config = (
             SolverConfigBuilder.builder()
-                .withTerminationConfig(self._termination_config)
-                .build()
+            .withTerminationConfig(self._termination_config)
+            .build()
         )
         self._cf_config = CounterfactualConfig().withSolverConfig(self._solver_config)
 
@@ -195,13 +195,13 @@ class CounterfactualExplainer:
 
     # pylint: disable=too-many-arguments
     def explain(
-            self,
-            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-            goal: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-            model: PredictionProvider,
-            data_distribution: Optional[DataDistribution] = None,
-            uuid: Optional[_uuid.UUID] = None,
-            timeout: Optional[float] = None,
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        goal: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
+        data_distribution: Optional[DataDistribution] = None,
+        uuid: Optional[_uuid.UUID] = None,
+        timeout: Optional[float] = None,
     ) -> CounterfactualResult:
         """Request for a counterfactual explanation given a list of features, goals and a
         :class:`~PredictionProvider`
@@ -260,7 +260,7 @@ class LimeResults(ExplanationVisualiser):
     def __init__(self, saliencyResults: SaliencyResults):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
-        self._saliencyResults = saliencyResults
+        self._saliency_results = saliencyResults
 
     def get_saliencies(self) -> Dict[str, Saliency]:
         """
@@ -271,9 +271,10 @@ class LimeResults(ExplanationVisualiser):
         Dict[str, Saliency]
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        return {entry.getKey(): entry.getValue()
-                for entry in self._saliencyResults.saliencies.entrySet()}
-
+        return {
+            entry.getKey(): entry.getValue()
+            for entry in self._saliency_results.saliencies.entrySet()
+        }
 
     def as_dataframe(self) -> pd.DataFrame:
         """
@@ -323,9 +324,9 @@ class LimeResults(ExplanationVisualiser):
         """Plot the LIME saliencies."""
         with mpl.rc_context(drcp):
             dictionary = {}
-            for feature_importance in self.get_saliencies().get(
-                    decision
-            ).getPerFeatureImportance():
+            for feature_importance in (
+                self.get_saliencies().get(decision).getPerFeatureImportance()
+            ):
                 dictionary[
                     feature_importance.getFeature().name
                 ] = feature_importance.getScore()
@@ -351,40 +352,59 @@ class LimeResults(ExplanationVisualiser):
         ps = {}
         for output_name, value in self.get_saliencies().items():
             lime_data_source = pd.DataFrame(
-                [{"feature": str(pfi.getFeature().getName()), "saliency": pfi.getScore()} for pfi in
-                 value.getPerFeatureImportance()])
-            lime_data_source['color'] = lime_data_source['saliency'] \
-                .apply(lambda x: ds["positive_primary_colour"] if x >= 0 else
-            ds["negative_primary_colour"])
-            lime_data_source['saliency_colored'] = lime_data_source['saliency'] \
-                .apply(lambda x: (bold_green_html if x >= 0 else bold_red_html)("{:.2f}".format(x)))
+                [
+                    {
+                        "feature": str(pfi.getFeature().getName()),
+                        "saliency": pfi.getScore(),
+                    }
+                    for pfi in value.getPerFeatureImportance()
+                ]
+            )
+            lime_data_source["color"] = lime_data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour"]
+                if x >= 0
+                else ds["negative_primary_colour"]
+            )
+            lime_data_source["saliency_colored"] = lime_data_source["saliency"].apply(
+                lambda x: (bold_green_html if x >= 0 else bold_red_html)(
+                    "{:.2f}".format(x)
+                )
+            )
 
-            lime_data_source['color_faded'] = lime_data_source['saliency'] \
-                .apply(lambda x: ds["positive_primary_colour_faded"] if x >= 0 else
-            ds["negative_primary_colour_faded"])
+            lime_data_source["color_faded"] = lime_data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour_faded"]
+                if x >= 0
+                else ds["negative_primary_colour_faded"]
+            )
             source = ColumnDataSource(lime_data_source)
-            htool = HoverTool(names=['bars'],
-                              tooltips="<h3>LIME</h3> {} saliency to {}: @saliency_colored".format(
-                                  feature_html("@feature"), output_html(output_name))
-                              )
-            p = figure(sizing_mode='stretch_both',
-                       title="Lime Feature Importances",
-                       y_range=lime_data_source['feature'],
-                       tools=[htool])
-            p.hbar(y='feature',
-                   left=0,
-                   right="saliency",
-                   fill_color="color_faded",
-                   line_color="color",
-                   hover_color='color',
-                   color='color',
-                   height=.75,
-                   name='bars',
-                   source=source)
-            p.line([0, 0], [0, len(lime_data_source)], color="#000")
-            p.xaxis.axis_label = "Saliency Value"
-            p.yaxis.axis_label = "Feature"
-            ps[output_name] = p
+            htool = HoverTool(
+                names=["bars"],
+                tooltips="<h3>LIME</h3> {} saliency to {}: @saliency_colored".format(
+                    feature_html("@feature"), output_html(output_name)
+                ),
+            )
+            bokeh_plot = figure(
+                sizing_mode="stretch_both",
+                title="Lime Feature Importances",
+                y_range=lime_data_source["feature"],
+                tools=[htool],
+            )
+            bokeh_plot.hbar(
+                y="feature",
+                left=0,
+                right="saliency",
+                fill_color="color_faded",
+                line_color="color",
+                hover_color="color",
+                color="color",
+                height=0.75,
+                name="bars",
+                source=source,
+            )
+            bokeh_plot.line([0, 0], [0, len(lime_data_source)], color="#000")
+            bokeh_plot.xaxis.axis_label = "Saliency Value"
+            bokeh_plot.yaxis.axis_label = "Feature"
+            ps[output_name] = bokeh_plot
         return ps
 
 
@@ -398,13 +418,13 @@ class LimeExplainer:
     """
 
     def __init__(
-            self,
-            perturbations=1,
-            seed=0,
-            samples=10,
-            penalise_sparse_balance=True,
-            normalise_weights=True,
-            track_counterfactuals=False
+        self,
+        perturbations=1,
+        seed=0,
+        samples=10,
+        penalise_sparse_balance=True,
+        normalise_weights=True,
+        track_counterfactuals=False,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -428,23 +448,22 @@ class LimeExplainer:
 
         self._lime_config = (
             LimeConfig()
-                .withNormalizeWeights(normalise_weights)
-                .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
-                .withSamples(samples)
-                .withEncodingParams(EncodingParams(0.07, 0.3))
-                .withAdaptiveVariance(True)
-                .withPenalizeBalanceSparse(penalise_sparse_balance)
-                .withTrackCounterfactuals(track_counterfactuals)
+            .withNormalizeWeights(normalise_weights)
+            .withPerturbationContext(PerturbationContext(self._jrandom, perturbations))
+            .withSamples(samples)
+            .withEncodingParams(EncodingParams(0.07, 0.3))
+            .withAdaptiveVariance(True)
+            .withPenalizeBalanceSparse(penalise_sparse_balance)
+            .withTrackCounterfactuals(track_counterfactuals)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
 
-
     def explain(
-            self,
-            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-            outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-            model: PredictionProvider,
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
     ) -> LimeResults:
         """Produce a LIME explanation.
 
@@ -489,7 +508,7 @@ class SHAPResults(ExplanationVisualiser):
     def __init__(self, saliency_results: SaliencyResults, background):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
-        self._saliencyResults = saliency_results
+        self._saliency_results = saliency_results
         self.background = background
 
     def get_saliencies(self) -> Dict[str, Saliency]:
@@ -501,8 +520,10 @@ class SHAPResults(ExplanationVisualiser):
         Dict[str, Saliency]
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        return {entry.getKey(): entry.getValue()
-                for entry in self._saliencyResults.saliencies.entrySet()}
+        return {
+            entry.getKey(): entry.getValue()
+            for entry in self._saliency_results.saliencies.entrySet()
+        }
 
     def get_fnull(self):
         """
@@ -528,17 +549,16 @@ class SHAPResults(ExplanationVisualiser):
         ).tolist()
         feature_values = [
             pfi.getFeature().getValue().asNumber()
-            for pfi in saliency.getPerFeatureImportance()
+            for pfi in saliency.getPerFeatureImportance()[:-1]
         ]
-        shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+        shap_values = [
+            pfi.getScore() for pfi in saliency.getPerFeatureImportance()[:-1]
+        ]
         feature_names = [
             str(pfi.getFeature().getName())
-            for pfi in saliency.getPerFeatureImportance()
+            for pfi in saliency.getPerFeatureImportance()[:-1]
         ]
-        if not self.old_saliency_method:
-            feature_values = feature_values[:-1]
-            shap_values = shap_values[:-1]
-            feature_names = feature_names[:-1]
+
         columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
         visualizer_data_frame = pd.DataFrame(
             [background_mean_feature_values, feature_values, shap_values],
@@ -703,7 +723,6 @@ class SHAPResults(ExplanationVisualiser):
                 plt.title(f"Explanation of {output_name}")
                 plt.show()
 
-
     def _get_bokeh_plot_dict(self):
         ps = {}
         for output_name, value in self.get_saliencies().items():
@@ -711,91 +730,138 @@ class SHAPResults(ExplanationVisualiser):
 
             # create dataframe of plot values
             data_source = pd.DataFrame(
-                [{"feature": str(pfi.getFeature().getName()), "saliency": pfi.getScore()} for pfi in
-                 value.getPerFeatureImportance()[:-1]])
-            prediction = fnull + data_source['saliency'].sum()
+                [
+                    {
+                        "feature": str(pfi.getFeature().getName()),
+                        "saliency": pfi.getScore(),
+                    }
+                    for pfi in value.getPerFeatureImportance()[:-1]
+                ]
+            )
+            prediction = fnull + data_source["saliency"].sum()
 
-            data_source['color'] = data_source['saliency'].apply(
-                lambda x: ds["positive_primary_colour"] if x >= 0 else ds[
-                    "negative_primary_colour"])
-            data_source['color_faded'] = data_source['saliency'].apply(
-                lambda x: ds["positive_primary_colour_faded"] if x >= 0 else ds[
-                    "negative_primary_colour_faded"])
-            data_source['index'] = data_source.index
-            data_source['saliency_text'] = data_source['saliency'].apply(
-                lambda x: (bold_red_html if x <= 0 else bold_green_html)("{:.2f}".format(x)))
-            data_source['bottom'] = pd.Series([fnull] + data_source['saliency'].iloc[0:-1].tolist()).cumsum()
-            data_source['top'] = data_source['bottom'] + data_source['saliency']
+            data_source["color"] = data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour"]
+                if x >= 0
+                else ds["negative_primary_colour"]
+            )
+            data_source["color_faded"] = data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour_faded"]
+                if x >= 0
+                else ds["negative_primary_colour_faded"]
+            )
+            data_source["index"] = data_source.index
+            data_source["saliency_text"] = data_source["saliency"].apply(
+                lambda x: (bold_red_html if x <= 0 else bold_green_html)(
+                    "{:.2f}".format(x)
+                )
+            )
+            data_source["bottom"] = pd.Series(
+                [fnull] + data_source["saliency"].iloc[0:-1].tolist()
+            ).cumsum()
+            data_source["top"] = data_source["bottom"] + data_source["saliency"]
 
             # create hovertools
-            htool_fnull = HoverTool(names=['fnull'],
-                                    tooltips=("<h3>SHAP</h3>Baseline {}: {}").format(
-                                        output_name,
-                                        output_html("{:.2f}".format(fnull))),
-                                    line_policy="interp")
-            htool_pred = HoverTool(names=['pred'],
-                                   tooltips=("<h3>SHAP</h3>Predicted {}: {}").format(
-                                       output_name,
-                                       output_html("{:.2f}".format(prediction))),
-                                   line_policy="interp")
-            htool_bars = HoverTool(names=['bars'],
-                                   tooltips="<h3>SHAP</h3> {} contributions to {}: @saliency_text".format(
-                                       feature_html("@feature"),
-                                       output_html(output_name)))
+            htool_fnull = HoverTool(
+                names=["fnull"],
+                tooltips=("<h3>SHAP</h3>Baseline {}: {}").format(
+                    output_name, output_html("{:.2f}".format(fnull))
+                ),
+                line_policy="interp",
+            )
+            htool_pred = HoverTool(
+                names=["pred"],
+                tooltips=("<h3>SHAP</h3>Predicted {}: {}").format(
+                    output_name, output_html("{:.2f}".format(prediction))
+                ),
+                line_policy="interp",
+            )
+            htool_bars = HoverTool(
+                names=["bars"],
+                tooltips="<h3>SHAP</h3> {} contributions to {}: @saliency_text".format(
+                    feature_html("@feature"), output_html(output_name)
+                ),
+            )
 
             # create plot
-            p = figure(sizing_mode='stretch_both',
-                       title="SHAP Feature Contributions",
-                       x_range=data_source['feature'],
-                       tools=[htool_pred, htool_fnull, htool_bars])
+            bokeh_plot = figure(
+                sizing_mode="stretch_both",
+                title="SHAP Feature Contributions",
+                x_range=data_source["feature"],
+                tools=[htool_pred, htool_fnull, htool_bars],
+            )
 
             # add fnull and background lines
             line_data_source = ColumnDataSource(
-                pd.DataFrame([
-                    {'x': 0, 'pred': prediction},
-                    {'x': len(data_source), 'pred': prediction}]))
+                pd.DataFrame(
+                    [
+                        {"x": 0, "pred": prediction},
+                        {"x": len(data_source), "pred": prediction},
+                    ]
+                )
+            )
             fnull_data_source = ColumnDataSource(
-                pd.DataFrame([
-                    {'x': 0, 'fnull': fnull},
-                    {'x': len(data_source), 'fnull': fnull}]))
+                pd.DataFrame(
+                    [{"x": 0, "fnull": fnull}, {"x": len(data_source), "fnull": fnull}]
+                )
+            )
 
-            p.line(x="x", y="fnull",
-                   line_color='#999',
-                   hover_line_color='#333',
-                   line_width=2,
-                   hover_line_width=4,
-                   line_dash='dashed',
-                   name='fnull',
-                   source=fnull_data_source)
-            p.line(x="x",
-                   y="pred",
-                   line_color='#999',
-                   hover_line_color='#333',
-                   line_width=2,
-                   hover_line_width=4,
-                   name='pred',
-                   source=line_data_source)
+            bokeh_plot.line(
+                x="x",
+                y="fnull",
+                line_color="#999",
+                hover_line_color="#333",
+                line_width=2,
+                hover_line_width=4,
+                line_dash="dashed",
+                name="fnull",
+                source=fnull_data_source,
+            )
+            bokeh_plot.line(
+                x="x",
+                y="pred",
+                line_color="#999",
+                hover_line_color="#333",
+                line_width=2,
+                hover_line_width=4,
+                name="pred",
+                source=line_data_source,
+            )
 
             # create candlestick plot lines
-            p.line(x=[.5, 1], y=data_source.iloc[0]['top'], color=data_source.iloc[0]['color'])
+            bokeh_plot.line(
+                x=[0.5, 1],
+                y=data_source.iloc[0]["top"],
+                color=data_source.iloc[0]["color"],
+            )
             for i in range(1, len(data_source)):
                 # bar left line
-                p.line(x=[i, i + .5], y=data_source.iloc[i]['bottom'], color=data_source.iloc[i]['color'])
+                bokeh_plot.line(
+                    x=[i, i + 0.5],
+                    y=data_source.iloc[i]["bottom"],
+                    color=data_source.iloc[i]["color"],
+                )
                 # bar right line
                 if i != len(data_source) - 1:
-                    p.line(x=[i + .5, i + 1], y=data_source.iloc[i]['top'], color=data_source.iloc[i]['color'])
+                    bokeh_plot.line(
+                        x=[i + 0.5, i + 1],
+                        y=data_source.iloc[i]["top"],
+                        color=data_source.iloc[i]["color"],
+                    )
 
             # create candles
-            p.vbar(x='feature',
-                   bottom="bottom",
-                   top="top",
-                   hover_color='color',
-                   color='color_faded',
-                   width=.75,
-                   name='bars',
-                   source=data_source)
-            p.yaxis.axis_label = str(output_name)
-            ps[output_name] = p
+            bokeh_plot.vbar(
+                x="feature",
+                bottom="bottom",
+                top="top",
+                hover_color="color",
+                color="color_faded",
+                width=0.75,
+                name="bars",
+                source=data_source,
+            )
+            bokeh_plot.yaxis.axis_label = str(output_name)
+            ps[output_name] = bokeh_plot
         return ps
 
 
@@ -826,13 +892,13 @@ class SHAPExplainer:
     """
 
     def __init__(
-            self,
-            background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
-            samples=None,
-            batch_size=20,
-            seed=0,
-            link_type: Optional[_ShapConfig.LinkType] = None,
-            track_counterfactuals=False
+        self,
+        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
+        samples=None,
+        batch_size=20,
+        seed=0,
+        link_type: Optional[_ShapConfig.LinkType] = None,
+        track_counterfactuals=False,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 
@@ -883,11 +949,11 @@ class SHAPExplainer:
 
         self._configbuilder = (
             _ShapConfig.builder()
-                .withLink(link_type)
-                .withBatchSize(batch_size)
-                .withPC(perturbation_context)
-                .withBackground(self.background)
-                .withTrackCounterfactuals(track_counterfactuals)
+            .withLink(link_type)
+            .withBatchSize(batch_size)
+            .withPC(perturbation_context)
+            .withBackground(self.background)
+            .withTrackCounterfactuals(track_counterfactuals)
         )
         if samples is not None:
             self._configbuilder.withNSamples(JInt(samples))
@@ -895,10 +961,10 @@ class SHAPExplainer:
         self._explainer = _ShapKernelExplainer(self._config)
 
     def explain(
-            self,
-            inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-            outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-            model: PredictionProvider,
+        self,
+        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
+        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+        model: PredictionProvider,
     ) -> SHAPResults:
         """Produce a SHAP explanation.
 
