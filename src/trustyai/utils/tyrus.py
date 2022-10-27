@@ -25,7 +25,7 @@ import java.lang
 
 
 # === JAVA/PYTHON OBJECT FORMATTING ================================================================
-def formatter(value):
+def _formatter(value):
     """round python and java floats to 2 decimal points"""
     return "{:.2f}".format(value) if type(value) in [float, java.lang.Double] else value
 
@@ -53,7 +53,7 @@ def format_cf_tooltip(raw_tooltip, output_name, output_val, unchanged):
     if unchanged:
         tooltip = "<h3>Original Input</h3>"
         tooltip += "{}: {}".format(
-            output_name.split("from <b")[0].strip(), formatter(output_val)
+            output_name.split("from <b")[0].strip(), _formatter(output_val)
         )
         tooltip += "<table>"
         tooltip += raw_tooltip
@@ -61,7 +61,7 @@ def format_cf_tooltip(raw_tooltip, output_name, output_val, unchanged):
     else:
         tooltip = "<h3>Counterfactual</h3>"
         tooltip += "Change {} to {} by changing:".format(
-            output_name, bold_green_html(formatter(output_val))
+            output_name, bold_green_html(_formatter(output_val))
         )
         tooltip += "<table>"
         tooltip += raw_tooltip
@@ -178,9 +178,9 @@ class Tyrus:
         ColumnDataSource for plotting"""
         rows = []
         original_features = self._get_input_as_df().iloc[0].to_dict()
-        formatted_features = {k: formatter(v) for k, v in original_features.items()}
+        formatted_features = {k: _formatter(v) for k, v in original_features.items()}
         original_output_values = {
-            k: formatter(v) for k, v in self.original_outputs.iloc[0].to_dict().items()
+            k: _formatter(v) for k, v in self.original_outputs.iloc[0].to_dict().items()
         }
 
         output_names, output_column_names = [], []
@@ -206,7 +206,7 @@ class Tyrus:
             original_tooltip = []
             for i, feature in enumerate(prediction.getInput().getFeatures()):
                 fname = str(feature.getName())
-                fval = formatter(feature.getValue().getUnderlyingObject())
+                fval = _formatter(feature.getValue().getUnderlyingObject())
                 if not preservation_mask[i]:
                     differences += 1
                     raw_tooltip.append(

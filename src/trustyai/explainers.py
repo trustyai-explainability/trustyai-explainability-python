@@ -262,7 +262,7 @@ class LimeResults(ExplanationVisualiser):
         manually."""
         self._saliency_results = saliencyResults
 
-    def get_saliencies(self) -> Dict[str, Saliency]:
+    def map(self) -> Dict[str, Saliency]:
         """
         Return a dictionary of found saliencies.
 
@@ -291,11 +291,11 @@ class LimeResults(ExplanationVisualiser):
             * ``${output_name}_value``: The original value of each feature.
             * ``${output_name}_confidence``: The confidence of the reported saliency.
         """
-        outputs = self.get_saliencies().keys()
+        outputs = self.map().keys()
 
         data = {}
         for output in outputs:
-            pfis = self.get_saliencies().get(output).getPerFeatureImportance()
+            pfis = self.map().get(output).getPerFeatureImportance()
             data[f"{output}_features"] = [
                 f"{pfi.getFeature().getName()}" for pfi in pfis
             ]
@@ -325,7 +325,7 @@ class LimeResults(ExplanationVisualiser):
         with mpl.rc_context(drcp):
             dictionary = {}
             for feature_importance in (
-                self.get_saliencies().get(decision).getPerFeatureImportance()
+                self.map().get(decision).getPerFeatureImportance()
             ):
                 dictionary[
                     feature_importance.getFeature().name
@@ -350,7 +350,7 @@ class LimeResults(ExplanationVisualiser):
 
     def _get_bokeh_plot_dict(self):
         plot_dict = {}
-        for output_name, value in self.get_saliencies().items():
+        for output_name, value in self.map().items():
             lime_data_source = pd.DataFrame(
                 [
                     {
