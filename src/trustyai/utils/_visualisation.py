@@ -15,12 +15,33 @@ class ExplanationVisualiser(ABC):
     def as_html(self) -> Styler:
         """Visualise the styled dataframe"""
 
+# HTML FORMAT FUNCTIONS ============================================================================
+def bold_green_html(content):
+    return '<b style="color:{};">{}</b>'.format(DEFAULT_STYLE["positive_primary_colour"], content)
+
+
+def bold_red_html(content):
+    return '<b style="color:{};">{}</b>'.format(DEFAULT_STYLE["negative_primary_colour"], content)
+
+
+def output_html(content):
+      return '<b style="color:#a64d79;background-color:#fff;">{}</b>'.format(content)
+
+
+def feature_html(content):
+    return '<b style="color:#000000;background-color:#fff;">{}</b>'.format(content)
+
+
 
 DEFAULT_STYLE = {
     "positive_primary_colour": "#13ba3c",
+    "positive_primary_colour_faded": "#88dc9d",
     "negative_primary_colour": "#ee0000",
+    "negative_primary_colour_faded": "#f67f7f",
     "neutral_primary_colour": "#ffffff",
 }
+
+
 
 
 DEFAULT_RC_PARAMS = {
