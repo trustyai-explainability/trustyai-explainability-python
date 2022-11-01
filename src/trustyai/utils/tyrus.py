@@ -365,5 +365,4 @@ class Tyrus:
 
         if display:
             show(plots)
-        else:
-            return None
+        return plots
