@@ -1,9 +1,10 @@
 name: Build arrow-converter JAR
+description: Build TrustyAI - Apache Arrow converter
 runs:
   using: "composite"
   steps:
     - name: Build arrow-converter
       shell: bash
       run: |
-        mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
+        mvn clean package -f java_sources/trusty-ai-arrow/pom.xml -fae -e -nsu
         mv java_sources/trusty-ai-arrow/target/arrow-converters-*.jar src/trustyai/dep/org/trustyai/
