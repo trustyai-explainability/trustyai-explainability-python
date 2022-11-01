@@ -118,6 +118,8 @@ class Tyrus:
 
         if self.notebook:
             output_notebook()
+        else:
+            output_file(filename="trustyai_dashboard.html", title="TrustyAI Dashboard")
 
         self.cfdict = None
         self.shap_saliencies = None
@@ -344,16 +346,23 @@ class Tyrus:
             tabs.append(Panel(child=joint, title=title))
 
         full_dash = Tabs(tabs=tabs, sizing_mode="scale_width")
-        if not self.notebook:
-            output_file(filename="trustyai_dashboard.html", title="TrustyAI Dashboard")
         return full_dash
 
-    def run(self):
+    def run(self, display=True):
         r"""Launch Tyrus TrustyAI Assistant and launch the dashboard. Depending on the setting
         of ``notebook``, this will either automatically open the Tyrus visualizations
         in a Jupyter notebook or browser window.
+
+         Parameters
+        ----------
+        display = True : boolean
+            Whether to automatically display the dashboard (true) or simply return it (false).
         """
         self._generate_saliencies()
         self._generate_counterfactual_datasource()
         plots = self._get_plots()
-        show(plots)
+
+        if display:
+            show(plots)
+        else:
+            return plots
