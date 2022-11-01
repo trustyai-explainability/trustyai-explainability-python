@@ -3,7 +3,7 @@
 # pylint: disable = too-many-instance-attributes, import-error. too-many-locals
 import numpy as np
 import pandas as pd
-from bokeh.io import show, output_file, output_notebook
+from bokeh.io import show, output_file, output_notebook, reset_output
 from bokeh.layouts import column
 from bokeh.models import (
     ColumnDataSource,
@@ -116,6 +116,7 @@ class Tyrus:
         )
         self.notebook = kwargs.get("notebook", False)
 
+        reset_output()
         if self.notebook:
             output_notebook()
         else:
@@ -350,8 +351,8 @@ class Tyrus:
 
     def run(self, display=True):
         r"""Launch Tyrus TrustyAI Assistant and launch the dashboard. Depending on the setting
-        of ``notebook``, this will either automatically open the Tyrus visualizations
-        in a Jupyter notebook or browser window.
+        of ``tyrus.notebook`` and ``display``, this will either automatically open the
+        Tyrus visualizations in a Jupyter notebook or browser window.
 
          Parameters
         ----------
@@ -365,4 +366,4 @@ class Tyrus:
         if display:
             show(plots)
         else:
-            return plots
+            return None
