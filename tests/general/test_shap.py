@@ -10,7 +10,7 @@ np.random.seed(0)
 
 import pytest
 
-from trustyai.explainers import SHAPExplainer
+from trustyai.explainers import SHAPExplainer, LimeExplainer
 from trustyai.model import feature, Model, Dataset
 from trustyai.utils import TestModels
 
@@ -47,6 +47,25 @@ def test_shap_arrow():
     for _, saliency in explanation.get_saliencies().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()[:-1]):
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
+
+
+def test_shap_repeats():
+    """Basic SHAP/Arrow test"""
+    np.random.seed(0)
+    n_features = 10
+    data = pd.DataFrame(np.random.rand(101, n_features))
+    background = data.iloc[:100]
+    to_explain = data.iloc[100:101]
+
+    model_weights = np.random.rand(n_features)
+    predict_function = lambda x: np.dot(x.values, model_weights)
+
+    model = Model(predict_function, dataframe_input=True, arrow=True)
+
+
+    explainer = SHAPExplainer(background=background)
+    for _ in range(500):
+        explanation = explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
 
 def test_shap_plots():

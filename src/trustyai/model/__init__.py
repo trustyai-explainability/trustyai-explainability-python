@@ -1,6 +1,7 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code, too-many-lines
 # pylint: disable = unused-import, wrong-import-order
 """General model classes"""
+import gc
 import uuid as _uuid
 from typing import List, Optional, Union, Callable
 import pandas as pd
