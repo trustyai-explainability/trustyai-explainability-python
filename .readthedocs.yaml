@@ -5,13 +5,9 @@
 # Required
 version: 2
 
-
-
 # Set the version of Python and other tools you might need
 build:
   os: ubuntu-20.04
-  apt_packages:
-    - maven
   tools:
     python: "3.9"
 
@@ -19,12 +15,6 @@ build:
 python:
   install:
     - requirements: requirements-dev.txt
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
-    - method: setuptools
-      path: .
 
 
 # Build documentation in the docs/ directory with Sphinx
