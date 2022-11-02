@@ -8,7 +8,7 @@ version: 2
 # Set the version of Python and other tools you might need
 build:
   os: ubuntu-20.04
-  apt-packages :
+  apt_packages :
     - maven
   tools:
     python: "3.9"
