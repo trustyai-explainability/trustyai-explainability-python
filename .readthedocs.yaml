@@ -12,13 +12,6 @@ build:
     - maven
   tools:
     python: "3.9"
-
-# install the package
-python:
-  install:
-    - requirements: requirements-dev.txt
-    - method: pip
-      path: .
   jobs:
     pre_create_environment:
       rm trustyai/dep/org/trustyai/*
@@ -28,9 +21,15 @@ python:
       mv trustyai-explainability/explainability-core/target/explainability-core-2.0.0-SNAPSHOT-tests.jar trustyai/dep/org/trustyai/
       mvn compile package -DskipTests -f java_sources/trusty-ai-arrow/pom.xml
       mv java_sources/trusty-ai-arrow/target/arrow-converters-0.0.1.jar trustyai/dep/org/trustyai/
-
     post_build:
       rm -Rf trustyai-explainability
+
+# install the package
+python:
+  install:
+    - requirements: requirements-dev.txt
+    - method: pip
+      path: .
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
