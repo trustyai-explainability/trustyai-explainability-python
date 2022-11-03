@@ -7,6 +7,5 @@ runs:
       shell: bash
       run: |
         git clone https://github.com/trustyai-explainability/trustyai-explainability.git
-        mvn clean install -DskipTests -f trustyai-explainability/explainability-arrows/pom.xml -Pshaded -fae -e -nsu
+        mvn clean install -DskipTests -f trustyai-explainability/pom.xml -Pshaded -fae -e -nsu
         mv trustyai-explainability/explainability-arrow/target/explainability-arrow-*-SNAPSHOT.jar src/trustyai/dep/org/trustyai/
-        
