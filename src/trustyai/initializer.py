@@ -15,7 +15,8 @@ import jpype.imports
 from jpype import _jcustomizer, _jclass
 
 DEFAULT_ARGS = (
-    "--add-opens=java.base/java.nio=ALL-UNNAMED",)  # see https://arrow.apache.org/docs/java/install.html#java-compatibility
+    "--add-opens=java.base/java.nio=ALL-UNNAMED",
+)  # see https://arrow.apache.org/docs/java/install.html#java-compatibility
 
 
 def _get_default_path():
