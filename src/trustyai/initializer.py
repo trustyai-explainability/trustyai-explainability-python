@@ -14,6 +14,9 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
+DEFAULT_ARGS = (
+    "--add-opens=java.base/java.nio=ALL-UNNAMED",)  # see https://arrow.apache.org/docs/java/install.html#java-compatibility
+
 
 def _get_default_path():
     try:
@@ -73,7 +76,8 @@ def init(*args, path=None):
             else:
                 logging.error("JAR %s not found.", jar_path)
 
-        jpype.startJVM(*args, classpath=path)
+        _args = args + DEFAULT_ARGS
+        jpype.startJVM(*_args, classpath=path)
 
         from java.lang import Thread
 
