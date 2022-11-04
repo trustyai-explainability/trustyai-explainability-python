@@ -27,7 +27,7 @@ def _get_default_path():
 
     core_deps = [
         f"{default_dep_path}/org/trustyai/explainability-arrow-2.0.0-SNAPSHOT.jar",
-        f"{default_dep_path}/org/trustyai/explainability-arrpw-2.0.0-SNAPSHOT-tests.jar",
+        f"{default_dep_path}/org/trustyai/explainability-arrow-2.0.0-SNAPSHOT-tests.jar",
     ]
 
     return core_deps, default_dep_path
