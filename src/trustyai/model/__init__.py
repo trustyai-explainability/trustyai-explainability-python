@@ -127,7 +127,7 @@ class Dataset:
             The Numpy array to be converted into a :class:`Dataset`.
         outputs : Optional[List[int]]
             An optional list of column indeces that represent model outputs. If not supplied,
-            the right-most column will taken as the model output.
+            the right-most column will taken as the model output. 
 
         Returns
         -------
