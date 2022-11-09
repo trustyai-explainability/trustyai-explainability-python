@@ -12,6 +12,8 @@ jobs:
           fetch-depth: 0
       - name: Build explainability-core
         uses: ./.github/actions/build-core
+      - name: Build explainability-arrow
+        uses: ./.github/actions/build-arrow
       - run: python3 -m pip install --upgrade build && python3 -m build
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
