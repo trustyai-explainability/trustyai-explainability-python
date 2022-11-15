@@ -40,7 +40,7 @@ def init(*args, path=None):
     imported, for example if you want to use a different version of the Trusty Explainability
     library than is bundled by default, you can do so by calling :func:`init`. If this is not
     manually called, trustyai will use the default set of libraries and automatically initialize
-    itself when necessary.
+    itself when necessary. 
 
     Parameters
     ----------
