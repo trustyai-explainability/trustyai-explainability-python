@@ -1,6 +1,5 @@
 graft src
 prune tests
-prune java_sources
 prune docs
 prune .github
 

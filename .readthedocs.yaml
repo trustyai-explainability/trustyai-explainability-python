@@ -5,15 +5,24 @@
 # Required
 version: 2
 
-
-
 # Set the version of Python and other tools you might need
 build:
   os: ubuntu-20.04
-  apt_packages:
+  apt_packages :
     - maven
   tools:
     python: "3.9"
+  jobs:
+    pre_create_environment:
+      - echo $(pwd)
+      - rm -f src/trustyai/dep/org/trustyai/*
+      - git clone https://github.com/trustyai-explainability/trustyai-explainability.git
+      - mvn clean install -DskipTests -f trustyai-explainability/pom.xml -Pquickly -fae -e -nsu
+      - mvn clean install -DskipTests -f trustyai-explainability/explainability-arrow/pom.xml -Pshaded -fae -e -nsu
+      -  mv trustyai-explainability/explainability-arrow/target/explainability-arrow-*-SNAPSHOT.jar src/trustyai/dep/org/trustyai/
+
+    post_build:
+      - rm -Rf trustyai-explainability
 
 # install the package
 python:
@@ -21,11 +30,6 @@ python:
     - requirements: requirements-dev.txt
     - method: pip
       path: .
-      extra_requirements:
-        - docs
-    - method: setuptools
-      path: .
-
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
