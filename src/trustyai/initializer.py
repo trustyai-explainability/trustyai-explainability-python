@@ -26,15 +26,11 @@ def _get_default_path():
         default_dep_path = os.path.join(get_python_lib(), "trustyai", "dep")
 
     core_deps = [
-        f"{default_dep_path}/org/trustyai/explainability-core-2.0.0-SNAPSHOT.jar",
-        f"{default_dep_path}/org/trustyai/explainability-core-2.0.0-SNAPSHOT-tests.jar",
+        f"{default_dep_path}/org/trustyai/explainability-arrow-2.0.0-SNAPSHOT.jar",
+        f"{default_dep_path}/org/trustyai/explainability-arrow-2.0.0-SNAPSHOT-tests.jar",
     ]
 
-    arrow_deps = [
-        f"{default_dep_path}/org/trustyai/arrow-converters-0.0.1.jar",
-    ]
-
-    return core_deps + arrow_deps, default_dep_path
+    return core_deps, default_dep_path
 
 
 def init(*args, path=None):
@@ -55,7 +51,6 @@ def init(*args, path=None):
     path: list[str]
         List of jar files to add the Java class path. By default, this will add the necessary
         dependencies of the TrustyAI Java library.
-
     """
     # Launch the JVM
     try:
