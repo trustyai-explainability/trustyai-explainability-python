@@ -47,7 +47,7 @@ from org.kie.trustyai.explainability.model import (
 )
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
-from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
+from org.kie.trustyai.arrow import ArrowConverters, PPAWrapper
 from org.kie.trustyai.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
@@ -343,7 +343,7 @@ class PredictionProvider:
 
 
 @JImplementsWithDocstring(
-    "org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False
+    "org.kie.trustyai.arrow.PredictionProviderArrow", deferred=False
 )
 class PredictionProviderArrow:
     """PredictionProviderArrow(pandas_predict_fun)
