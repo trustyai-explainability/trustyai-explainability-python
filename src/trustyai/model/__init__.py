@@ -1,4 +1,4 @@
-# pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code,
+# pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code, too-many-lines
 # pylint: disable = unused-import, wrong-import-order
 """General model classes"""
 import uuid as _uuid
@@ -13,7 +13,17 @@ from trustyai.utils import JImplementsWithDocstring
 
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
-from jpype import JImplements, JOverride, _jcustomizer, _jclass, JByte, JArray, JLong
+from jpype import (
+    JImplements,
+    JOverride,
+    _jcustomizer,
+    _jclass,
+    JByte,
+    JArray,
+    JLong,
+    JInt,
+    JString,
+)
 from org.kie.trustyai.explainability.local.counterfactual.entities import (
     CounterfactualEntity,
 )
@@ -29,6 +39,7 @@ from org.kie.trustyai.explainability.model import (
     PredictionOutput as _PredictionOutput,
     Prediction as _Prediction,
     Saliency as _Saliency,
+    SaliencyResults as _SaliencyResults,
     SimplePrediction as _SimplePrediction,
     Value as _Value,
     Type as _Type,
@@ -36,7 +47,7 @@ from org.kie.trustyai.explainability.model import (
 )
 
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
-from org.trustyai.arrowconverters import ArrowConverters, PPAWrapper
+from org.kie.trustyai.arrow import ArrowConverters, PPAWrapper
 from org.kie.trustyai.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
 )
@@ -332,7 +343,7 @@ class PredictionProvider:
 
 
 @JImplementsWithDocstring(
-    "org.trustyai.arrowconverters.PredictionProviderArrow", deferred=False
+    "org.kie.trustyai.arrow.PredictionProviderArrow", deferred=False
 )
 class PredictionProviderArrow:
     """PredictionProviderArrow(pandas_predict_fun)
@@ -739,6 +750,27 @@ class _JPredictionFeatureDomain:
         return self.getFeatureDomains()
 
 
+@_jcustomizer.JImplementationFor(
+    "org.kie.trustyai.explainability.model.SaliencyResults"
+)
+# pylint: disable=no-member
+class SaliencyResults:
+    """Java PredictionFeatureDomain implicit methods"""
+
+    @property
+    def saliencies(self):
+        """Return saliencies"""
+        return self.getSaliencies()
+
+    def __sub__(self, other: _SaliencyResults):
+        """Overload SaliencyResults difference"""
+        return self.difference(other)
+
+    def __eq__(self, other: _SaliencyResults):
+        """Overload SaliencyResults equality"""
+        return self.equals(other)
+
+
 def output(name, dtype, value=None, score=1.0) -> _Output:
     """Create a Java :class:`Output`. The :class:`Output` class is used to represent the
     individual components of model outputs.
@@ -817,7 +849,12 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
     """
 
     if dtype == "categorical":
-        _factory = FeatureFactory.newCategoricalFeature
+        if isinstance(value, int):
+            _factory = FeatureFactory.newCategoricalNumericalFeature
+            value = JInt(value)
+        else:
+            _factory = FeatureFactory.newCategoricalFeature
+            value = JString(value)
     elif dtype == "number":
         _factory = FeatureFactory.newNumericalFeature
     elif dtype == "bool":
@@ -825,6 +862,7 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
     else:
         _factory = FeatureFactory.newObjectFeature
 
+    name = JString(name)
     if domain:
         _feature = _factory(name, value, feature_domain(domain))
     else:

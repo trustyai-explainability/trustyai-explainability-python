@@ -1,11 +1,10 @@
 name: Build exp-core JAR
+description: Clone and build TrustyAI-Explainability library (shaded in a single JAR)
 runs:
   using: "composite"
   steps:
-    - name: Build exp-core
+    - name: Build explainability-core
       shell: bash
       run: |
         git clone https://github.com/trustyai-explainability/trustyai-explainability.git
-        mvn install package -DskipTests -f trustyai-explainability/explainability-core/pom.xml -Pshaded
-        mv trustyai-explainability/explainability-core/target/explainability-core-*.jar trustyai/dep/org/trustyai/
-        
+        mvn clean install -DskipTests -f trustyai-explainability/pom.xml -Pquickly -fae -e -nsu

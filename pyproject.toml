@@ -1,0 +1,64 @@
+[project]
+name = "trustyai"
+version = "0.2.5"
+description = "Python bindings to the TrustyAI explainability library."
+authors = [{ name = "Rui Vieira", email = "rui@redhat.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.7"
+
+keywords = ["trustyai", "xai", "explainability", "ml"]
+
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Java",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Java Libraries"
+]
+
+dependencies = [
+    "Jpype1", "pyarrow", "matplotlib", "pandas", "numpy"
+]
+
+[project.optional-dependencies]
+dev = [
+    "JPype1==1.3.0",
+    "black==21.6b0",
+    "click==8.0.4",
+    "joblib==1.0.1",
+    "jupyter==1.0.0",
+    "scikit-learn==0.24.2",
+    "pylint==2.9.0",
+    "pytest==6.2.4",
+    "setuptools",
+    "wheel",
+    "xgboost==1.4.2",
+    "twine==3.4.2",
+    "pyarrow==7.0.0",
+    "numpydoc",
+    "matplotlib==3.5.1",
+    "pandas==1.2.5",
+    "pytest-xdist",
+    "pytest-benchmark"
+]
+
+[project.urls]
+homepage = "https://github.com/trustyai-explainability/trustyai-explainability-python"
+documentation = "https://trustyai-explainability-python.readthedocs.io/en/latest/"
+repository = "https://github.com/trustyai-explainability/trustyai-explainability-python"
+
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]

@@ -1,4 +1,4 @@
-name: Benchmarks (merge)
+name: TrustyAI Python benchmarks (merge)
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
       - name: Install TrustyAI Python package
         run: |
           pip install -r requirements-dev.txt
-          pip install . --force --no-binary :trustyai:
+          pip install .
       - name: Run benchmark
         run: |
           pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json

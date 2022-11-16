@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/version-0.2.4-green) ![TrustyAI](https://img.shields.io/badge/TrustyAI-1.22.1-green) [![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml)
+![version](https://img.shields.io/badge/version-0.2.4-green) [![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml)
 
 # python-trustyai
 
@@ -41,10 +41,13 @@ The Jupyter server will be available at `localhost:8888`.
 
 ### Binder
 
-You can also run the example Jupyter notebooks using `mybinder.org`: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trustyai-python/trustyai-explainability-python-examples/main?labpath=examples)
+You can also run the example Jupyter notebooks
+using `mybinder.org`: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trustyai-python/trustyai-explainability-python-examples/main?labpath=examples)
 
 ## Documentation
-Check out the [ReadTheDocs page](https://trustyai-explainability-python.readthedocs.io/en/latest/) for API references and examples.
+
+Check out the [ReadTheDocs page](https://trustyai-explainability-python.readthedocs.io/en/latest/) for API references
+and examples.
 
 ## Getting started
 
@@ -103,3 +106,16 @@ You can see the `sumSkipModel` in the [LIME tests](./tests/test_limeexplainer.py
 You can look at the [tests](./tests) for working examples.
 
 There are also [Jupyter notebooks available](https://github.com/trustyai-python/examples).
+
+## Contributing
+
+To install `trustyai` for local development, use:
+
+```shell
+$ cd scripts
+$ ./build.sh
+```
+
+This will compile the necessary [Java libraries](https://github.com/trustyai-explainability/trustyai-explainability) and
+install
+the TrustyAI Python package, locally.
