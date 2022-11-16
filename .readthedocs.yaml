@@ -14,7 +14,6 @@ build:
     python: "3.9"
   jobs:
     pre_create_environment:
-      - echo $(pwd)
       - rm -f src/trustyai/dep/org/trustyai/*
       - git clone https://github.com/trustyai-explainability/trustyai-explainability.git
       - mvn clean install -DskipTests -f trustyai-explainability/pom.xml -Pquickly -fae -e -nsu
