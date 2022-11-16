@@ -33,6 +33,16 @@ LEVEL_1_CONFIG = {
     "num_features": 11
 }
 
+LEVEL_1_CONFIG_LIME = {
+    "rhos": np.linspace(0, 1, 5),
+    "bench_datasets": ["gaussianLinear", "gaussianNonLinearAdditive", "gaussianPiecewiseConstant"],
+    "bench_explainers": ["limetrustyai_mlp", "limetrustyai_wlr", "lime", "random"],
+    "bench_models": ["lr", "dtree", "mlp"],
+    "bench_metrics": ["roar_faithfulness", "roar_monotonicity", "faithfulness", "monotonicity",
+                      "shapley", "shapley_corr", "infidelity"],
+    "num_features": 5
+}
+
 LEVEL_2_CONFIG = {
     "rhos": np.linspace(0, 1, 5),
     "bench_datasets": ["gaussianLinear", "gaussianNonLinearAdditive", "gaussianPiecewiseConstant",
@@ -161,16 +171,28 @@ def level_n(level):
     plot_test_results(results_df, level)
     results_df.to_pickle("level_{}_results.pkl".format(level))
 
+
+def level_config(config, name):
+    results_df = run_test_config(config)
+    plot_test_results(results_df, name)
+    results_df.to_pickle("level_{}_results.pkl".format(name))
+
+
 def test_level_0():
     # ~4.5 min
     level_n(0)
+
 
 def test_level_1():
     # ~2.5 hours
     level_n(1)
 
+
 def test_level_2():
-    # ~4.5 min
+    # loooong
     level_n(2)
 
+
+def test_lime():
+    level_config(LEVEL_1_CONFIG_LIME, "LIME")
 

@@ -356,6 +356,7 @@ class LimeExplainer:
         samples=10,
         penalise_sparse_balance=True,
         normalise_weights=True,
+        use_wlr_model=False,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -385,6 +386,7 @@ class LimeExplainer:
             .withEncodingParams(EncodingParams(0.07, 0.3))
             .withAdaptiveVariance(True)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
+            .withUseWLRLinearModel(use_wlr_model)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
