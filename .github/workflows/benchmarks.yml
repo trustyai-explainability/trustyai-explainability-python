@@ -44,13 +44,7 @@ jobs:
         with:
           name: TrustyAI continuous benchmarks
           tool: 'pytest'
-          output-file-path: tests/benchmarks/results.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
-          alert-threshold: '200%'
-          comment-on-alert: true
           comment-always: true
           fail-on-alert: false
-          save-data-file: false
           alert-comment-cc-users: '@ruivieira'
-          skip-fetch-gh-pages: true
