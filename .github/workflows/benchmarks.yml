@@ -53,3 +53,4 @@ jobs:
           fail-on-alert: false
           save-data-file: false
           alert-comment-cc-users: '@ruivieira'
+          skip-fetch-gh-pages: true
