@@ -1,11 +1,9 @@
-name: TrustyAI Python benchmarks
+name: TrustyAI Python benchmarks (PR)
 
 on:
-  push:
-    branches:
-      - '*'
-      - '!main'
   pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -29,27 +27,24 @@ jobs:
           check-latest: true
       - uses: stCarolas/setup-maven@v4
         with:
-          maven-version: 3.5.4
-      - name: Install dependencies
+          maven-version: 3.8.1
+      - name: Build explainability-core
+        uses: ./.github/actions/build-core
+      - name: Build arrow-converter
+        uses: ./.github/actions/build-arrow
+      - name: Install TrustyAI Python package
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
           pip install -r requirements-dev.txt
           pip install .
       - name: Run benchmark
         run: |
           pytest tests/benchmarks/benchmark.py --benchmark-json tests/benchmarks/results.json
-      - name: Store benchmark result
+      - name: Benchmark result comment
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: TrustyAI continuous benchmarks
           tool: 'pytest'
-          output-file-path: tests/benchmarks/results.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
-          alert-threshold: '200%'
-          comment-on-alert: true
           comment-always: true
           fail-on-alert: false
-          save-data-file: false
           alert-comment-cc-users: '@ruivieira'
