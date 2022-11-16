@@ -51,5 +51,5 @@ jobs:
           comment-on-alert: true
           comment-always: true
           fail-on-alert: false
-          save-data-file: true
+          save-data-file: false
           alert-comment-cc-users: '@ruivieira'
