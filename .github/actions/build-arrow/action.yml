@@ -7,4 +7,4 @@ runs:
       shell: bash
       run: |
         mvn clean install -DskipTests -f trustyai-explainability/explainability-arrow/pom.xml -Pshaded -fae -e -nsu
-        mv trustyai-explainability/explainability-arrow/target/explainability-arrow-*-SNAPSHOT.jar src/trustyai/dep/org/trustyai/
+        mv trustyai-explainability/explainability-arrow/target/explainability-arrow-*.jar src/trustyai/dep/org/trustyai/

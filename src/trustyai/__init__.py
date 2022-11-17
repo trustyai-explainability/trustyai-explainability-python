@@ -3,6 +3,7 @@
 """Main TrustyAI Python bindings"""
 import os
 import logging
+from .version import __version__
 
 # set initialized env variable to 0
 import warnings
