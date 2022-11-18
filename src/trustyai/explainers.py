@@ -356,7 +356,8 @@ class LimeExplainer:
         samples=10,
         penalise_sparse_balance=True,
         normalise_weights=True,
-        use_wlr_model=False,
+        use_wlr_model=True,
+        **kwargs,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -705,6 +706,7 @@ class SHAPExplainer:
         batch_size=20,
         seed=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
+        **kwargs,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 

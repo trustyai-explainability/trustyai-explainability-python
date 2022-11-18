@@ -1,0 +1,214 @@
+{
+    "machine_info": {
+        "node": "MacBook-Pro",
+        "processor": "i386",
+        "machine": "x86_64",
+        "python_compiler": "Clang 14.0.0 (clang-1400.0.29.102)",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.10.8",
+        "python_version": "3.10.8",
+        "python_build": [
+            "main",
+            "Oct 13 2022 10:17:43"
+        ],
+        "release": "21.6.0",
+        "system": "Darwin",
+        "cpu": {
+            "python_version": "3.10.8.final.0 (64 bit)",
+            "cpuinfo_version": [
+                9,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "9.0.0",
+            "arch": "X86_64",
+            "bits": 64,
+            "count": 10,
+            "arch_string_raw": "x86_64",
+            "brand_raw": "Apple M1 Pro",
+            "hz_actual_friendly": "2.4000 GHz",
+            "hz_actual": [
+                2400000000,
+                0
+            ],
+            "family": 6,
+            "flags": [
+                "acpi",
+                "aes",
+                "apic",
+                "clflush",
+                "clfsh",
+                "cmov",
+                "cx16",
+                "cx8",
+                "de",
+                "ds",
+                "dscpl",
+                "dtes64",
+                "dtse64",
+                "est",
+                "fpu",
+                "fxsr",
+                "htt",
+                "lahf_lm",
+                "mca",
+                "mce",
+                "mmx",
+                "mon",
+                "monitor",
+                "msr",
+                "mtrr",
+                "pae",
+                "pat",
+                "pbe",
+                "pclmulqdq",
+                "pdcm",
+                "pge",
+                "pni",
+                "popcnt",
+                "pse",
+                "pse36",
+                "seglim64",
+                "sep",
+                "ss",
+                "sse",
+                "sse2",
+                "sse3",
+                "sse4.1",
+                "sse4.2",
+                "sse4_1",
+                "sse4_2",
+                "ssse3",
+                "tm",
+                "tm2",
+                "tpr",
+                "tsc",
+                "vme",
+                "vmx"
+            ],
+            "vendor_id_raw": "GenuineIntel",
+            "hz_advertised_friendly": "2.5000 GHz",
+            "hz_advertised": [
+                2500000000,
+                0
+            ],
+            "l2_cache_size": 65536,
+            "l2_cache_line_size": 8192,
+            "l2_cache_associativity": 8,
+            "model": 44
+        }
+    },
+    "commit_info": {
+        "id": "ac3291502dd7f59d7eef37c9daaa60fce8852284",
+        "time": "2022-11-17T10:55:07+00:00",
+        "author_time": "2022-11-17T10:55:07+00:00",
+        "dirty": true,
+        "project": "trustyai-explainability-python",
+        "branch": "xaibench"
+    },
+    "benchmarks": [
+        {
+            "group": "xai_bench",
+            "name": "test_level_0",
+            "fullname": "xai_benchmark.py::test_level_0",
+            "params": null,
+            "param": null,
+            "extra_info": {
+                "runs": [
+                    {
+                        "dataset": "gaussianPiecewiseConstant",
+                        "dataset_mu": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "dataset_rho": 0.5,
+                        "dataset_dim": 3,
+                        "dataset_noise": 0.01,
+                        "dataset_weight": [
+                            2,
+                            1,
+                            0
+                        ],
+                        "dataset_num_train_samples": 1000,
+                        "dataset_num_val_samples": 100,
+                        "model": "mlp",
+                        "explainer": "shap_trustyai",
+                        "runtime": 4.841146945953369,
+                        "model_perf_train": "0.11",
+                        "model_perf_test": "0.09",
+                        "metric_roar_faithfulness": 0.21925176905715038,
+                        "metric_roar_monotonicity": 0.485,
+                        "metric_faithfulness": 0.7282241123808262,
+                        "metric_monotonicity": 0.53,
+                        "metric_shapley": 0.49924938657705564,
+                        "metric_shapley_corr": -0.04964281078654672,
+                        "metric_infidelity": 0.03483956196728693
+                    },
+                    {
+                        "dataset": "gaussianPiecewiseConstant",
+                        "dataset_mu": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "dataset_rho": 0.5,
+                        "dataset_dim": 3,
+                        "dataset_noise": 0.01,
+                        "dataset_weight": [
+                            2,
+                            1,
+                            0
+                        ],
+                        "dataset_num_train_samples": 1000,
+                        "dataset_num_val_samples": 100,
+                        "model": "mlp",
+                        "explainer": "lime_trustyai",
+                        "runtime": 2.513861894607544,
+                        "model_perf_train": "0.11",
+                        "model_perf_test": "0.09",
+                        "metric_roar_faithfulness": 0.10990461464288344,
+                        "metric_roar_monotonicity": 0.48,
+                        "metric_faithfulness": 0.7494115347191364,
+                        "metric_monotonicity": 0.54,
+                        "metric_shapley": 0.40033896847268574,
+                        "metric_shapley_corr": -0.05579307712909496,
+                        "metric_infidelity": 0.043174621287392585
+                    }
+                ]
+            },
+            "options": {
+                "disable_gc": true,
+                "timer": "time",
+                "min_rounds": 1,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 21.530704021453857,
+                "max": 21.530704021453857,
+                "mean": 21.530704021453857,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 21.530704021453857,
+                "iqr": 0.0,
+                "q1": 21.530704021453857,
+                "q3": 21.530704021453857,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 21.530704021453857,
+                "hd15iqr": 21.530704021453857,
+                "ops": 0.04644529965223474,
+                "total": 21.530704021453857,
+                "data": [
+                    21.530704021453857
+                ],
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2022-11-18T15:56:00.151126",
+    "version": "4.0.0"
+}
