@@ -9,11 +9,12 @@ import site
 from typing import List
 import uuid
 import warnings
-from .version import __version__
 
 import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
+
+from .version import __version__
 
 DEFAULT_ARGS = (
     "--add-opens=java.base/java.nio=ALL-UNNAMED",
