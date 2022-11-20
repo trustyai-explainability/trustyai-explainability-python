@@ -14,8 +14,6 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
-from .version import __version__
-
 DEFAULT_ARGS = (
     "--add-opens=java.base/java.nio=ALL-UNNAMED",
 )  # see https://arrow.apache.org/docs/java/install.html#java-compatibility
@@ -28,8 +26,7 @@ def _get_default_path():
         default_dep_path = os.path.join(get_python_lib(), "trustyai", "dep")
 
     core_deps = [
-        f"{default_dep_path}/org/trustyai/explainability-arrow-{__version__}.jar",
-        f"{default_dep_path}/org/trustyai/explainability-arrow-{__version__}-tests.jar",
+        f"{default_dep_path}/org/trustyai/explainability-arrow-999-SNAPSHOT.jar",
     ]
 
     return core_deps, default_dep_path
