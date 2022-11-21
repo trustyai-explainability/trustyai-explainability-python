@@ -423,8 +423,8 @@ class LimeExplainer:
         seed=0,
         samples=10,
         penalise_sparse_balance=True,
-        normalise_weights=True,
         track_counterfactuals=False,
+        normalise_weights=False,
     ):
         """Initialize the :class:`LimeExplainer`.
 
