@@ -78,5 +78,8 @@ numpydoc_show_class_members = False
 
 
 def setup(app):
+    import trustyai
     from trustyai.model import Model
+    from trustyai.utils.tyrus import Tyrus
     Model.__name__ = "Model"
+    Tyrus.__name__ = "Tyrus"
