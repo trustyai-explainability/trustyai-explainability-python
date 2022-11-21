@@ -427,7 +427,7 @@ class LimeExplainer:
         track_counterfactuals=False,
         normalise_weights=False,
         use_wlr_model=True,
-        **kwargs
+        **kwargs,
     ):
         """Initialize the :class:`LimeExplainer`.
 
