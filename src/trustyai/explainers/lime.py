@@ -1,13 +1,12 @@
 """Explainers.lime module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument, duplicate-code
-from typing import Dict, List, Union
+from typing import Dict
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 import pandas as pd
-import numpy as np
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
 from trustyai.utils._visualisation import (
@@ -20,10 +19,7 @@ from trustyai.utils._visualisation import (
     feature_html,
 )
 
-from trustyai.model import (
-    PredictionInput,
-    simple_prediction,
-)
+from trustyai.model import simple_prediction, PredUnionType
 
 from org.kie.trustyai.explainability.local.lime import (
     LimeConfig as _LimeConfig,
@@ -31,9 +27,6 @@ from org.kie.trustyai.explainability.local.lime import (
 )
 from org.kie.trustyai.explainability.model import (
     EncodingParams,
-    Feature,
-    Output,
-    PredictionOutput,
     PredictionProvider,
     Saliency,
     SaliencyResults,
@@ -256,10 +249,7 @@ class LimeExplainer:
         self._explainer = _LimeExplainer(self._lime_config)
 
     def explain(
-        self,
-        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-        model: PredictionProvider,
+        self, inputs: PredUnionType, outputs: PredUnionType, model: PredictionProvider
     ) -> LimeResults:
         """Produce a LIME explanation.
 

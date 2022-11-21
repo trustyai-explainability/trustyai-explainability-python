@@ -34,16 +34,13 @@ from org.kie.trustyai.explainability.local.shap import (
     ShapKernelExplainer as _ShapKernelExplainer,
 )
 from org.kie.trustyai.explainability.model import (
-    Feature,
-    Output,
-    PredictionOutput,
     PredictionProvider,
     Saliency,
     SaliencyResults,
     PerturbationContext,
+    PredUnionType,
 )
 from java.util import Random
-
 
 # pylint: disable=invalid-name
 class SHAPResults(ExplanationVisualiser):
@@ -505,10 +502,7 @@ class SHAPExplainer:
         self._explainer = _ShapKernelExplainer(self._config)
 
     def explain(
-        self,
-        inputs: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-        outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
-        model: PredictionProvider,
+        self, inputs: PredUnionType, outputs: PredUnionType, model: PredictionProvider
     ) -> SHAPResults:
         """Produce a SHAP explanation.
 
