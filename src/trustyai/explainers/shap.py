@@ -1,6 +1,6 @@
 """Explainers.shap module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
-# pylint: disable = unused-argument, consider-using-f-string, invalid-name
+# pylint: disable = unused-argument, consider-using-f-string, invalid-name, too-many-arguments
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
