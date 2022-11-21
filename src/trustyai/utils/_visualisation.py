@@ -1,4 +1,5 @@
 """Visualiser utilies for explainer results"""
+# pylint: disable = consider-using-f-string
 from abc import ABC, abstractmethod
 import pandas as pd
 from pandas.io.formats.style import Styler
@@ -51,7 +52,6 @@ DEFAULT_STYLE = {
     "negative_primary_colour_faded": "#f67f7f",
     "neutral_primary_colour": "#ffffff",
 }
-
 
 DEFAULT_RC_PARAMS = {
     "patch.linewidth": 0.5,
