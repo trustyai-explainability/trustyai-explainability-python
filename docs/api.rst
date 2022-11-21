@@ -60,6 +60,15 @@ trustyai.explainers
 	SHAPExplainer
 	SHAPResults
 
+trustyai.utils
+-------------------
+.. currentmodule:: trustyai.utils.tyrus
+.. explainers_api:
+.. autosummary::
+	:toctree: generated/
+
+	Tyrus
+
 
 
 

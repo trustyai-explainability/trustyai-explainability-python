@@ -1,8 +1,11 @@
 """Explainers module"""
-# pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long
+# pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
+# pylint: disable = unused-argument, too-many-lines
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.plotting import figure
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import numpy as np
@@ -14,7 +17,12 @@ from trustyai.utils._visualisation import (
     ExplanationVisualiser,
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
+    bold_red_html,
+    bold_green_html,
+    output_html,
+    feature_html,
 )
+
 from trustyai.model import (
     counterfactual_prediction,
     feature,
@@ -50,7 +58,7 @@ from org.kie.trustyai.explainability.model import (
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
-from java.util import Random, HashMap
+from java.util import Random
 
 SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
@@ -250,10 +258,24 @@ class LimeResults(ExplanationVisualiser):
     and provides a variety of methods to visualize and interact with the explanation.
     """
 
-    def __init__(self, saliencies: SaliencyResults):
+    def __init__(self, saliencyResults: SaliencyResults):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
-        self._saliencies = saliencies
+        self._saliency_results = saliencyResults
+
+    def map(self) -> Dict[str, Saliency]:
+        """
+        Return a dictionary of found saliencies.
+
+        Returns
+        -------
+        Dict[str, Saliency]
+             A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
+        """
+        return {
+            entry.getKey(): entry.getValue()
+            for entry in self._saliency_results.saliencies.entrySet()
+        }
 
     def as_dataframe(self) -> pd.DataFrame:
         """
@@ -270,11 +292,11 @@ class LimeResults(ExplanationVisualiser):
             * ``${output_name}_value``: The original value of each feature.
             * ``${output_name}_confidence``: The confidence of the reported saliency.
         """
-        outputs = self._saliencies.saliencies.keys()
+        outputs = self.map().keys()
 
         data = {}
         for output in outputs:
-            pfis = self._saliencies.saliencies.get(output).getPerFeatureImportance()
+            pfis = self.map().get(output).getPerFeatureImportance()
             data[f"{output}_features"] = [
                 f"{pfi.getFeature().getName()}" for pfi in pfis
             ]
@@ -299,25 +321,13 @@ class LimeResults(ExplanationVisualiser):
         """
         return self.as_dataframe().style
 
-    def map(self) -> Dict[str, Saliency]:
-        """
-        Return the dictionary of the found saliencies.
-
-        Returns
-        -------
-        Dict[str, Saliency]
-             A dictionary keyed by output name, and the values will be the corresponding
-              :class:`~trustyai.model.Saliency` object.
-        """
-        return self._saliencies.saliencies
-
     def plot(self, decision: str) -> None:
         """Plot the LIME saliencies."""
         with mpl.rc_context(drcp):
             dictionary = {}
-            for feature_importance in self._saliencies.saliencies.get(
-                decision
-            ).getPerFeatureImportance():
+            for feature_importance in (
+                self.map().get(decision).getPerFeatureImportance()
+            ):
                 dictionary[
                     feature_importance.getFeature().name
                 ] = feature_importance.getScore()
@@ -339,6 +349,65 @@ class LimeResults(ExplanationVisualiser):
             plt.tight_layout()
             plt.show()
 
+    def _get_bokeh_plot_dict(self):
+        plot_dict = {}
+        for output_name, value in self.map().items():
+            lime_data_source = pd.DataFrame(
+                [
+                    {
+                        "feature": str(pfi.getFeature().getName()),
+                        "saliency": pfi.getScore(),
+                    }
+                    for pfi in value.getPerFeatureImportance()
+                ]
+            )
+            lime_data_source["color"] = lime_data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour"]
+                if x >= 0
+                else ds["negative_primary_colour"]
+            )
+            lime_data_source["saliency_colored"] = lime_data_source["saliency"].apply(
+                lambda x: (bold_green_html if x >= 0 else bold_red_html)(
+                    "{:.2f}".format(x)
+                )
+            )
+
+            lime_data_source["color_faded"] = lime_data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour_faded"]
+                if x >= 0
+                else ds["negative_primary_colour_faded"]
+            )
+            source = ColumnDataSource(lime_data_source)
+            htool = HoverTool(
+                names=["bars"],
+                tooltips="<h3>LIME</h3> {} saliency to {}: @saliency_colored".format(
+                    feature_html("@feature"), output_html(output_name)
+                ),
+            )
+            bokeh_plot = figure(
+                sizing_mode="stretch_both",
+                title="Lime Feature Importances",
+                y_range=lime_data_source["feature"],
+                tools=[htool],
+            )
+            bokeh_plot.hbar(
+                y="feature",
+                left=0,
+                right="saliency",
+                fill_color="color_faded",
+                line_color="color",
+                hover_color="color",
+                color="color",
+                height=0.75,
+                name="bars",
+                source=source,
+            )
+            bokeh_plot.line([0, 0], [0, len(lime_data_source)], color="#000")
+            bokeh_plot.xaxis.axis_label = "Saliency Value"
+            bokeh_plot.yaxis.axis_label = "Feature"
+            plot_dict[output_name] = bokeh_plot
+        return plot_dict
+
 
 # pylint: disable=too-many-arguments
 class LimeExplainer:
@@ -355,7 +424,10 @@ class LimeExplainer:
         seed=0,
         samples=10,
         penalise_sparse_balance=True,
+        track_counterfactuals=False,
         normalise_weights=False,
+        use_wlr_model=True,
+        **kwargs,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -385,6 +457,8 @@ class LimeExplainer:
             .withEncodingParams(EncodingParams(0.07, 0.3))
             .withAdaptiveVariance(True)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
+            .withUseWLRLinearModel(use_wlr_model)
+            .withTrackCounterfactuals(track_counterfactuals)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
@@ -435,12 +509,11 @@ class SHAPResults(ExplanationVisualiser):
     and provides a variety of methods to visualize and interact with the explanation.
     """
 
-    def __init__(self, shap_results: SaliencyResults, background):
+    def __init__(self, saliency_results: SaliencyResults, background):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
-        self.shap_results = shap_results
+        self._saliency_results = saliency_results
         self.background = background
-        self.old_saliency_method = False
 
     def get_saliencies(self) -> Dict[str, Saliency]:
         """
@@ -451,15 +524,10 @@ class SHAPResults(ExplanationVisualiser):
         Dict[str, Saliency]
              A dictionary of :class:`~trustyai.model.Saliency` objects, keyed by output name.
         """
-        saliencies = self.shap_results.saliencies
-        if isinstance(saliencies, HashMap):
-            output = {
-                entry.getKey(): entry.getValue() for entry in saliencies.entrySet()
-            }
-        else:
-            self.old_saliency_method = True
-            output = {s.getOutput().getName(): s for s in saliencies}
-        return output
+        return {
+            entry.getKey(): entry.getValue()
+            for entry in self._saliency_results.saliencies.entrySet()
+        }
 
     def get_fnull(self):
         """
@@ -470,19 +538,10 @@ class SHAPResults(ExplanationVisualiser):
         Array[float]
              An array of the y-intercepts, in order of the model outputs.
         """
-        saliencies = self.shap_results.saliencies
-        if isinstance(saliencies, HashMap):
-            fnull = {
-                output_name: saliency.getPerFeatureImportance()[-1].getScore()
-                for output_name, saliency in self.get_saliencies().items()
-            }
-        else:
-            self.old_saliency_method = True
-            fnull = {
-                s.getOutput().getName(): self.shap_results.getFnull().getEntry(i)
-                for i, s in enumerate(saliencies)
-            }
-        return fnull
+        return {
+            output_name: saliency.getPerFeatureImportance()[-1].getScore()
+            for output_name, saliency in self.get_saliencies().items()
+        }
 
     def _saliency_to_dataframe(self, saliency, output_name):
         background_mean_feature_values = np.mean(
@@ -494,17 +553,16 @@ class SHAPResults(ExplanationVisualiser):
         ).tolist()
         feature_values = [
             pfi.getFeature().getValue().asNumber()
-            for pfi in saliency.getPerFeatureImportance()
+            for pfi in saliency.getPerFeatureImportance()[:-1]
         ]
-        shap_values = [pfi.getScore() for pfi in saliency.getPerFeatureImportance()]
+        shap_values = [
+            pfi.getScore() for pfi in saliency.getPerFeatureImportance()[:-1]
+        ]
         feature_names = [
             str(pfi.getFeature().getName())
-            for pfi in saliency.getPerFeatureImportance()
+            for pfi in saliency.getPerFeatureImportance()[:-1]
         ]
-        if not self.old_saliency_method:
-            feature_values = feature_values[:-1]
-            shap_values = shap_values[:-1]
-            feature_names = feature_names[:-1]
+
         columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
         visualizer_data_frame = pd.DataFrame(
             [background_mean_feature_values, feature_values, shap_values],
@@ -616,15 +674,12 @@ class SHAPResults(ExplanationVisualiser):
         with mpl.rc_context(drcp):
             for output_name, saliency in self.get_saliencies().items():
                 shap_values = [
-                    pfi.getScore() for pfi in saliency.getPerFeatureImportance()
+                    pfi.getScore() for pfi in saliency.getPerFeatureImportance()[:-1]
                 ]
                 feature_names = [
                     str(pfi.getFeature().getName())
-                    for pfi in saliency.getPerFeatureImportance()
+                    for pfi in saliency.getPerFeatureImportance()[:-1]
                 ]
-                if not self.old_saliency_method:
-                    shap_values = shap_values[:-1]
-                    feature_names = feature_names[:-1]
                 fnull = self.get_fnull()[output_name]
                 prediction = fnull + sum(shap_values)
                 plt.figure()
@@ -669,6 +724,147 @@ class SHAPResults(ExplanationVisualiser):
                 plt.title(f"Explanation of {output_name}")
                 plt.show()
 
+    def _get_bokeh_plot_dict(self):
+        plots = {}
+        for output_name, value in self.get_saliencies().items():
+            fnull = self.get_fnull()[output_name]
+
+            # create dataframe of plot values
+            data_source = pd.DataFrame(
+                [
+                    {
+                        "feature": str(pfi.getFeature().getName()),
+                        "saliency": pfi.getScore(),
+                    }
+                    for pfi in value.getPerFeatureImportance()[:-1]
+                ]
+            )
+            prediction = fnull + data_source["saliency"].sum()
+
+            data_source["color"] = data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour"]
+                if x >= 0
+                else ds["negative_primary_colour"]
+            )
+            data_source["color_faded"] = data_source["saliency"].apply(
+                lambda x: ds["positive_primary_colour_faded"]
+                if x >= 0
+                else ds["negative_primary_colour_faded"]
+            )
+            data_source["index"] = data_source.index
+            data_source["saliency_text"] = data_source["saliency"].apply(
+                lambda x: (bold_red_html if x <= 0 else bold_green_html)(
+                    "{:.2f}".format(x)
+                )
+            )
+            data_source["bottom"] = pd.Series(
+                [fnull] + data_source["saliency"].iloc[0:-1].tolist()
+            ).cumsum()
+            data_source["top"] = data_source["bottom"] + data_source["saliency"]
+
+            # create hovertools
+            htool_fnull = HoverTool(
+                names=["fnull"],
+                tooltips=("<h3>SHAP</h3>Baseline {}: {}").format(
+                    output_name, output_html("{:.2f}".format(fnull))
+                ),
+                line_policy="interp",
+            )
+            htool_pred = HoverTool(
+                names=["pred"],
+                tooltips=("<h3>SHAP</h3>Predicted {}: {}").format(
+                    output_name, output_html("{:.2f}".format(prediction))
+                ),
+                line_policy="interp",
+            )
+            htool_bars = HoverTool(
+                names=["bars"],
+                tooltips="<h3>SHAP</h3> {} contributions to {}: @saliency_text".format(
+                    feature_html("@feature"), output_html(output_name)
+                ),
+            )
+
+            # create plot
+            bokeh_plot = figure(
+                sizing_mode="stretch_both",
+                title="SHAP Feature Contributions",
+                x_range=data_source["feature"],
+                tools=[htool_pred, htool_fnull, htool_bars],
+            )
+
+            # add fnull and background lines
+            line_data_source = ColumnDataSource(
+                pd.DataFrame(
+                    [
+                        {"x": 0, "pred": prediction},
+                        {"x": len(data_source), "pred": prediction},
+                    ]
+                )
+            )
+            fnull_data_source = ColumnDataSource(
+                pd.DataFrame(
+                    [{"x": 0, "fnull": fnull}, {"x": len(data_source), "fnull": fnull}]
+                )
+            )
+
+            bokeh_plot.line(
+                x="x",
+                y="fnull",
+                line_color="#999",
+                hover_line_color="#333",
+                line_width=2,
+                hover_line_width=4,
+                line_dash="dashed",
+                name="fnull",
+                source=fnull_data_source,
+            )
+            bokeh_plot.line(
+                x="x",
+                y="pred",
+                line_color="#999",
+                hover_line_color="#333",
+                line_width=2,
+                hover_line_width=4,
+                name="pred",
+                source=line_data_source,
+            )
+
+            # create candlestick plot lines
+            bokeh_plot.line(
+                x=[0.5, 1],
+                y=data_source.iloc[0]["top"],
+                color=data_source.iloc[0]["color"],
+            )
+            for i in range(1, len(data_source)):
+                # bar left line
+                bokeh_plot.line(
+                    x=[i, i + 0.5],
+                    y=data_source.iloc[i]["bottom"],
+                    color=data_source.iloc[i]["color"],
+                )
+                # bar right line
+                if i != len(data_source) - 1:
+                    bokeh_plot.line(
+                        x=[i + 0.5, i + 1],
+                        y=data_source.iloc[i]["top"],
+                        color=data_source.iloc[i]["color"],
+                    )
+
+            # create candles
+            bokeh_plot.vbar(
+                x="feature",
+                bottom="bottom",
+                top="top",
+                hover_color="color",
+                color="color_faded",
+                width=0.75,
+                name="bars",
+                source=data_source,
+            )
+            bokeh_plot.yaxis.axis_label = str(output_name)
+            plots[output_name] = bokeh_plot
+        return plots
+
 
 class SHAPExplainer:
     r"""*"By how much did each feature contribute to the outputs?"*
@@ -703,6 +899,8 @@ class SHAPExplainer:
         batch_size=20,
         seed=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
+        track_counterfactuals=False,
+        **kwargs,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 
@@ -757,6 +955,7 @@ class SHAPExplainer:
             .withBatchSize(batch_size)
             .withPC(perturbation_context)
             .withBackground(self.background)
+            .withTrackCounterfactuals(track_counterfactuals)
         )
         if samples is not None:
             self._configbuilder.withNSamples(JInt(samples))
@@ -789,7 +988,6 @@ class SHAPExplainer:
             * Pandas DataFrame with 1 row and ``n_outputs`` columns
             * A List of TrustyAI :class:`Output`, as created by the :func:`~output` function
             * A TrustyAI :class:`PredictionOutput`
-
         model : :obj:`~trustyai.model.PredictionProvider`
             The TrustyAI PredictionProvider, as generated by :class:`~trustyai.model.Model` or
             :class:`~trustyai.model.ArrowModel`.
