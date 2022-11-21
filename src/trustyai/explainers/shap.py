@@ -1,6 +1,6 @@
 """Explainers.shap module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
-# pylint: disable = unused-argument, consider-using-f-string, invalid-name, too-many-arguments
+# pylint: disable = unused-argument, consider-using-f-string, invalid-name
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -434,11 +434,7 @@ class SHAPExplainer:
     def __init__(
         self,
         background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
-        samples=None,
-        batch_size=20,
-        seed=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
-        track_counterfactuals=False,
         **kwargs,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
@@ -449,23 +445,26 @@ class SHAPExplainer:
         or List[:class:`PredictionInput]
             The set of background datapoints as an array, dataframe of shape
             ``[n_datapoints, n_features]``, or list of TrustyAI PredictionInputs.
-        samples: int
-            The number of samples to use when computing SHAP values. Higher values will increase
-            explanation accuracy, at the  cost of runtime.
-        batch_size: int
-            The number of batches passed to the PredictionProvider at once. When using a
-            :class:`~Model` in the :func:`explain` function, this parameter has no effect. With an
-            :class:`~ArrowModel`, `batch_sizes` of around
-            :math:`\frac{2000}{\mathtt{len(background)}}` can produce significant
-            performance gains.
-        seed: int
-            The random seed to be used when generating explanations.
         link_type : :obj:`~_ShapConfig.LinkType`
             A choice of either ``trustyai.explainers._ShapConfig.LinkType.IDENTITY``
             or ``trustyai.explainers._ShapConfig.LinkType.LOGIT``. If the model output is a
             probability, choosing the ``LOGIT`` link will rescale explanations into log-odds units.
             Otherwise, choose ``IDENTITY``.
-
+        Keyword Arguments:
+            * samples: int
+                (default=None) The number of samples to use when computing SHAP values. Higher
+                values will increase explanation accuracy, at the  cost of runtime. If none,
+                samples will equal 2048 + 2*n_features
+            * seed: int
+                (default=0) The random seed to be used when generating explanations.
+            * batchSize: int
+                (default=20) The number of batches passed to the PredictionProvider at once.
+                When uusing :class:`~Model` with `arrow=False` this parameter has no effect.
+                If `arrow=True`, `batch_sizes` of around
+                :math:`\frac{2000}{\mathtt{len(background)}}` can produce significant
+                performance gains.
+            * trackCounterfactuals : bool
+                (default=False) Keep track of produced byproduct counterfactuals during SHAP run.
         Returns
         -------
         :class:`~SHAPResults`
@@ -474,7 +473,7 @@ class SHAPExplainer:
         if not link_type:
             link_type = _ShapConfig.LinkType.IDENTITY
         self._jrandom = Random()
-        self._jrandom.setSeed(seed)
+        self._jrandom.setSeed(kwargs.get("seed", 0))
         perturbation_context = PerturbationContext(self._jrandom, 0)
 
         if isinstance(background, np.ndarray):
@@ -491,13 +490,13 @@ class SHAPExplainer:
         self._configbuilder = (
             _ShapConfig.builder()
             .withLink(link_type)
-            .withBatchSize(batch_size)
+            .withBatchSize(kwargs.get("batch_size", 20))
             .withPC(perturbation_context)
             .withBackground(self.background)
-            .withTrackCounterfactuals(track_counterfactuals)
+            .withTrackCounterfactuals(kwargs.get("track_counterfactuals", False))
         )
-        if samples is not None:
-            self._configbuilder.withNSamples(JInt(samples))
+        if kwargs.get("samples") is not None:
+            self._configbuilder.withNSamples(JInt(kwargs["samples"]))
         self._config = self._configbuilder.build()
         self._explainer = _ShapKernelExplainer(self._config)
 
