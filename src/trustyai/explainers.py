@@ -355,7 +355,9 @@ class LimeExplainer:
         seed=0,
         samples=10,
         penalise_sparse_balance=True,
-        normalise_weights=False,
+        normalise_weights=True,
+        use_wlr_model=True,
+        **kwargs,
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -385,6 +387,7 @@ class LimeExplainer:
             .withEncodingParams(EncodingParams(0.07, 0.3))
             .withAdaptiveVariance(True)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
+            .withUseWLRLinearModel(use_wlr_model)
         )
 
         self._explainer = _LimeExplainer(self._lime_config)
@@ -703,6 +706,7 @@ class SHAPExplainer:
         batch_size=20,
         seed=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
+        **kwargs,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 
