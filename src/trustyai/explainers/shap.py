@@ -27,6 +27,7 @@ from trustyai.model import (
     Dataset,
     PredictionInput,
     simple_prediction,
+    PredUnionType,
 )
 
 from org.kie.trustyai.explainability.local.shap import (
@@ -38,7 +39,6 @@ from org.kie.trustyai.explainability.model import (
     Saliency,
     SaliencyResults,
     PerturbationContext,
-    PredUnionType,
 )
 from java.util import Random
 
