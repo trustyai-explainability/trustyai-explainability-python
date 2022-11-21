@@ -6,6 +6,7 @@ import logging
 
 # set initialized env variable to 0
 import warnings
+from .version import __version__
 
 TRUSTYAI_IS_INITIALIZED = False
 
