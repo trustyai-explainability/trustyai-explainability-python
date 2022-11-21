@@ -1,6 +1,6 @@
 """Explainers module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
-# pylint: disable = unused-argument
+# pylint: disable = unused-argument, too-many-lines
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -427,7 +427,7 @@ class LimeExplainer:
         track_counterfactuals=False,
         normalise_weights=False,
         use_wlr_model=True,
-        **kwargs
+        **kwargs,
     ):
         """Initialize the :class:`LimeExplainer`.
 
