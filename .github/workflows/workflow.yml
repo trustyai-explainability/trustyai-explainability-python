@@ -23,8 +23,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Build explainability-core
         uses: ./.github/actions/build-core
-      - name: Build explainability-arrow
-        uses: ./.github/actions/build-arrow
       - name: Install TrustyAI Python package
         run: |
           pip install -r requirements-dev.txt
