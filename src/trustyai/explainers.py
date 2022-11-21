@@ -1,5 +1,6 @@
 """Explainers module"""
-# pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long
+# pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
+# pylint: disable = unused-argument
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -425,6 +426,8 @@ class LimeExplainer:
         penalise_sparse_balance=True,
         track_counterfactuals=False,
         normalise_weights=False,
+        use_wlr_model=True,
+        **kwargs
     ):
         """Initialize the :class:`LimeExplainer`.
 
@@ -454,6 +457,7 @@ class LimeExplainer:
             .withEncodingParams(EncodingParams(0.07, 0.3))
             .withAdaptiveVariance(True)
             .withPenalizeBalanceSparse(penalise_sparse_balance)
+            .withUseWLRLinearModel(use_wlr_model)
             .withTrackCounterfactuals(track_counterfactuals)
         )
 
@@ -896,6 +900,7 @@ class SHAPExplainer:
         seed=0,
         link_type: Optional[_ShapConfig.LinkType] = None,
         track_counterfactuals=False,
+        **kwargs,
     ):
         r"""Initialize the :class:`SHAPxplainer`.
 

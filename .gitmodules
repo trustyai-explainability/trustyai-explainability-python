@@ -1,0 +1,3 @@
+[submodule "tests/benchmarks/trustyai_xai_bench"]
+	path = tests/benchmarks/trustyai_xai_bench
+	url = https://github.com/trustyai-explainability/trustyai_xai_bench
