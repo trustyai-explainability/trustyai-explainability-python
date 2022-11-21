@@ -1,6 +1,6 @@
 """Explainers.lime module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
-# pylint: disable = unused-argument
+# pylint: disable = unused-argument, duplicate-code
 from typing import Dict, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
