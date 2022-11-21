@@ -69,6 +69,8 @@ Type = _Type
 
 trusty_type_map = {"i": "number", "O": "categorical", "f": "number", "b": "bool"}
 
+# universal union type for all Python -> Java data
+PredUnionType = Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput]
 
 # pylint: disable = no-member
 @_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Dataset")
@@ -873,8 +875,7 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
 
 # pylint: disable=line-too-long
 def simple_prediction(
-    input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-    outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+    input_features: PredUnionType, outputs: PredUnionType
 ) -> SimplePrediction:
     """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
     this function will bundle them into Prediction objects for use with the LIME and SHAP
@@ -928,8 +929,8 @@ def simple_prediction(
 
 # pylint: disable=too-many-arguments
 def counterfactual_prediction(
-    input_features: Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput],
-    outputs: Union[np.ndarray, pd.DataFrame, List[Output], PredictionOutput],
+    input_features: PredUnionType,
+    outputs: PredUnionType,
     data_distribution: Optional[DataDistribution] = None,
     uuid: Optional[_uuid.UUID] = None,
     timeout: Optional[float] = None,
