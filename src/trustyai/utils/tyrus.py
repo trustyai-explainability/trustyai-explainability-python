@@ -1,6 +1,7 @@
 """Tyrus module"""
 # pylint: disable = too-few-public-methods, wrong-import-order, protected-access, cell-var-from-loop
 # pylint: disable = too-many-instance-attributes, import-error. too-many-locals
+# pylint: disable = consider-using-f-string
 import numpy as np
 import pandas as pd
 from bokeh.io import show, output_file, output_notebook, reset_output

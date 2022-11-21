@@ -1,5 +1,6 @@
 # pylint: disable = import-error, too-few-public-methods, invalid-name, duplicate-code, too-many-lines
 # pylint: disable = unused-import, wrong-import-order
+# pylint: disable = consider-using-f-string
 """General model classes"""
 import uuid as _uuid
 from typing import List, Optional, Union, Callable

@@ -1,6 +1,6 @@
+# pylint: disable = consider-using-f-string
 """Info text used in Tyrus visualization explainer info"""
 from trustyai.utils._visualisation import bold_red_html, bold_green_html
-
 
 LIME_TEXT = """
 <div style="padding: 10px">
