@@ -30,7 +30,6 @@ from org.kie.trustyai.explainability.local.lime import (
     LimeExplainer as _LimeExplainer,
 )
 from org.kie.trustyai.explainability.model import (
-    DataDistribution,
     EncodingParams,
     Feature,
     Output,

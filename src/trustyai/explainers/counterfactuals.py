@@ -1,7 +1,7 @@
 """Explainers.countefactual module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument
-from typing import Dict, Optional, List, Union
+from typing import Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
@@ -29,14 +29,10 @@ from org.kie.trustyai.explainability.local.counterfactual import (
 )
 from org.kie.trustyai.explainability.model import (
     DataDistribution,
-    EncodingParams,
     Feature,
     Output,
     PredictionOutput,
     PredictionProvider,
-    Saliency,
-    SaliencyResults,
-    PerturbationContext,
 )
 from org.optaplanner.core.config.solver.termination import TerminationConfig
 from java.lang import Long
