@@ -222,9 +222,9 @@ class LimeExplainer:
                 (default=True) Whether to use a weighted linear regression as the LIME explanatory
                 model. If `false`, a multilayer perceptron is used, which generally has a slower
                 runtime,
-            seed: int
+            * seed: int
                 (default=0) The random seed to be used.
-            perturbations: int
+            * perturbations: int
                 (default=1) The starting number of feature perturbations within the explanation
                 process.
             * trackCounterfactuals : bool
