@@ -1,4 +1,5 @@
 # pylint: disable = import-error, import-outside-toplevel, dangerous-default-value, invalid-name, R0801
+# pylint: disable = deprecated-module
 """Main TrustyAI Python bindings"""
 from distutils.sysconfig import get_python_lib
 import glob
