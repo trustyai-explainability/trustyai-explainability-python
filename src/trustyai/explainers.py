@@ -1,5 +1,6 @@
 """Explainers module"""
-# pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long
+# pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
+# pylint: disable = unused-argument
 from typing import Dict, Optional, List, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
