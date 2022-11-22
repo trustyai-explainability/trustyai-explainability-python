@@ -46,13 +46,13 @@ class SaliencyResults(ExplanationResults):
 
     def plot(self, output_name=None, render_bokeh=False) -> None:
         """
-        Plot the saliencies of a particular output
+        Plot the found feature saliencies.
 
         Parameters
         ----------
         output_name : str
             (default=None) The name of the output to be explainer. If `None`, all outputs will
-             be displayed
+            be displayed
         render_bokeh : bool
             (default: false) Whether to render as bokeh (true) or matplotlib (false)
         """
