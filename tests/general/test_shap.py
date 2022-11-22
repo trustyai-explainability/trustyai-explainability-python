@@ -24,7 +24,7 @@ def test_no_variance_one_output():
     shap_explainer = SHAPExplainer(background=background)
     for i in range(2):
         explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
-        for _, saliency in explanation.get_saliencies().items():
+        for _, saliency in explanation.saliency_map().items():
             for feature_importance in saliency.getPerFeatureImportance()[:-1]:
                 assert feature_importance.getScore() == 0.0
 
@@ -44,7 +44,7 @@ def test_shap_arrow():
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
-    for _, saliency in explanation.get_saliencies().items():
+    for _, saliency in explanation.saliency_map().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()[:-1]):
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
@@ -62,7 +62,10 @@ def test_shap_plots():
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
-    explanation.candlestick_plot()
+    explanation.plot()
+    explanation.plot(bokeh=True)
+    explanation.plot(output_name='output-0')
+    explanation.plot(output_name='output-0', bokeh=True)
 
 
 def test_shap_as_df():
