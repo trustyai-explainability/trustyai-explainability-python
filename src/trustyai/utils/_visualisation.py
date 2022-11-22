@@ -2,7 +2,6 @@
 # pylint: disable = consider-using-f-string
 
 
-
 # HTML FORMAT FUNCTIONS ============================================================================
 def bold_green_html(content):
     """Format the content string as a bold, green html object"""

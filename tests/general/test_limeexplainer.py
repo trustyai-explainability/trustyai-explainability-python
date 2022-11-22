@@ -101,9 +101,9 @@ def test_lime_plots():
 
     explanation = lime_explainer.explain(inputs=features, outputs=outputs, model=model)
     explanation.plot()
-    explanation.plot(bokeh=True)
+    explanation.plot(render_bokeh=True)
     explanation.plot(output_name="sum-but0")
-    explanation.plot(output_name="sum-but0", bokeh=True)
+    explanation.plot(output_name="sum-but0", render_bokeh=True)
 
 
 def test_lime_v2():

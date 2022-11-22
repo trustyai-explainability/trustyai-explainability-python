@@ -213,11 +213,15 @@ class SHAPResults(SaliencyResults):
         with mpl.rc_context(drcp):
             shap_values = [
                 pfi.getScore()
-                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[:-1]
+                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[
+                    :-1
+                ]
             ]
             feature_names = [
                 str(pfi.getFeature().getName())
-                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[:-1]
+                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[
+                    :-1
+                ]
             ]
             fnull = self.get_fnull()[output_name]
             prediction = fnull + sum(shap_values)
@@ -231,16 +235,12 @@ class SHAPResults(SaliencyResults):
                 )
                 width = 0.9
                 if j > 0:
-                    plt.plot(
-                        [j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color
-                    )
+                    plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
                 plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
                 pos += shap_values[j]
 
                 if j != len(shap_values) - 1:
-                    plt.plot(
-                        [j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color
-                    )
+                    plt.plot([j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color)
 
             plt.axhline(
                 fnull,
@@ -273,7 +273,9 @@ class SHAPResults(SaliencyResults):
                     "feature": str(pfi.getFeature().getName()),
                     "saliency": pfi.getScore(),
                 }
-                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[:-1]
+                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[
+                    :-1
+                ]
             ]
         )
         prediction = fnull + data_source["saliency"].sum()
@@ -290,9 +292,7 @@ class SHAPResults(SaliencyResults):
         )
         data_source["index"] = data_source.index
         data_source["saliency_text"] = data_source["saliency"].apply(
-            lambda x: (bold_red_html if x <= 0 else bold_green_html)(
-                "{:.2f}".format(x)
-            )
+            lambda x: (bold_red_html if x <= 0 else bold_green_html)("{:.2f}".format(x))
         )
         data_source["bottom"] = pd.Series(
             [fnull] + data_source["saliency"].iloc[0:-1].tolist()
@@ -402,8 +402,11 @@ class SHAPResults(SaliencyResults):
         return bokeh_plot
 
     def _get_bokeh_plot_dict(self):
-        return {decision: self._get_bokeh_plot(decision)
-                for decision in self.saliency_map().keys()}
+        return {
+            decision: self._get_bokeh_plot(decision)
+            for decision in self.saliency_map().keys()
+        }
+
 
 class SHAPExplainer:
     r"""*"By how much did each feature contribute to the outputs?"*

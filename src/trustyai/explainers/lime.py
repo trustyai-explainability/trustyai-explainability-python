@@ -7,7 +7,6 @@ import bokeh.models
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from bokeh.models import ColumnDataSource, HoverTool
-from bokeh.io import show
 from bokeh.plotting import figure
 import pandas as pd
 
@@ -151,9 +150,7 @@ class LimeResults(SaliencyResults):
             else ds["negative_primary_colour"]
         )
         lime_data_source["saliency_colored"] = lime_data_source["saliency"].apply(
-            lambda x: (bold_green_html if x >= 0 else bold_red_html)(
-                "{:.2f}".format(x)
-            )
+            lambda x: (bold_green_html if x >= 0 else bold_red_html)("{:.2f}".format(x))
         )
 
         lime_data_source["color_faded"] = lime_data_source["saliency"].apply(
@@ -192,8 +189,10 @@ class LimeResults(SaliencyResults):
         return bokeh_plot
 
     def _get_bokeh_plot_dict(self) -> Dict[str, bokeh.models.Plot]:
-        return {output_name: self._get_bokeh_plot(output_name)
-                for output_name in self.saliency_map().keys()}
+        return {
+            output_name: self._get_bokeh_plot(output_name)
+            for output_name in self.saliency_map().keys()
+        }
 
 
 class LimeExplainer:

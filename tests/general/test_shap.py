@@ -63,9 +63,9 @@ def test_shap_plots():
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     explanation.plot()
-    explanation.plot(bokeh=True)
+    explanation.plot(render_bokeh=True)
     explanation.plot(output_name='output-0')
-    explanation.plot(output_name='output-0', bokeh=True)
+    explanation.plot(output_name='output-0', render_bokeh=True)
 
 
 def test_shap_as_df():
