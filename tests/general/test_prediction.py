@@ -2,8 +2,8 @@
 """Test model provider interface"""
 
 from common import *
-from trustyai.model import simple_prediction, counterfactual_prediction, Dataset, feature, output
-
+from trustyai.model import simple_prediction, counterfactual_prediction,feature, output
+from trustyai.utils.data_conversions import numpy_to_prediction_object
 import pytest
 
 # test that predictions are created correctly from numpy arrays
@@ -34,8 +34,8 @@ def test_predictions_pandas():
 
 # test that predictions are created correctly from prediction input + outputs
 def test_prediction_pi():
-    input_values = Dataset.numpy_to_prediction_object(np.arange(5).reshape(1, -1), feature)[0]
-    output_values = Dataset.numpy_to_prediction_object(np.arange(2).reshape(1, -1), output)[0]
+    input_values = numpy_to_prediction_object(np.arange(5).reshape(1, -1), feature)[0]
+    output_values = numpy_to_prediction_object(np.arange(2).reshape(1, -1), output)[0]
 
     pred = simple_prediction(input_values, output_values)
     assert len(pred.getInput().getFeatures()) == 5
@@ -46,10 +46,10 @@ def test_prediction_pi():
 
 # test that predictions are created correctly from feature+output lists
 def test_prediction_featurelist():
-    input_values = Dataset.numpy_to_prediction_object(
+    input_values = numpy_to_prediction_object(
         np.arange(5).reshape(1, -1), feature
     )[0].getFeatures()
-    output_values = Dataset.numpy_to_prediction_object(
+    output_values = numpy_to_prediction_object(
         np.arange(2).reshape(1, -1), output
     )[0].getOutputs()
 

@@ -1,13 +1,14 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, invalid-name
 """Implicit conversion test suite"""
-
 from common import *
 
 from jpype import _jclass
 
 from trustyai.model import feature
 from trustyai.model.domain import feature_domain
+from trustyai.utils.data_conversions import one_input_convert, one_output_convert
 from org.kie.trustyai.explainability.model import Type
+
 
 
 def test_list_python_to_java():
@@ -95,3 +96,35 @@ def test_feature_domains():
     assert f2.domain
     print(f2.domain)
     assert not f2.is_constrained
+
+
+def test_one_input_conversion():
+    numpy1 = np.arange(0, 10)
+    numpy2 = np.arange(0, 10).reshape(1, 10)
+    series = pd.Series(numpy1, index=["input-{}".format(i) for i in range(10)])
+    df = pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(10)])
+
+    ta_numpy1 = one_input_convert(numpy1)
+    ta_numpy2 = one_input_convert(numpy2)
+    ta_series = one_input_convert(series)
+    ta_df = one_input_convert(df)
+
+    assert ta_numpy1.equals(ta_numpy2)
+    assert ta_numpy2.equals(ta_series)
+    assert ta_series.equals(ta_df)
+
+
+def test_one_output_conversion():
+    numpy1 = np.arange(0, 10)
+    numpy2 = np.arange(0, 10).reshape(1, 10)
+    series = pd.Series(numpy1, index=["output-{}".format(i) for i in range(10)])
+    df = pd.DataFrame(numpy2, columns=["output-{}".format(i) for i in range(10)])
+
+    ta_numpy1 = one_output_convert(numpy1)
+    ta_numpy2 = one_output_convert(numpy2)
+    ta_series = one_output_convert(series)
+    ta_df = one_output_convert(df)
+
+    assert ta_numpy1.equals(ta_numpy2)
+    assert ta_numpy2.equals(ta_series)
+    assert ta_series.equals(ta_df)
