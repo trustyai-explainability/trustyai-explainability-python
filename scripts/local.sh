@@ -22,6 +22,7 @@ EXP_CORE_DEST=$1
 if [[ "$EXP_CORE_DEST" == "" ]]
 then
   EXP_CORE_DEST="../trustyai-explainability"
+  echo "No argument provided, building trustyai-explainability from ${EXP_CORE_DEST}"
 else
   echo "Building trustyai-explainability from ${EXP_CORE_DEST}"
 fi
