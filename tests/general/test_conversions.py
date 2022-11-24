@@ -119,6 +119,32 @@ def test_one_input_conversion():
     assert ta_series.equals(ta_df)
 
 
+def test_one_input_conversion_domained():
+    n_feats = 5
+    np.random.seed(0)
+
+    domain_bounds = [[np.random.rand(), np.random.rand()] for _ in range(n_feats)]
+    domains = [feature_domain((lb, ub)) for lb, ub in domain_bounds]
+    numpy1 = np.arange(0, n_feats)
+    numpy2 = np.arange(0, n_feats).reshape(1, n_feats)
+    series = pd.Series(numpy1, index=["input-{}".format(i) for i in range(n_feats)])
+    df = pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(n_feats)])
+
+    ta_numpy1 = one_input_convert(numpy1, feature_domains=domains)
+    ta_numpy2 = one_input_convert(numpy2, feature_domains=domains)
+    ta_series = one_input_convert(series, feature_domains=domains)
+    ta_df = one_input_convert(df, feature_domains=domains)
+
+    for converted in [ta_numpy1, ta_numpy2, ta_df, ta_series]:
+        for i in range(n_feats):
+            assert converted.getFeatures().get(i).getDomain().getLowerBound() == domain_bounds[i][0]
+            assert converted.getFeatures().get(i).getDomain().getUpperBound() == domain_bounds[i][1]
+
+    assert ta_numpy1.equals(ta_numpy2)
+    assert ta_numpy2.equals(ta_series)
+    assert ta_series.equals(ta_df)
+
+
 def test_one_output_conversion():
     numpy1 = np.arange(0, 10)
     numpy2 = np.arange(0, 10).reshape(1, 10)
@@ -148,6 +174,7 @@ def test_many_outputs_conversion():
         assert ta_numpy1[i].equals(ta_numpy2[i])
         assert ta_numpy2[i].equals(ta_df[i])
 
+
 def test_many_outputs_conversion2():
     numpy1 = np.arange(0, 100).reshape(10, 10)
     df = pd.DataFrame(numpy1, columns=["output-{}".format(i) for i in range(10)])
@@ -157,6 +184,7 @@ def test_many_outputs_conversion2():
 
     for i in range(10):
         assert ta_numpy1[i].equals(ta_df[i])
+
 
 def test_many_inputs_conversion():
     numpy1 = np.arange(0, 10)
@@ -171,6 +199,7 @@ def test_many_inputs_conversion():
         assert ta_numpy1[i].equals(ta_numpy2[i])
         assert ta_numpy2[i].equals(ta_df[i])
 
+
 def test_many_inputs_conversion2():
     numpy1 = np.arange(0, 100).reshape(10, 10)
     df = pd.DataFrame(numpy1, columns=["input-{}".format(i) for i in range(10)])
@@ -179,4 +208,32 @@ def test_many_inputs_conversion2():
     ta_df = many_inputs_convert(df)
 
     for i in range(10):
+        assert ta_numpy1[i].equals(ta_df[i])
+
+
+def test_many_inputs_conversion_domained():
+    n_feats = 5
+    n_datapoints = 100
+    np.random.seed(0)
+
+    domain_bounds = [[np.random.rand(), np.random.rand()] for _ in range(n_feats)]
+    domains = [feature_domain((lb, ub)) for lb, ub in domain_bounds]
+    numpy1 = np.arange(0, n_feats*n_datapoints).reshape(-1, n_feats)
+    df = pd.DataFrame(numpy1, columns=["input-{}".format(i) for i in range(n_feats)])
+
+    ta_numpy1 = many_inputs_convert(numpy1, feature_domains=domains)
+    ta_df = many_inputs_convert(df, feature_domains=domains)
+
+    assert len(ta_numpy1) == n_datapoints
+    assert len(ta_df) == n_datapoints
+
+    for converted in [ta_numpy1, ta_df]:
+        for i in range(n_datapoints):
+            for j in range(n_feats):
+                assert converted[i].getFeatures().get(j).getDomain().getLowerBound() \
+                       == domain_bounds[j][0]
+                assert converted[j].getFeatures().get(j).getDomain().getUpperBound() \
+                       == domain_bounds[j][1]
+
+    for i in range(n_datapoints):
         assert ta_numpy1[i].equals(ta_df[i])

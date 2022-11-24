@@ -5,12 +5,14 @@
 from typing import Union, List
 
 import trustyai.model
+from trustyai.model.domain import feature_domain
 from org.kie.trustyai.explainability.model import (
     Feature,
     Output,
     PredictionInput,
     PredictionOutput,
 )
+from org.kie.trustyai.explainability.model.domain import FeatureDomain
 
 import pandas as pd
 import numpy as np
@@ -107,36 +109,73 @@ _conversion_docstrings = {
     ],
 }
 
+
+# === Domain Inserter ==============================================================================
+def domain_insertion(
+    undomained_input: PredictionInput, feature_domains: List[FeatureDomain]
+):
+    """Given a PredictionInput and a corresponding list of feature domains, where
+    `len(feature_domains) == len(PredictionInput.getFeatures()`, return a PredictionInput
+    where the ith feature has the ith domain. If the ith domain is `None`, the feature
+    is constrained."""
+    assert len(undomained_input.getFeatures()) == len(feature_domains)
+
+    domained_features = []
+    for i, f in enumerate(undomained_input.getFeatures()):
+        if feature_domains[i] is None:
+            domained_features.append(
+                Feature(f.getName(), f.getType(), f.getValue(), True, None)
+            )
+        else:
+            domained_features.append(
+                Feature(
+                    f.getName(), f.getType(), f.getValue(), False, feature_domains[i]
+                )
+            )
+    return PredictionInput(domained_features)
+
+
 # === input functions ==============================================================================
-def one_input_convert(python_inputs: OneInputUnionType) -> PredictionInput:
+def one_input_convert(
+    python_inputs: OneInputUnionType, feature_domains: FeatureDomain = None
+) -> PredictionInput:
     """Convert an object of OneInputUnionType into a PredictionInput."""
     if isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
             python_inputs = python_inputs.reshape(1, -1)
-        return numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
-    if isinstance(python_inputs, pd.DataFrame):
-        return df_to_prediction_object(python_inputs, trustyai.model.feature)[0]
-    if isinstance(python_inputs, pd.Series):
-        print(pd.DataFrame([python_inputs]))
-        return df_to_prediction_object(
+        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+    elif isinstance(python_inputs, pd.DataFrame):
+        pi = df_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+    elif isinstance(python_inputs, pd.Series):
+        pi = df_to_prediction_object(
             pd.DataFrame([python_inputs]), trustyai.model.feature
         )[0]
-    if isinstance(python_inputs, PredictionInput):
-        return python_inputs
-    # fallback case is List[Feature]
-    return PredictionInput(python_inputs)
+    elif isinstance(python_inputs, PredictionInput):
+        pi = python_inputs
+    else:
+        # fallback case is List[Feature]
+        pi = PredictionInput(python_inputs)
+
+    if feature_domains is not None:
+        pi = domain_insertion(pi, feature_domains)
+    return pi
 
 
-def many_inputs_convert(python_inputs: ManyInputsUnionType) -> List[PredictionInput]:
+def many_inputs_convert(
+    python_inputs: ManyInputsUnionType, feature_domains: List[FeatureDomain] = None
+) -> List[PredictionInput]:
     """Convert an object of ManyInputsUnionType into a List[PredictionInput]"""
     if isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
             python_inputs = python_inputs.reshape(1, -1)
-        return numpy_to_prediction_object(python_inputs, trustyai.model.feature)
-    if isinstance(python_inputs, pd.DataFrame):
-        return df_to_prediction_object(python_inputs, trustyai.model.feature)
+        pis = numpy_to_prediction_object(python_inputs, trustyai.model.feature)
+    elif isinstance(python_inputs, pd.DataFrame):
+        pis = df_to_prediction_object(python_inputs, trustyai.model.feature)
     # fallback case is List[PredictionInput]
-    return python_inputs
+    else:
+        pis = python_inputs
+
+    return [domain_insertion(pi, feature_domains) for pi in pis]
 
 
 # === output functions =============================================================================
