@@ -56,6 +56,7 @@ def test_counterfactual_generation():
     goal = np.array([5])
 
     background_ta = BackgroundGenerator(data).counterfactual(goal, model, 100)
+    assert len(background_ta) > 0
     background = prediction_object_to_numpy(background_ta)
 
     for row in background:

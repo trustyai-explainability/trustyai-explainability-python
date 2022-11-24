@@ -46,6 +46,8 @@ from org.kie.trustyai.explainability.local.shap.background import (
 )
 
 from org.kie.trustyai.explainability.model import (
+    Feature,
+PredictionInput
     PredictionProvider,
     Saliency,
     SaliencyResults,
@@ -417,7 +419,7 @@ class SHAPResults(ExplanationVisualiser):
 
 class BackgroundGenerator():
     @data_conversion_docstring("many_inputs")
-    def __init__(self, datapoints: ManyInputsUnionType, seed=0):
+    def __init__(self, datapoints: ManyInputsUnionType, feature_domains=None, seed=0):
         r"""Initialize the :class:`BackgroundGenerator`.
 
         Parameters
@@ -428,6 +430,12 @@ class BackgroundGenerator():
             The random seed to use in the sampling/generation method
         """
         self.datapoints = many_inputs_convert(datapoints)
+
+        if feature_domains is not None:
+
+        for pi in datapoints:
+            pi =
+
         self.seed = 0
         self._jrandom = Random()
         self._jrandom.setSeed(self.seed)
@@ -530,7 +538,7 @@ class BackgroundGenerator():
             .build()
 
         if len(goals) == 1:
-            return generator.generate(self.datapoints, goals_converted.get(0), k_per_goal)
+            return generator.generate(self.datapoints, goals_converted[0], k_per_goal)
         else:
             return generator.generateRange(
                 self.datapoints,
