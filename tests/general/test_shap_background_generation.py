@@ -5,7 +5,7 @@ import numpy as np
 import math
 
 from trustyai.explainers.shap import BackgroundGenerator
-from trustyai.model import Model
+from trustyai.model import Model, feature_domain
 from trustyai.utils.data_conversions import prediction_object_to_numpy
 
 
@@ -51,12 +51,19 @@ def test_counterfactual_generation():
     seed = 0
     np.random.seed(seed)
     data = np.random.rand(100, 5)
-
     model = Model(lambda x: x.sum(1), arrow=False)
     goal = np.array([5])
 
-    background_ta = BackgroundGenerator(data).counterfactual(goal, model, 100)
-    assert len(background_ta) > 0
+    # check that undomained backgrounds are caught
+    attribute_error_thrown = False
+    try:
+        BackgroundGenerator(data).counterfactual(goal, model, 10, timeout_seconds=5)
+    except AttributeError:
+        attribute_error_thrown = True
+    assert attribute_error_thrown
+
+    domains = [feature_domain((-10, 10)) for _ in range(5)]
+    background_ta = BackgroundGenerator(data, domains).counterfactual(goal, model, 100)
     background = prediction_object_to_numpy(background_ta)
 
     for row in background:
