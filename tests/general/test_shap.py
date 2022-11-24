@@ -37,12 +37,13 @@ def test_shap_arrow():
     background = data.iloc[:100]
     to_explain = data.iloc[100:101]
 
-    model_weights = np.random.rand(5)
+    model_weights = np.randozm.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
     model = Model(predict_function, dataframe_input=True, arrow=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
+
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
     for _, saliency in explanation.get_saliencies().items():

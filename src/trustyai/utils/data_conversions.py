@@ -130,6 +130,8 @@ def one_input_convert(python_inputs: OneInputUnionType) -> PredictionInput:
 def many_inputs_convert(python_inputs: ManyInputsUnionType) -> List[PredictionInput]:
     """Convert an object of ManyInputsUnionType into a List[PredictionInput]"""
     if isinstance(python_inputs, np.ndarray):
+        if len(python_inputs.shape) == 1:
+            python_outputs = python_inputs.reshape(1, -1)
         return numpy_to_prediction_object(python_inputs, trustyai.model.feature)
     if isinstance(python_inputs, pd.DataFrame):
         return df_to_prediction_object(python_inputs, trustyai.model.feature)
@@ -161,6 +163,8 @@ def many_outputs_convert(
 ) -> List[PredictionOutput]:
     """Convert an object of ManyOutputsUnionType into a List[PredictionOutput]"""
     if isinstance(python_outputs, np.ndarray):
+        if len(python_outputs.shape) == 1:
+            python_outputs = python_outputs.reshape(1, -1)
         return numpy_to_prediction_object(python_outputs, trustyai.model.output)
     if isinstance(python_outputs, pd.DataFrame):
         return df_to_prediction_object(python_outputs, trustyai.model.output)

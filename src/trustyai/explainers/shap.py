@@ -505,7 +505,7 @@ class SHAPExplainer:
         ----------
         inputs : {}
             The input features to the model, as a: {}
-        outputs : :{}
+        outputs : {}
             The corresponding model outputs for the provided features, that is,
             ``outputs = model(input_features)``. These can take the form of a: {}
 

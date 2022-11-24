@@ -6,7 +6,12 @@ from jpype import _jclass
 
 from trustyai.model import feature
 from trustyai.model.domain import feature_domain
-from trustyai.utils.data_conversions import one_input_convert, one_output_convert
+from trustyai.utils.data_conversions import (
+    one_input_convert,
+    one_output_convert,
+    many_inputs_convert,
+    many_outputs_convert
+)
 from org.kie.trustyai.explainability.model import Type
 
 
@@ -128,3 +133,50 @@ def test_one_output_conversion():
     assert ta_numpy1.equals(ta_numpy2)
     assert ta_numpy2.equals(ta_series)
     assert ta_series.equals(ta_df)
+
+
+def test_many_outputs_conversion():
+    numpy1 = np.arange(0, 10)
+    numpy2 = np.arange(0, 10).reshape(1, 10)
+    df = pd.DataFrame(numpy2, columns=["output-{}".format(i) for i in range(10)])
+
+    ta_numpy1 = many_outputs_convert(numpy1)
+    ta_numpy2 = many_outputs_convert(numpy2)
+    ta_df = many_outputs_convert(df)
+
+    for i in range(1):
+        assert ta_numpy1[i].equals(ta_numpy2[i])
+        assert ta_numpy2[i].equals(ta_df[i])
+
+def test_many_outputs_conversion2():
+    numpy1 = np.arange(0, 100).reshape(10, 10)
+    df = pd.DataFrame(numpy1, columns=["output-{}".format(i) for i in range(10)])
+
+    ta_numpy1 = many_outputs_convert(numpy1)
+    ta_df = many_outputs_convert(df)
+
+    for i in range(10):
+        assert ta_numpy1[i].equals(ta_df[i])
+
+def test_many_inputs_conversion():
+    numpy1 = np.arange(0, 10)
+    numpy2 = np.arange(0, 10).reshape(1, 10)
+    df = pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(10)])
+
+    ta_numpy1 = many_inputs_convert(numpy1)
+    ta_numpy2 = many_inputs_convert(numpy2)
+    ta_df = many_inputs_convert(df)
+
+    for i in range(1):
+        assert ta_numpy1[i].equals(ta_numpy2[i])
+        assert ta_numpy2[i].equals(ta_df[i])
+
+def test_many_inputs_conversion2():
+    numpy1 = np.arange(0, 100).reshape(10, 10)
+    df = pd.DataFrame(numpy1, columns=["input-{}".format(i) for i in range(10)])
+
+    ta_numpy1 = many_inputs_convert(numpy1)
+    ta_df = many_inputs_convert(df)
+
+    for i in range(10):
+        assert ta_numpy1[i].equals(ta_df[i])
