@@ -175,7 +175,10 @@ def many_inputs_convert(
     else:
         pis = python_inputs
 
-    return [domain_insertion(pi, feature_domains) for pi in pis]
+    if feature_domains is not None:
+        return [domain_insertion(pi, feature_domains) for pi in pis]
+    else:
+        return pis
 
 
 # === output functions =============================================================================
