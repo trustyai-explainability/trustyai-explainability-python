@@ -44,6 +44,7 @@ def test_shap_arrow():
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
+
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
     for _, saliency in explanation.get_saliencies().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()[:-1]):
