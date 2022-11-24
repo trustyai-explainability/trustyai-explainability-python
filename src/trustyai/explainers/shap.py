@@ -47,7 +47,7 @@ from org.kie.trustyai.explainability.local.shap.background import (
 
 from org.kie.trustyai.explainability.model import (
     Feature,
-PredictionInput
+    PredictionInput,
     PredictionProvider,
     Saliency,
     SaliencyResults,
@@ -429,13 +429,8 @@ class BackgroundGenerator():
         seed : int
             The random seed to use in the sampling/generation method
         """
-        self.datapoints = many_inputs_convert(datapoints)
-
-        if feature_domains is not None:
-
-        for pi in datapoints:
-            pi =
-
+        self.datapoints = many_inputs_convert(datapoints, feature_domains)
+        self.feature_domains = feature_domains
         self.seed = 0
         self._jrandom = Random()
         self._jrandom.setSeed(self.seed)
@@ -525,7 +520,9 @@ class BackgroundGenerator():
         :list:`PredictionInput`
             The background dataset to pass to the :class:`~SHAPExplainer`
         """
-
+        if self.feature_domains is None:
+            raise AttributeError("Feature domains must be passed to perform"
+                                 " meaningful counterfactual search")
         goals_converted = many_outputs_convert(goals)
         generator = CounterfactualGenerator.builder()\
             .withModel(model)\

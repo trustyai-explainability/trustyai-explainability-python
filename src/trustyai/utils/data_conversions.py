@@ -12,9 +12,7 @@ from org.kie.trustyai.explainability.model import (
     PredictionInput,
     PredictionOutput,
 )
-from org.kie.trustyai.explainability.model.domain import (
-    FeatureDomain
-)
+from org.kie.trustyai.explainability.model.domain import FeatureDomain
 
 import pandas as pd
 import numpy as np
@@ -113,7 +111,13 @@ _conversion_docstrings = {
 
 
 # === Domain Inserter ==============================================================================
-def domain_insertion(undomained_input: PredictionInput, feature_domains: List[FeatureDomain]):
+def domain_insertion(
+    undomained_input: PredictionInput, feature_domains: List[FeatureDomain]
+):
+    """Given a PredictionInput and a corresponding list of feature domains, where
+    `len(feature_domains) == len(PredictionInput.getFeatures()`, return a PredictionInput
+    where the ith feature has the ith domain. If the ith domain is `None`, the feature
+    is constrained."""
     assert len(undomained_input.getFeatures()) == len(feature_domains)
 
     domained_features = []
@@ -125,17 +129,16 @@ def domain_insertion(undomained_input: PredictionInput, feature_domains: List[Fe
         else:
             domained_features.append(
                 Feature(
-                    f.getName(),
-                    f.getType(),
-                    f.getValue(),
-                    False,
-                    feature_domains[i])
+                    f.getName(), f.getType(), f.getValue(), False, feature_domains[i]
+                )
             )
     return PredictionInput(domained_features)
 
 
 # === input functions ==============================================================================
-def one_input_convert(python_inputs: OneInputUnionType, feature_domains: FeatureDomain= None  ) -> PredictionInput:
+def one_input_convert(
+    python_inputs: OneInputUnionType, feature_domains: FeatureDomain = None
+) -> PredictionInput:
     """Convert an object of OneInputUnionType into a PredictionInput."""
     if isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
@@ -158,19 +161,22 @@ def one_input_convert(python_inputs: OneInputUnionType, feature_domains: Feature
     return pi
 
 
-def many_inputs_convert(python_inputs: ManyInputsUnionType, feature_domains: FeatureDomain=None) -> List[PredictionInput]:
+def many_inputs_convert(
+    python_inputs: ManyInputsUnionType, feature_domains: List[FeatureDomain] = None
+) -> List[PredictionInput]:
     """Convert an object of ManyInputsUnionType into a List[PredictionInput]"""
     if isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
             python_inputs = python_inputs.reshape(1, -1)
         pis = numpy_to_prediction_object(python_inputs, trustyai.model.feature)
     elif isinstance(python_inputs, pd.DataFrame):
-        pis =df_to_prediction_object(python_inputs, trustyai.model.feature)
+        pis = df_to_prediction_object(python_inputs, trustyai.model.feature)
     # fallback case is List[PredictionInput]
     else:
         pis = python_inputs
 
     return [domain_insertion(pi, feature_domains) for pi in pis]
+
 
 # === output functions =============================================================================
 def one_output_convert(python_outputs: OneOutputUnionType) -> PredictionOutput:
@@ -203,9 +209,6 @@ def many_outputs_convert(
         return df_to_prediction_object(python_outputs, trustyai.model.output)
     # fallback case is List[PredictionOutput]
     return python_outputs
-
-
-
 
 
 # === TrustyAI Conversions =========================================================================
