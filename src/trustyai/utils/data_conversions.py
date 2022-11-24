@@ -131,7 +131,7 @@ def many_inputs_convert(python_inputs: ManyInputsUnionType) -> List[PredictionIn
     """Convert an object of ManyInputsUnionType into a List[PredictionInput]"""
     if isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
-            python_outputs = python_inputs.reshape(1, -1)
+            python_inputs = python_inputs.reshape(1, -1)
         return numpy_to_prediction_object(python_inputs, trustyai.model.feature)
     if isinstance(python_inputs, pd.DataFrame):
         return df_to_prediction_object(python_inputs, trustyai.model.feature)
