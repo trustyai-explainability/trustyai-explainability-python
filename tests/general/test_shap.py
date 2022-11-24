@@ -37,7 +37,7 @@ def test_shap_arrow():
     background = data.iloc[:100]
     to_explain = data.iloc[100:101]
 
-    model_weights = np.randozm.rand(5)
+    model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
     model = Model(predict_function, dataframe_input=True, arrow=True)
