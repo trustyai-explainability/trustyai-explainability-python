@@ -43,6 +43,7 @@ def data_conversion_docstring(*keys):
         The input value accepts: {}
     """
     keylist = []
+    print(keys)
     for k in keys:
         if k in _conversion_docstrings:
             keylist += _conversion_docstrings[k]
