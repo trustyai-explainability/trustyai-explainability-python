@@ -45,27 +45,43 @@ def test_kmeans_generation():
         assert np.linalg.norm(row - ground_truth[ground_truth_idx]) < 2.5
 
 
-def test_counterfactual_generation():
-    """Test that k-means recovers centroids of well-clustered data"""
-
+def test_counterfactual_generation_single_goal():
+    """Test that cf background meets requirements"""
     seed = 0
     np.random.seed(seed)
     data = np.random.rand(100, 5)
     model = Model(lambda x: x.sum(1), arrow=False)
-    goal = np.array([5])
+    goal = np.array([1.0])
 
     # check that undomained backgrounds are caught
     attribute_error_thrown = False
     try:
-        BackgroundGenerator(data).counterfactual(goal, model, 10, timeout_seconds=5)
+        BackgroundGenerator(data).counterfactual(goal, model, 10,)
     except AttributeError:
         attribute_error_thrown = True
     assert attribute_error_thrown
 
     domains = [feature_domain((-10, 10)) for _ in range(5)]
-    background_ta = BackgroundGenerator(data, domains).counterfactual(goal, model, 100)
+    background_ta = BackgroundGenerator(data, domains, seed)\
+        .counterfactual(goal, model, 5, step_count=5000, timeout_seconds=2)
     background = prediction_object_to_numpy(background_ta)
 
     for row in background:
-        print(row)
-        assert np.linalg.norm(5 - model(row)) < .01
+        assert np.linalg.norm(goal - model(row.reshape(1, -1))) < .01
+
+
+def test_counterfactual_generation_multi_goal():
+    """Test that cf background meets requirements for multiple goals"""
+
+    seed = 0
+    np.random.seed(seed)
+    data = np.random.rand(100, 5)
+    model = Model(lambda x: x.sum(1), arrow=False)
+    goals = np.arange(1, 10).reshape(-1, 1)
+    domains = [feature_domain((-10, 10)) for _ in range(5)]
+    background_ta = BackgroundGenerator(data, domains, seed)\
+        .counterfactual(goals, model, 1, step_count=5000, timeout_seconds=2, chain=True)
+    background = prediction_object_to_numpy(background_ta)
+
+    for i, goal in enumerate(goals):
+        assert np.linalg.norm(goal - model(background[i:i+1])) < goal[0]/100

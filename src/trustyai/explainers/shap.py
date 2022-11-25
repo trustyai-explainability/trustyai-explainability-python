@@ -1,7 +1,6 @@
 """Explainers.shap module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument, consider-using-f-string, invalid-name
-import random
 from typing import Dict, Optional
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -31,7 +30,8 @@ from trustyai.utils.data_conversions import (
     ManyInputsUnionType,
     ManyOutputsUnionType,
     many_inputs_convert,
-    data_conversion_docstring, many_outputs_convert,
+    data_conversion_docstring,
+    many_outputs_convert,
 )
 
 from org.kie.trustyai.explainability.local.shap import (
@@ -42,12 +42,10 @@ from org.kie.trustyai.explainability.local.shap import (
 from org.kie.trustyai.explainability.local.shap.background import (
     RandomGenerator,
     KMeansGenerator,
-    CounterfactualGenerator
+    CounterfactualGenerator,
 )
 
 from org.kie.trustyai.explainability.model import (
-    Feature,
-    PredictionInput,
     PredictionProvider,
     Saliency,
     SaliencyResults,
@@ -417,7 +415,16 @@ class SHAPResults(ExplanationVisualiser):
             plots[output_name] = bokeh_plot
         return plots
 
-class BackgroundGenerator():
+
+class BackgroundGenerator:
+    r"""Generate a background for the SHAP explainer via one of three algorithms:
+
+    * `sample`: Randomly sample a set of provided points
+    * `kmeans`: Summarize a set of provided points into k centroids
+    * `counterfactual`: Generate a set of background points that meet certain criteria
+
+    """
+
     @data_conversion_docstring("many_inputs")
     def __init__(self, datapoints: ManyInputsUnionType, feature_domains=None, seed=0):
         r"""Initialize the :class:`BackgroundGenerator`.
@@ -468,8 +475,13 @@ class BackgroundGenerator():
         return KMeansGenerator(self.datapoints, self.seed).generate(k)
 
     @data_conversion_docstring("many_outputs")
-    def counterfactual(self, goals: ManyOutputsUnionType, model: PredictionProvider,
-                       k_per_goal=100, **kwargs):
+    def counterfactual(
+        self,
+        goals: ManyOutputsUnionType,
+        model: PredictionProvider,
+        k_per_goal=100,
+        **kwargs,
+    ):
         r"""Generate a background via the CounterfactualExplainer. This lets you specify
         exact output values that the background dataset conforms to, and thus set the reference
         point by which all SHAP values compare. For example, if your model is a regression
@@ -521,30 +533,32 @@ class BackgroundGenerator():
             The background dataset to pass to the :class:`~SHAPExplainer`
         """
         if self.feature_domains is None:
-            raise AttributeError("Feature domains must be passed to perform"
-                                 " meaningful counterfactual search")
+            raise AttributeError(
+                "Feature domains must be passed to perform"
+                " meaningful counterfactual search"
+            )
         goals_converted = many_outputs_convert(goals)
-        generator = CounterfactualGenerator.builder()\
-            .withModel(model)\
-            .withKSeeds(kwargs.get('k_seeds', 5))\
-            .withRandom(self._jrandom)\
-            .withTimeoutSeconds(kwargs.get("timeout_seconds", 30))\
-            .withStepCount(kwargs.get("step_count", 10_000))\
-            .withGoalThreshold(kwargs.get("goal_threshold", .01))\
-            .withMaxAttemptCount(kwargs.get('max_attempt_count', 5))\
+        generator = (
+            CounterfactualGenerator.builder()
+            .withModel(model)
+            .withKSeeds(kwargs.get("k_seeds", 5))
+            .withRandom(self._jrandom)
+            .withTimeoutSeconds(kwargs.get("timeout_seconds", 3))
+            .withStepCount(kwargs.get("step_count", 5_000))
+            .withGoalThreshold(kwargs.get("goal_threshold", 0.01))
+            .withMaxAttemptCount(kwargs.get("max_attempt_count", 5))
             .build()
+        )
 
         if len(goals) == 1:
-            return generator.generate(self.datapoints, goals_converted[0], k_per_goal)
-        else:
-            return generator.generateRange(
-                self.datapoints,
-                goals_converted,
-                k_per_goal,
-                kwargs.get('chain', False)
+            background = generator.generate(
+                self.datapoints, goals_converted[0], k_per_goal
             )
-
-
+        else:
+            background = generator.generateRange(
+                self.datapoints, goals_converted, k_per_goal, kwargs.get("chain", False)
+            )
+        return background
 
 
 class SHAPExplainer:

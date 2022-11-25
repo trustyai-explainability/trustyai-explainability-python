@@ -171,14 +171,13 @@ def many_inputs_convert(
         pis = numpy_to_prediction_object(python_inputs, trustyai.model.feature)
     elif isinstance(python_inputs, pd.DataFrame):
         pis = df_to_prediction_object(python_inputs, trustyai.model.feature)
-    # fallback case is List[PredictionInput]
     else:
+        # fallback case is List[PredictionInput]
         pis = python_inputs
 
     if feature_domains is not None:
-        return [domain_insertion(pi, feature_domains) for pi in pis]
-    else:
-        return pis
+        pis = [domain_insertion(pi, feature_domains) for pi in pis]
+    return pis
 
 
 # === output functions =============================================================================
