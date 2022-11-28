@@ -1,7 +1,7 @@
 """Explainers.shap module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument, consider-using-f-string, invalid-name
-from typing import Dict, Optional, List, Union
+from typing import Dict, Optional
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from bokeh.models import ColumnDataSource, HoverTool
@@ -21,13 +21,15 @@ from trustyai.utils._visualisation import (
     output_html,
     feature_html,
 )
-
 from trustyai.model import (
-    feature,
-    Dataset,
-    PredictionInput,
     simple_prediction,
-    PredUnionType,
+)
+from trustyai.utils.data_conversions import (
+    OneInputUnionType,
+    OneOutputUnionType,
+    ManyInputsUnionType,
+    many_inputs_convert,
+    data_conversion_docstring,
 )
 
 from org.kie.trustyai.explainability.local.shap import (
@@ -434,9 +436,10 @@ class SHAPExplainer:
     the outputs, as compared to the background inputs?*
     """
 
+    @data_conversion_docstring("many_inputs")
     def __init__(
         self,
-        background: Union[np.ndarray, pd.DataFrame, List[PredictionInput]],
+        background: ManyInputsUnionType,
         link_type: Optional[_ShapConfig.LinkType] = None,
         **kwargs,
     ):
@@ -444,10 +447,8 @@ class SHAPExplainer:
 
         Parameters
         ----------
-        background : :class:`numpy.array`, :class:`Pandas.DataFrame`
-        or List[:class:`PredictionInput]
-            The set of background datapoints as an array, dataframe of shape
-            ``[n_datapoints, n_features]``, or list of TrustyAI PredictionInputs.
+        background : {}
+            The set of background datapoints as a: {}
         link_type : :obj:`~_ShapConfig.LinkType`
             A choice of either ``trustyai.explainers._ShapConfig.LinkType.IDENTITY``
             or ``trustyai.explainers._ShapConfig.LinkType.LOGIT``. If the model output is a
@@ -464,10 +465,11 @@ class SHAPExplainer:
                 (default=20) The number of batches passed to the PredictionProvider at once.
                 When uusing :class:`~Model` with `arrow=False` this parameter has no effect.
                 If `arrow=True`, `batch_sizes` of around
-                :math:`\frac{2000}{\mathtt{len(background)}}` can produce significant
+                :math:`\frac{{2000}}{{\mathtt{{len(background)}}}}` can produce significant
                 performance gains.
             * trackCounterfactuals : bool
                 (default=False) Keep track of produced byproduct counterfactuals during SHAP run.
+
         Returns
         -------
         :class:`~SHAPResults`
@@ -477,18 +479,8 @@ class SHAPExplainer:
             link_type = _ShapConfig.LinkType.IDENTITY
         self._jrandom = Random()
         self._jrandom.setSeed(kwargs.get("seed", 0))
+        self.background = many_inputs_convert(background)
         perturbation_context = PerturbationContext(self._jrandom, 0)
-
-        if isinstance(background, np.ndarray):
-            self.background = Dataset.numpy_to_prediction_object(background, feature)
-        elif isinstance(background, pd.DataFrame):
-            self.background = Dataset.df_to_prediction_object(background, feature)
-        elif isinstance(background[0], PredictionInput):
-            self.background = background
-        else:
-            raise AttributeError(
-                "Unsupported background type: {}".format(type(background))
-            )
 
         self._configbuilder = (
             _ShapConfig.builder()
@@ -503,32 +495,22 @@ class SHAPExplainer:
         self._config = self._configbuilder.build()
         self._explainer = _ShapKernelExplainer(self._config)
 
+    @data_conversion_docstring("one_input", "one_output")
     def explain(
-        self, inputs: PredUnionType, outputs: PredUnionType, model: PredictionProvider
+        self,
+        inputs: OneInputUnionType,
+        outputs: OneOutputUnionType,
+        model: PredictionProvider,
     ) -> SHAPResults:
         """Produce a SHAP explanation.
 
         Parameters
         ----------
-        inputs : :class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Feature`], or :class:`PredictionInput`
-            The input features to the model, as a:
-
-            * Numpy array of shape ``[1, n_features]``
-            * Pandas DataFrame with 1 row and ``n_features`` columns
-            * A List of TrustyAI :class:`Feature`, as created by the :func:`~feature` function
-            * A TrustyAI :class:`PredictionInput`
-
-        outputs : :class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Output`], or :class:`PredictionOutput`
+        inputs : {}
+            The input features to the model, as a: {}
+        outputs : {}
             The corresponding model outputs for the provided features, that is,
-            ``outputs = model(input_features)``. These can take the form of a:
-
-            * Numpy array of shape ``[1, n_outputs]``
-            * Pandas DataFrame with 1 row and ``n_outputs`` columns
-            * A List of TrustyAI :class:`Output`, as created by the :func:`~output` function
-            * A TrustyAI :class:`PredictionOutput`
-        model : :obj:`~trustyai.model.PredictionProvider`
-            The TrustyAI PredictionProvider, as generated by :class:`~trustyai.model.Model` or
-            :class:`~trustyai.model.ArrowModel`.
+            ``outputs = model(input_features)``. These can take the form of a: {}
 
         Returns
         -------

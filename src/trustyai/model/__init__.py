@@ -11,6 +11,17 @@ import numpy as np
 from trustyai import _default_initializer
 from trustyai.model.domain import feature_domain
 from trustyai.utils import JImplementsWithDocstring
+from trustyai.utils.data_conversions import (
+    one_input_convert,
+    one_output_convert,
+    OneOutputUnionType,
+    OneInputUnionType,
+    numpy_to_prediction_object,
+    df_to_prediction_object,
+    prediction_object_to_numpy,
+    prediction_object_to_pandas,
+    data_conversion_docstring,
+)
 
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
@@ -67,10 +78,6 @@ VectorSchemaRoot = _VectorSchemaRoot
 Value = _Value
 Type = _Type
 
-trusty_type_map = {"i": "number", "O": "categorical", "f": "number", "b": "bool"}
-
-# universal union type for all Python -> Java data
-PredUnionType = Union[np.ndarray, pd.DataFrame, List[Feature], PredictionInput]
 
 # pylint: disable = no-member
 @_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Dataset")
@@ -110,10 +117,10 @@ class Dataset:
         """
         if not outputs:
             outputs = [df.iloc[:, -1].name]
-        prediction_inputs = Dataset.df_to_prediction_object(
+        prediction_inputs = df_to_prediction_object(
             df.loc[:, ~df.columns.isin(outputs)], feature
         )
-        prediction_outputs = Dataset.df_to_prediction_object(df[outputs], output)
+        prediction_outputs = df_to_prediction_object(df[outputs], output)
         predictions = [
             SimplePrediction(prediction_inputs[i], prediction_outputs[i])
             for i in range(len(prediction_inputs))
@@ -140,160 +147,13 @@ class Dataset:
         if not outputs:
             outputs = [shape[1] - 1]
         inputs = list(set(range(shape[1])).difference(outputs))
-        prediction_inputs = Dataset.numpy_to_prediction_object(
-            array[:, inputs], feature
-        )
-        prediction_outputs = Dataset.numpy_to_prediction_object(
-            array[:, outputs], output
-        )
+        prediction_inputs = numpy_to_prediction_object(array[:, inputs], feature)
+        prediction_outputs = numpy_to_prediction_object(array[:, outputs], output)
         predictions = [
             SimplePrediction(prediction_inputs[i], prediction_outputs[i])
             for i in range(len(prediction_inputs))
         ]
         return _Dataset(predictions)
-
-    # pylint: disable=comparison-with-callable
-    @staticmethod
-    def df_to_prediction_object(
-        df: pd.DataFrame, func
-    ) -> Union[List[PredictionInput], List[PredictionOutput]]:
-        """
-        Convert a Pandas DataFrame into a list of TrustyAI
-        :class:`PredictionInput` or :class:`PredictionOutput`
-
-        Parameters
-        ----------
-        df : :class:`pandas.DataFrame`
-            The DataFrame to be converted.
-        func : :class:`~feature` or :class:`~output`
-            The function to use when converted the DataFrame. If ``feature``, the DataFrame
-            will be wrapped into a :class:`PredictionInput`. If ``output``, the DataFrame
-            will be wrapped into a :class:`PredictionOutput`.
-        """
-        df = df.reset_index(drop=True)
-        features_names = [str(x) for x in df.columns.values]
-        rows = df.values.tolist()
-        types = [trusty_type_map[t.kind] for t in df.dtypes.values]
-        typed_rows = [zip(row, types, features_names) for row in rows]
-        predictions = []
-        wrapper = PredictionInput if func is feature else PredictionOutput
-
-        for row in typed_rows:
-            values = list(row)
-            collection = []
-            for fv in values:
-                f = func(name=fv[2], dtype=fv[1], value=fv[0])
-                collection.append(f)
-            predictions.append(wrapper(collection))
-        return predictions
-
-    @staticmethod
-    def numpy_to_prediction_object(
-        array: np.ndarray, func, names=None
-    ) -> Union[List[PredictionInput], List[PredictionOutput]]:
-        """
-        Convert a Numpy array into a list of TrustyAI
-        :class:`PredictionInput` or :class:`PredictionOutput`
-
-        Parameters
-        ----------
-        array : :class:`np.ndarray`
-            The array to be converted.
-        func: :class:`~feature` or :class:`~output`
-            The function to use when converted the array. If ``feature``, the array
-            will be wrapped into a :class:`PredictionInput`. If ``output``, the array
-            will be wrapped into a :class:`PredictionOutput`.
-        names: list{str]
-            The names of the features/outputs in the created PredictionInput/PredictionOutput object
-        """
-        shape = array.shape
-
-        # pylint: disable=comparison-with-callable
-        if func == feature:
-            prefix = "input"
-            wrapper = PredictionInput
-        else:
-            prefix = "output"
-            wrapper = PredictionOutput
-        if names is None:
-            names = [f"{prefix}-{i}" for i in range(shape[1])]
-        types = [trusty_type_map[array[:, i].dtype.kind] for i in range(shape[1])]
-        predictions = []
-        for row_index in range(shape[0]):
-            collection = []
-            for col_index in range(shape[1]):
-                f = func(
-                    name=names[col_index],
-                    dtype=types[col_index],
-                    value=array[row_index, col_index],
-                )
-                collection.append(f)
-            predictions.append(wrapper(collection))
-        return predictions
-
-    @staticmethod
-    def prediction_object_to_numpy(
-        objects: Union[List[PredictionInput], List[PredictionOutput]]
-    ) -> np.array:
-        """
-        Convert a list of TrustyAI
-        :class:`PredictionInput` or :class:`PredictionOutput` into a Numpy array.
-
-        Parameters
-        ----------
-        objects : List[:class:`PredictionInput`] orList[:class:`PredictionOutput`]
-            The PredictionInput or PredictionOutput objects to be converted.
-        """
-        if isinstance(objects[0], PredictionInput):
-            arr = np.array(
-                [
-                    [f.getValue().getUnderlyingObject() for f in pi.getFeatures()]
-                    for pi in objects
-                ]
-            )
-        else:
-            arr = np.array(
-                [
-                    [o.getValue().getUnderlyingObject() for o in po.getOutputs()]
-                    for po in objects
-                ]
-            )
-        return arr
-
-    @staticmethod
-    def prediction_object_to_pandas(
-        objects: Union[List[PredictionInput], List[PredictionOutput]]
-    ) -> pd.DataFrame:
-        """
-        Convert a list of TrustyAI
-        :class:`PredictionInput` or :class:`PredictionOutput` into a Pandas DataFrame.
-
-        Parameters
-        ----------
-        objects : List[:class:`PredictionInput`] orList[:class:`PredictionOutput`]
-            The PredictionInput or PredictionOutput objects to be converted.
-        """
-        if isinstance(objects[0], PredictionInput):
-            df = pd.DataFrame(
-                [
-                    {
-                        in_feature.getName(): in_feature.getValue().getUnderlyingObject()
-                        for in_feature in pi.getFeatures()
-                    }
-                    for pi in objects
-                ]
-            )
-        else:
-            df = pd.DataFrame(
-                [
-                    {
-                        output.getName(): output.getValue().getUnderlyingObject()
-                        for output in po.getOutputs()
-                    }
-                    for po in objects
-                ]
-            )
-        return df
 
 
 @JImplementsWithDocstring(
@@ -475,18 +335,18 @@ class Model:
             if dataframe_input:
                 self.prediction_provider = PredictionProvider(
                     lambda x: self._cast_outputs(
-                        predict_fun(Dataset.prediction_object_to_pandas(x))
+                        predict_fun(prediction_object_to_pandas(x))
                     )
                 )
             else:
                 self.prediction_provider = PredictionProvider(
                     lambda x: self._cast_outputs(
-                        predict_fun(Dataset.prediction_object_to_numpy(x))
+                        predict_fun(prediction_object_to_numpy(x))
                     )
                 )
 
     def _cast_outputs(self, output_array):
-        return Dataset.df_to_prediction_object(
+        return df_to_prediction_object(
             self._cast_outputs_to_dataframe(output_array), output
         )
 
@@ -874,8 +734,9 @@ def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
 
 
 # pylint: disable=line-too-long
+@data_conversion_docstring("one_input", "one_output")
 def simple_prediction(
-    input_features: PredUnionType, outputs: PredUnionType
+    input_features: OneInputUnionType, outputs: OneOutputUnionType
 ) -> SimplePrediction:
     """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
     this function will bundle them into Prediction objects for use with the LIME and SHAP
@@ -883,54 +744,23 @@ def simple_prediction(
 
     Parameters
     ----------
-    input_features : :class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Feature`], or :class:`PredictionInput`
-        The input features to the model, as a:
-
-        * Numpy array of shape ``[1, n_features]``
-        * Pandas DataFrame with 1 row and ``n_features`` columns
-        * A List of TrustyAI :class:`Feature`, as created by the :func:`~feature` function
-        * A TrustyAI :class:`PredictionInput`
-
-    outputs : :class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Output`], or :class:`PredictionOutput`
-        The corresponding model outputs for the provided features, that is,
-        ``outputs = model(input_features)``. These can take the form of a:
-
-        * Numpy array of shape ``[1, n_outputs]``
-        * Pandas DataFrame with 1 row and ``n_outputs`` columns
-        * A List of TrustyAI :class:`Output`, as created by the :func:`~output` function
-        * A TrustyAI :class:`PredictionOutput`
-
+    input_features : {}
+        List of input features, as a: {}
+    outputs : {}
+        The desired model outputs to be searched for in the counterfactual explanation.
+        These can take the form of a: {}
     """
-    # saliency_map inputs to PredictionInput
-    if isinstance(input_features, np.ndarray):
-        if len(input_features.shape) == 1:
-            input_features = input_features.reshape(1, -1)
-        inputs_ta = Dataset.numpy_to_prediction_object(input_features, feature)[0]
-    elif isinstance(input_features, pd.DataFrame):
-        inputs_ta = Dataset.df_to_prediction_object(input_features, feature)[0]
-    elif isinstance(input_features, PredictionInput):
-        inputs_ta = input_features
-    else:
-        inputs_ta = PredictionInput(input_features)
 
-    # saliency_map outputs to PredictionOutput
-    if isinstance(outputs, np.ndarray):
-        if len(outputs.shape) == 1:
-            outputs = outputs.reshape(1, -1)
-        outputs_ta = Dataset.numpy_to_prediction_object(outputs, output)[0]
-    elif isinstance(outputs, pd.DataFrame):
-        outputs_ta = Dataset.df_to_prediction_object(outputs, output)[0]
-    elif isinstance(outputs, PredictionOutput):
-        outputs_ta = outputs
-    else:
-        outputs_ta = PredictionOutput(outputs)
-    return SimplePrediction(inputs_ta, outputs_ta)
+    return SimplePrediction(
+        one_input_convert(input_features), one_output_convert(outputs)
+    )
 
 
 # pylint: disable=too-many-arguments
+@data_conversion_docstring("one_input", "one_output")
 def counterfactual_prediction(
-    input_features: PredUnionType,
-    outputs: PredUnionType,
+    input_features: OneInputUnionType,
+    outputs: OneOutputUnionType,
     data_distribution: Optional[DataDistribution] = None,
     uuid: Optional[_uuid.UUID] = None,
     timeout: Optional[float] = None,
@@ -941,23 +771,11 @@ def counterfactual_prediction(
 
     Parameters
     ----------
-    input_features : :class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Feature`], or :class:`PredictionInput`
-        List of input features, as a:
-
-        * Numpy array of shape ``[1, n_features]``
-        * Pandas DataFrame with 1 row and ``n_features`` columns
-        * A List of TrustyAI :class:`Feature`, as created by the :func:`~feature` function
-        * A TrustyAI :class:`PredictionInput`
-
-    outputs : :class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Output`], or :class:`PredictionOutput`
+    input_features : {}
+        List of input features, as a: {}
+    outputs : {}
         The desired model outputs to be searched for in the counterfactual explanation.
-        These can take the form of a:
-
-        * Numpy array of shape ``[1, n_outputs]``
-        * Pandas DataFrame with 1 row and ``n_outputs`` columns
-        * A List of TrustyAI :class:`Output`, as created by the :func:`~output` function
-        * A TrustyAI :class:`PredictionOutput`
-
+        These can take the form of a: {}
     data_distribution : Optional[:class:`DataDistribution`]
         The :class:`DataDistribution` to use when sampling the inputs.
     uuid : Optional[:class:`_uuid.UUID`]
@@ -970,33 +788,9 @@ def counterfactual_prediction(
     if timeout:
         timeout = Long(timeout)
 
-    # saliency_map inputs to PredictionInput
-    if isinstance(input_features, np.ndarray):
-        if len(input_features.shape) == 1:
-            input_features = input_features.reshape(1, -1)
-        inputs_ta = Dataset.numpy_to_prediction_object(input_features, feature)[0]
-    elif isinstance(input_features, pd.DataFrame):
-        inputs_ta = Dataset.df_to_prediction_object(input_features, feature)[0]
-    elif isinstance(input_features, PredictionInput):
-        inputs_ta = input_features
-    else:
-        inputs_ta = PredictionInput(input_features)
-
-    # saliency_map outputs to PredictionOutput
-    if isinstance(outputs, np.ndarray):
-        if len(outputs.shape) == 1:
-            outputs = outputs.reshape(1, -1)
-        outputs_ta = Dataset.numpy_to_prediction_object(outputs, output)[0]
-    elif isinstance(outputs, pd.DataFrame):
-        outputs_ta = Dataset.df_to_prediction_object(outputs, output)[0]
-    elif isinstance(outputs, PredictionOutput):
-        outputs_ta = outputs
-    else:
-        outputs_ta = PredictionOutput(outputs)
-
     return CounterfactualPrediction(
-        inputs_ta,
-        outputs_ta,
+        one_input_convert(input_features),
+        one_output_convert(outputs),
         data_distribution,
         uuid,
         timeout,

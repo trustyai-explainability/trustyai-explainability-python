@@ -11,7 +11,8 @@ np.random.seed(0)
 import pytest
 
 from trustyai.explainers import SHAPExplainer
-from trustyai.model import feature, Model, Dataset
+from trustyai.model import feature, Model
+from trustyai.utils.data_conversions import numpy_to_prediction_object
 from trustyai.utils import TestModels
 
 
@@ -20,7 +21,7 @@ def test_no_variance_one_output():
     model = TestModels.getSumSkipModel(0)
 
     background = np.array([[1.0, 2.0, 3.0] for _ in range(2)])
-    prediction_outputs = model.predictAsync(Dataset.numpy_to_prediction_object(background, feature)).get()
+    prediction_outputs = model.predictAsync(numpy_to_prediction_object(background, feature)).get()
     shap_explainer = SHAPExplainer(background=background)
     for i in range(2):
         explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
@@ -42,6 +43,7 @@ def test_shap_arrow():
     model = Model(predict_function, dataframe_input=True, arrow=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
+
 
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
     for _, saliency in explanation.saliency_map().items():

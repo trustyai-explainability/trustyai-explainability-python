@@ -35,8 +35,6 @@ Data Objects
 .. autosummary::
 	:toctree: generated/
 
-	simple_prediction
-	counterfactual_prediction
 	Dataset
 
 Model Classes
