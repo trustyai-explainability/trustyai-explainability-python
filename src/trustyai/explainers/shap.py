@@ -12,8 +12,8 @@ import numpy as np
 from jpype import JInt
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
+from .explanation_results import SaliencyResults
 from trustyai.utils._visualisation import (
-    ExplanationVisualiser,
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
     bold_red_html,
@@ -48,13 +48,13 @@ from org.kie.trustyai.explainability.local.shap.background import (
 from org.kie.trustyai.explainability.model import (
     PredictionProvider,
     Saliency,
-    SaliencyResults,
     PerturbationContext,
 )
 from java.util import Random
 
 
-class SHAPResults(ExplanationVisualiser):
+# pylint: disable=invalid-name
+class SHAPResults(SaliencyResults):
     """Wraps SHAP results. This object is returned by the :class:`~SHAPExplainer`,
     and provides a variety of methods to visualize and interact with the explanation.
     """
@@ -62,10 +62,10 @@ class SHAPResults(ExplanationVisualiser):
     def __init__(self, saliency_results: SaliencyResults, background):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
-        self._saliency_results = saliency_results
+        self._java_saliency_results = saliency_results
         self.background = background
 
-    def get_saliencies(self) -> Dict[str, Saliency]:
+    def saliency_map(self) -> Dict[str, Saliency]:
         """
         Return a dictionary of found saliencies.
 
@@ -76,7 +76,7 @@ class SHAPResults(ExplanationVisualiser):
         """
         return {
             entry.getKey(): entry.getValue()
-            for entry in self._saliency_results.saliencies.entrySet()
+            for entry in self._java_saliency_results.saliencies.entrySet()
         }
 
     def get_fnull(self):
@@ -90,7 +90,7 @@ class SHAPResults(ExplanationVisualiser):
         """
         return {
             output_name: saliency.getPerFeatureImportance()[-1].getScore()
-            for output_name, saliency in self.get_saliencies().items()
+            for output_name, saliency in self.saliency_map().items()
         }
 
     def _saliency_to_dataframe(self, saliency, output_name):
@@ -156,7 +156,7 @@ class SHAPResults(ExplanationVisualiser):
             * ``SHAP Value``: The found SHAP value of this feature.
         """
         df_dict = {}
-        for output_name, saliency in self.get_saliencies().items():
+        for output_name, saliency in self.saliency_map().items():
             df_dict[output_name] = self._saliency_to_dataframe(saliency, output_name)[0]
         return df_dict
 
@@ -189,7 +189,7 @@ class SHAPResults(ExplanationVisualiser):
             return [None] + formats + [None]
 
         df_dict = {}
-        for i, (output_name, saliency) in enumerate(self.get_saliencies().items()):
+        for i, (output_name, saliency) in enumerate(self.saliency_map().items()):
             (
                 df,
                 feature_names,
@@ -218,202 +218,205 @@ class SHAPResults(ExplanationVisualiser):
             )
         return df_dict
 
-    def candlestick_plot(self) -> None:
+    def _matplotlib_plot(self, output_name) -> None:
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
         one per output."""
         with mpl.rc_context(drcp):
-            for output_name, saliency in self.get_saliencies().items():
-                shap_values = [
-                    pfi.getScore() for pfi in saliency.getPerFeatureImportance()[:-1]
+            shap_values = [
+                pfi.getScore()
+                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[
+                    :-1
                 ]
-                feature_names = [
-                    str(pfi.getFeature().getName())
-                    for pfi in saliency.getPerFeatureImportance()[:-1]
+            ]
+            feature_names = [
+                str(pfi.getFeature().getName())
+                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[
+                    :-1
                 ]
-                fnull = self.get_fnull()[output_name]
-                prediction = fnull + sum(shap_values)
-                plt.figure()
-                pos = fnull
-                for j, shap_value in enumerate(shap_values):
-                    color = (
-                        ds["negative_primary_colour"]
-                        if shap_value < 0
-                        else ds["positive_primary_colour"]
-                    )
-                    width = 0.9
-                    if j > 0:
-                        plt.plot(
-                            [j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color
-                        )
-                    plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
-                    pos += shap_values[j]
-
-                    if j != len(shap_values) - 1:
-                        plt.plot(
-                            [j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color
-                        )
-
-                plt.axhline(
-                    fnull,
-                    color="#444444",
-                    linestyle="--",
-                    zorder=0,
-                    label="Background Value",
-                )
-                plt.axhline(prediction, color="#444444", zorder=0, label="Prediction")
-                plt.legend()
-
-                ticksize = np.diff(plt.gca().get_yticks())[0]
-                plt.ylim(
-                    plt.gca().get_ylim()[0] - ticksize / 2,
-                    plt.gca().get_ylim()[1] + ticksize / 2,
-                )
-                plt.xticks(np.arange(len(feature_names)), feature_names)
-                plt.ylabel(saliency.getOutput().getName())
-                plt.xlabel("Feature SHAP Value")
-                plt.title(f"Explanation of {output_name}")
-                plt.show()
-
-    def _get_bokeh_plot_dict(self):
-        plots = {}
-        for output_name, value in self.get_saliencies().items():
+            ]
             fnull = self.get_fnull()[output_name]
+            prediction = fnull + sum(shap_values)
+            plt.figure()
+            pos = fnull
+            for j, shap_value in enumerate(shap_values):
+                color = (
+                    ds["negative_primary_colour"]
+                    if shap_value < 0
+                    else ds["positive_primary_colour"]
+                )
+                width = 0.9
+                if j > 0:
+                    plt.plot([j - 0.5, j + width / 2 * 0.99], [pos, pos], color=color)
+                plt.bar(j, height=shap_value, bottom=pos, color=color, width=width)
+                pos += shap_values[j]
 
-            # create dataframe of plot values
-            data_source = pd.DataFrame(
+                if j != len(shap_values) - 1:
+                    plt.plot([j - width / 2 * 0.99, j + 0.5], [pos, pos], color=color)
+
+            plt.axhline(
+                fnull,
+                color="#444444",
+                linestyle="--",
+                zorder=0,
+                label="Background Value",
+            )
+            plt.axhline(prediction, color="#444444", zorder=0, label="Prediction")
+            plt.legend()
+
+            ticksize = np.diff(plt.gca().get_yticks())[0]
+            plt.ylim(
+                plt.gca().get_ylim()[0] - ticksize / 2,
+                plt.gca().get_ylim()[1] + ticksize / 2,
+            )
+            plt.xticks(np.arange(len(feature_names)), feature_names)
+            plt.ylabel(self.saliency_map()[output_name].getOutput().getName())
+            plt.xlabel("Feature SHAP Value")
+            plt.title(f"Explanation of {output_name}")
+            plt.show()
+
+    def _get_bokeh_plot(self, output_name):
+        fnull = self.get_fnull()[output_name]
+
+        # create dataframe of plot values
+        data_source = pd.DataFrame(
+            [
+                {
+                    "feature": str(pfi.getFeature().getName()),
+                    "saliency": pfi.getScore(),
+                }
+                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()[
+                    :-1
+                ]
+            ]
+        )
+        prediction = fnull + data_source["saliency"].sum()
+
+        data_source["color"] = data_source["saliency"].apply(
+            lambda x: ds["positive_primary_colour"]
+            if x >= 0
+            else ds["negative_primary_colour"]
+        )
+        data_source["color_faded"] = data_source["saliency"].apply(
+            lambda x: ds["positive_primary_colour_faded"]
+            if x >= 0
+            else ds["negative_primary_colour_faded"]
+        )
+        data_source["index"] = data_source.index
+        data_source["saliency_text"] = data_source["saliency"].apply(
+            lambda x: (bold_red_html if x <= 0 else bold_green_html)("{:.2f}".format(x))
+        )
+        data_source["bottom"] = pd.Series(
+            [fnull] + data_source["saliency"].iloc[0:-1].tolist()
+        ).cumsum()
+        data_source["top"] = data_source["bottom"] + data_source["saliency"]
+
+        # create hovertools
+        htool_fnull = HoverTool(
+            names=["fnull"],
+            tooltips=("<h3>SHAP</h3>Baseline {}: {}").format(
+                output_name, output_html("{:.2f}".format(fnull))
+            ),
+            line_policy="interp",
+        )
+        htool_pred = HoverTool(
+            names=["pred"],
+            tooltips=("<h3>SHAP</h3>Predicted {}: {}").format(
+                output_name, output_html("{:.2f}".format(prediction))
+            ),
+            line_policy="interp",
+        )
+        htool_bars = HoverTool(
+            names=["bars"],
+            tooltips="<h3>SHAP</h3> {} contributions to {}: @saliency_text".format(
+                feature_html("@feature"), output_html(output_name)
+            ),
+        )
+
+        # create plot
+        bokeh_plot = figure(
+            sizing_mode="stretch_both",
+            title="SHAP Feature Contributions",
+            x_range=data_source["feature"],
+            tools=[htool_pred, htool_fnull, htool_bars],
+        )
+
+        # add fnull and background lines
+        line_data_source = ColumnDataSource(
+            pd.DataFrame(
                 [
-                    {
-                        "feature": str(pfi.getFeature().getName()),
-                        "saliency": pfi.getScore(),
-                    }
-                    for pfi in value.getPerFeatureImportance()[:-1]
+                    {"x": 0, "pred": prediction},
+                    {"x": len(data_source), "pred": prediction},
                 ]
             )
-            prediction = fnull + data_source["saliency"].sum()
+        )
+        fnull_data_source = ColumnDataSource(
+            pd.DataFrame(
+                [{"x": 0, "fnull": fnull}, {"x": len(data_source), "fnull": fnull}]
+            )
+        )
 
-            data_source["color"] = data_source["saliency"].apply(
-                lambda x: ds["positive_primary_colour"]
-                if x >= 0
-                else ds["negative_primary_colour"]
-            )
-            data_source["color_faded"] = data_source["saliency"].apply(
-                lambda x: ds["positive_primary_colour_faded"]
-                if x >= 0
-                else ds["negative_primary_colour_faded"]
-            )
-            data_source["index"] = data_source.index
-            data_source["saliency_text"] = data_source["saliency"].apply(
-                lambda x: (bold_red_html if x <= 0 else bold_green_html)(
-                    "{:.2f}".format(x)
-                )
-            )
-            data_source["bottom"] = pd.Series(
-                [fnull] + data_source["saliency"].iloc[0:-1].tolist()
-            ).cumsum()
-            data_source["top"] = data_source["bottom"] + data_source["saliency"]
+        bokeh_plot.line(
+            x="x",
+            y="fnull",
+            line_color="#999",
+            hover_line_color="#333",
+            line_width=2,
+            hover_line_width=4,
+            line_dash="dashed",
+            name="fnull",
+            source=fnull_data_source,
+        )
+        bokeh_plot.line(
+            x="x",
+            y="pred",
+            line_color="#999",
+            hover_line_color="#333",
+            line_width=2,
+            hover_line_width=4,
+            name="pred",
+            source=line_data_source,
+        )
 
-            # create hovertools
-            htool_fnull = HoverTool(
-                names=["fnull"],
-                tooltips=("<h3>SHAP</h3>Baseline {}: {}").format(
-                    output_name, output_html("{:.2f}".format(fnull))
-                ),
-                line_policy="interp",
-            )
-            htool_pred = HoverTool(
-                names=["pred"],
-                tooltips=("<h3>SHAP</h3>Predicted {}: {}").format(
-                    output_name, output_html("{:.2f}".format(prediction))
-                ),
-                line_policy="interp",
-            )
-            htool_bars = HoverTool(
-                names=["bars"],
-                tooltips="<h3>SHAP</h3> {} contributions to {}: @saliency_text".format(
-                    feature_html("@feature"), output_html(output_name)
-                ),
-            )
-
-            # create plot
-            bokeh_plot = figure(
-                sizing_mode="stretch_both",
-                title="SHAP Feature Contributions",
-                x_range=data_source["feature"],
-                tools=[htool_pred, htool_fnull, htool_bars],
-            )
-
-            # add fnull and background lines
-            line_data_source = ColumnDataSource(
-                pd.DataFrame(
-                    [
-                        {"x": 0, "pred": prediction},
-                        {"x": len(data_source), "pred": prediction},
-                    ]
-                )
-            )
-            fnull_data_source = ColumnDataSource(
-                pd.DataFrame(
-                    [{"x": 0, "fnull": fnull}, {"x": len(data_source), "fnull": fnull}]
-                )
-            )
-
+        # create candlestick plot lines
+        bokeh_plot.line(
+            x=[0.5, 1],
+            y=data_source.iloc[0]["top"],
+            color=data_source.iloc[0]["color"],
+        )
+        for i in range(1, len(data_source)):
+            # bar left line
             bokeh_plot.line(
-                x="x",
-                y="fnull",
-                line_color="#999",
-                hover_line_color="#333",
-                line_width=2,
-                hover_line_width=4,
-                line_dash="dashed",
-                name="fnull",
-                source=fnull_data_source,
+                x=[i, i + 0.5],
+                y=data_source.iloc[i]["bottom"],
+                color=data_source.iloc[i]["color"],
             )
-            bokeh_plot.line(
-                x="x",
-                y="pred",
-                line_color="#999",
-                hover_line_color="#333",
-                line_width=2,
-                hover_line_width=4,
-                name="pred",
-                source=line_data_source,
-            )
-
-            # create candlestick plot lines
-            bokeh_plot.line(
-                x=[0.5, 1],
-                y=data_source.iloc[0]["top"],
-                color=data_source.iloc[0]["color"],
-            )
-            for i in range(1, len(data_source)):
-                # bar left line
+            # bar right line
+            if i != len(data_source) - 1:
                 bokeh_plot.line(
-                    x=[i, i + 0.5],
-                    y=data_source.iloc[i]["bottom"],
+                    x=[i + 0.5, i + 1],
+                    y=data_source.iloc[i]["top"],
                     color=data_source.iloc[i]["color"],
                 )
-                # bar right line
-                if i != len(data_source) - 1:
-                    bokeh_plot.line(
-                        x=[i + 0.5, i + 1],
-                        y=data_source.iloc[i]["top"],
-                        color=data_source.iloc[i]["color"],
-                    )
 
-            # create candles
-            bokeh_plot.vbar(
-                x="feature",
-                bottom="bottom",
-                top="top",
-                hover_color="color",
-                color="color_faded",
-                width=0.75,
-                name="bars",
-                source=data_source,
-            )
-            bokeh_plot.yaxis.axis_label = str(output_name)
-            plots[output_name] = bokeh_plot
-        return plots
+        # create candles
+        bokeh_plot.vbar(
+            x="feature",
+            bottom="bottom",
+            top="top",
+            hover_color="color",
+            color="color_faded",
+            width=0.75,
+            name="bars",
+            source=data_source,
+        )
+        bokeh_plot.yaxis.axis_label = str(output_name)
+        return bokeh_plot
+
+    def _get_bokeh_plot_dict(self):
+        return {
+            decision: self._get_bokeh_plot(decision)
+            for decision in self.saliency_map().keys()
+        }
 
 
 class BackgroundGenerator:

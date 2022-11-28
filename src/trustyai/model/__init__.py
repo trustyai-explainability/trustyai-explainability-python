@@ -750,6 +750,7 @@ def simple_prediction(
         The desired model outputs to be searched for in the counterfactual explanation.
         These can take the form of a: {}
     """
+
     return SimplePrediction(
         one_input_convert(input_features), one_output_convert(outputs)
     )
@@ -787,7 +788,6 @@ def counterfactual_prediction(
     if timeout:
         timeout = Long(timeout)
 
-    # map inputs to PredictionInput
     return CounterfactualPrediction(
         one_input_convert(input_features),
         one_output_convert(outputs),

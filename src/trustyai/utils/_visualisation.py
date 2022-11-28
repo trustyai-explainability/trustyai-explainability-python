@@ -1,21 +1,5 @@
 """Visualiser utilies for explainer results"""
 # pylint: disable = consider-using-f-string
-from abc import ABC, abstractmethod
-import pandas as pd
-from pandas.io.formats.style import Styler
-
-
-# pylint: disable=too-few-public-methods
-class ExplanationVisualiser(ABC):
-    """Abstract class for explanation visualisers"""
-
-    @abstractmethod
-    def as_dataframe(self) -> pd.DataFrame:
-        """Display explanation result as a dataframe"""
-
-    @abstractmethod
-    def as_html(self) -> Styler:
-        """Visualise the styled dataframe"""
 
 
 # HTML FORMAT FUNCTIONS ============================================================================
