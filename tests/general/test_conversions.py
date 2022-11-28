@@ -37,6 +37,37 @@ def test_numeric_domain_tuple():
     assert jdomain.getUpperBound() == 1000.0
 
 
+def test_categorical_numeric_domain_list():
+    """Test create numeric domain from list"""
+    domain = [0, 1000]
+    jdomain = feature_domain(domain)
+    assert jdomain.getCategories().size() == 2
+    assert jdomain.getCategories().containsAll(domain)
+
+    domain = [0.0, 1000.0]
+    jdomain = feature_domain(domain)
+    assert jdomain.getCategories().size() == 2
+    assert jdomain.getCategories().containsAll(domain)
+
+
+def test_categorical_object_domain_list():
+    """Test create object domain from list"""
+    domain = [True, False]
+    jdomain = feature_domain(domain)
+    assert str(jdomain.getClass().getSimpleName()) == "ObjectFeatureDomain"
+    assert jdomain.getCategories().size() == 2
+    assert jdomain.getCategories().containsAll(domain)
+
+
+def test_categorical_object_domain_list_2():
+    """Test create object domain from list"""
+    domain = [b"test", b"test2"]
+    jdomain = feature_domain(domain)
+    assert str(jdomain.getClass().getSimpleName()) == "ObjectFeatureDomain"
+    assert jdomain.getCategories().size() == 2
+    assert jdomain.getCategories().containsAll(domain)
+
+
 def test_empty_domain():
     """Test empty domain"""
     domain = feature_domain(None)
@@ -45,7 +76,7 @@ def test_empty_domain():
 
 def test_categorical_domain_tuple():
     """Test create categorical domain from tuple and list"""
-    domain = ("foo", "bar", "baz")
+    domain = ["foo", "bar", "baz"]
     jdomain = feature_domain(domain)
     assert jdomain.getCategories().size() == 3
     assert jdomain.getCategories().containsAll(list(domain))
@@ -54,7 +85,6 @@ def test_categorical_domain_tuple():
     jdomain = feature_domain(domain)
     assert jdomain.getCategories().size() == 3
     assert jdomain.getCategories().containsAll(domain)
-
 
 def test_feature_function():
     """Test helper method to create features"""
