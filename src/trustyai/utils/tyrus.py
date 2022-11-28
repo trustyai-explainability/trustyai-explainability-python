@@ -146,8 +146,8 @@ class Tyrus:
         )
 
         # extract found byproduct counterfactuals
-        shap_cfs = list(self.shap_saliencies._saliency_results.getAvailableCFs())
-        lime_cfs = list(self.lime_saliencies._saliency_results.getAvailableCFs())
+        shap_cfs = list(self.shap_saliencies._java_saliency_results.getAvailableCFs())
+        lime_cfs = list(self.lime_saliencies._java_saliency_results.getAvailableCFs())
 
         # randomly select some to filter as per self.fraction_counterfactuals_to_display
         # this is just to speed up plot rendering

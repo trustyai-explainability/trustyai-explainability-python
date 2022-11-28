@@ -901,7 +901,7 @@ def simple_prediction(
         * A TrustyAI :class:`PredictionOutput`
 
     """
-    # map inputs to PredictionInput
+    # saliency_map inputs to PredictionInput
     if isinstance(input_features, np.ndarray):
         if len(input_features.shape) == 1:
             input_features = input_features.reshape(1, -1)
@@ -913,7 +913,7 @@ def simple_prediction(
     else:
         inputs_ta = PredictionInput(input_features)
 
-    # map outputs to PredictionOutput
+    # saliency_map outputs to PredictionOutput
     if isinstance(outputs, np.ndarray):
         if len(outputs.shape) == 1:
             outputs = outputs.reshape(1, -1)
@@ -970,7 +970,7 @@ def counterfactual_prediction(
     if timeout:
         timeout = Long(timeout)
 
-    # map inputs to PredictionInput
+    # saliency_map inputs to PredictionInput
     if isinstance(input_features, np.ndarray):
         if len(input_features.shape) == 1:
             input_features = input_features.reshape(1, -1)
@@ -982,7 +982,7 @@ def counterfactual_prediction(
     else:
         inputs_ta = PredictionInput(input_features)
 
-    # map outputs to PredictionOutput
+    # saliency_map outputs to PredictionOutput
     if isinstance(outputs, np.ndarray):
         if len(outputs.shape) == 1:
             outputs = outputs.reshape(1, -1)
