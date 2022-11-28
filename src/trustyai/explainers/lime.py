@@ -25,6 +25,7 @@ from trustyai.utils.data_conversions import (
     data_conversion_docstring,
     OneOutputUnionType,
 )
+
 from .explanation_results import SaliencyResults
 from trustyai.model import simple_prediction
 
