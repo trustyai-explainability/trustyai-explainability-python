@@ -2,6 +2,8 @@
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument, duplicate-code, consider-using-f-string, invalid-name
 from typing import Dict
+
+import bokeh.models
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from bokeh.models import ColumnDataSource, HoverTool
@@ -10,7 +12,6 @@ import pandas as pd
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
 from trustyai.utils._visualisation import (
-    ExplanationVisualiser,
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
     bold_red_html,
@@ -18,11 +19,14 @@ from trustyai.utils._visualisation import (
     output_html,
     feature_html,
 )
+
 from trustyai.utils.data_conversions import (
     OneInputUnionType,
     data_conversion_docstring,
     OneOutputUnionType,
 )
+from trustyai.model import simple_prediction
+from .explanation_results import SaliencyResults
 from trustyai.model import simple_prediction
 
 from org.kie.trustyai.explainability.local.lime import (
@@ -33,7 +37,6 @@ from org.kie.trustyai.explainability.model import (
     EncodingParams,
     PredictionProvider,
     Saliency,
-    SaliencyResults,
     PerturbationContext,
 )
 
@@ -42,7 +45,7 @@ from java.util import Random
 LimeConfig = _LimeConfig
 
 
-class LimeResults(ExplanationVisualiser):
+class LimeResults(SaliencyResults):
     """Wraps LIME results. This object is returned by the :class:`~LimeExplainer`,
     and provides a variety of methods to visualize and interact with the explanation.
     """
@@ -50,9 +53,9 @@ class LimeResults(ExplanationVisualiser):
     def __init__(self, saliencyResults: SaliencyResults):
         """Constructor method. This is called internally, and shouldn't ever need to be used
         manually."""
-        self._saliency_results = saliencyResults
+        self._java_saliency_results = saliencyResults
 
-    def map(self) -> Dict[str, Saliency]:
+    def saliency_map(self) -> Dict[str, Saliency]:
         """
         Return a dictionary of found saliencies.
 
@@ -63,7 +66,7 @@ class LimeResults(ExplanationVisualiser):
         """
         return {
             entry.getKey(): entry.getValue()
-            for entry in self._saliency_results.saliencies.entrySet()
+            for entry in self._java_saliency_results.saliencies.entrySet()
         }
 
     def as_dataframe(self) -> pd.DataFrame:
@@ -81,11 +84,11 @@ class LimeResults(ExplanationVisualiser):
             * ``${output_name}_value``: The original value of each feature.
             * ``${output_name}_confidence``: The confidence of the reported saliency.
         """
-        outputs = self.map().keys()
+        outputs = self.saliency_map().keys()
 
         data = {}
         for output in outputs:
-            pfis = self.map().get(output).getPerFeatureImportance()
+            pfis = self.saliency_map().get(output).getPerFeatureImportance()
             data[f"{output}_features"] = [
                 f"{pfi.getFeature().getName()}" for pfi in pfis
             ]
@@ -110,12 +113,12 @@ class LimeResults(ExplanationVisualiser):
         """
         return self.as_dataframe().style
 
-    def plot(self, decision: str) -> None:
+    def _matplotlib_plot(self, output_name: str) -> None:
         """Plot the LIME saliencies."""
         with mpl.rc_context(drcp):
             dictionary = {}
             for feature_importance in (
-                self.map().get(decision).getPerFeatureImportance()
+                self.saliency_map().get(output_name).getPerFeatureImportance()
             ):
                 dictionary[
                     feature_importance.getFeature().name
@@ -127,7 +130,7 @@ class LimeResults(ExplanationVisualiser):
                 else ds["positive_primary_colour"]
                 for i in dictionary.values()
             ]
-            plt.title(f"LIME explanation of {decision}")
+            plt.title(f"LIME explanation of {output_name}")
             plt.barh(
                 range(len(dictionary)),
                 dictionary.values(),
@@ -138,64 +141,65 @@ class LimeResults(ExplanationVisualiser):
             plt.tight_layout()
             plt.show()
 
-    def _get_bokeh_plot_dict(self):
-        plot_dict = {}
-        for output_name, value in self.map().items():
-            lime_data_source = pd.DataFrame(
-                [
-                    {
-                        "feature": str(pfi.getFeature().getName()),
-                        "saliency": pfi.getScore(),
-                    }
-                    for pfi in value.getPerFeatureImportance()
-                ]
-            )
-            lime_data_source["color"] = lime_data_source["saliency"].apply(
-                lambda x: ds["positive_primary_colour"]
-                if x >= 0
-                else ds["negative_primary_colour"]
-            )
-            lime_data_source["saliency_colored"] = lime_data_source["saliency"].apply(
-                lambda x: (bold_green_html if x >= 0 else bold_red_html)(
-                    "{:.2f}".format(x)
-                )
-            )
+    def _get_bokeh_plot(self, output_name) -> bokeh.models.Plot:
+        lime_data_source = pd.DataFrame(
+            [
+                {
+                    "feature": str(pfi.getFeature().getName()),
+                    "saliency": pfi.getScore(),
+                }
+                for pfi in self.saliency_map()[output_name].getPerFeatureImportance()
+            ]
+        )
+        lime_data_source["color"] = lime_data_source["saliency"].apply(
+            lambda x: ds["positive_primary_colour"]
+            if x >= 0
+            else ds["negative_primary_colour"]
+        )
+        lime_data_source["saliency_colored"] = lime_data_source["saliency"].apply(
+            lambda x: (bold_green_html if x >= 0 else bold_red_html)("{:.2f}".format(x))
+        )
 
-            lime_data_source["color_faded"] = lime_data_source["saliency"].apply(
-                lambda x: ds["positive_primary_colour_faded"]
-                if x >= 0
-                else ds["negative_primary_colour_faded"]
-            )
-            source = ColumnDataSource(lime_data_source)
-            htool = HoverTool(
-                names=["bars"],
-                tooltips="<h3>LIME</h3> {} saliency to {}: @saliency_colored".format(
-                    feature_html("@feature"), output_html(output_name)
-                ),
-            )
-            bokeh_plot = figure(
-                sizing_mode="stretch_both",
-                title="Lime Feature Importances",
-                y_range=lime_data_source["feature"],
-                tools=[htool],
-            )
-            bokeh_plot.hbar(
-                y="feature",
-                left=0,
-                right="saliency",
-                fill_color="color_faded",
-                line_color="color",
-                hover_color="color",
-                color="color",
-                height=0.75,
-                name="bars",
-                source=source,
-            )
-            bokeh_plot.line([0, 0], [0, len(lime_data_source)], color="#000")
-            bokeh_plot.xaxis.axis_label = "Saliency Value"
-            bokeh_plot.yaxis.axis_label = "Feature"
-            plot_dict[output_name] = bokeh_plot
-        return plot_dict
+        lime_data_source["color_faded"] = lime_data_source["saliency"].apply(
+            lambda x: ds["positive_primary_colour_faded"]
+            if x >= 0
+            else ds["negative_primary_colour_faded"]
+        )
+        source = ColumnDataSource(lime_data_source)
+        htool = HoverTool(
+            names=["bars"],
+            tooltips="<h3>LIME</h3> {} saliency to {}: @saliency_colored".format(
+                feature_html("@feature"), output_html(output_name)
+            ),
+        )
+        bokeh_plot = figure(
+            sizing_mode="stretch_both",
+            title="Lime Feature Importances",
+            y_range=lime_data_source["feature"],
+            tools=[htool],
+        )
+        bokeh_plot.hbar(
+            y="feature",
+            left=0,
+            right="saliency",
+            fill_color="color_faded",
+            line_color="color",
+            hover_color="color",
+            color="color",
+            height=0.75,
+            name="bars",
+            source=source,
+        )
+        bokeh_plot.line([0, 0], [0, len(lime_data_source)], color="#000")
+        bokeh_plot.xaxis.axis_label = "Saliency Value"
+        bokeh_plot.yaxis.axis_label = "Feature"
+        return bokeh_plot
+
+    def _get_bokeh_plot_dict(self) -> Dict[str, bokeh.models.Plot]:
+        return {
+            output_name: self._get_bokeh_plot(output_name)
+            for output_name in self.saliency_map().keys()
+        }
 
 
 class LimeExplainer:

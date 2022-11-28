@@ -8,8 +8,8 @@ import pandas as pd
 import uuid as _uuid
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
+from .explanation_results import ExplanationResults
 from trustyai.utils._visualisation import (
-    ExplanationVisualiser,
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
 )
@@ -44,7 +44,7 @@ SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
 
 
-class CounterfactualResult(ExplanationVisualiser):
+class CounterfactualResult(ExplanationResults):
     """Wraps Counterfactual results. This object is returned by the
     :class:`~CounterfactualExplainer`, and provides a variety of methods to visualize and interact
     with the results of the counterfactual explanation.
