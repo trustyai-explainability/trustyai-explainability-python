@@ -117,7 +117,7 @@ class CounterfactualResult(ExplanationResults):
         """
         return self.as_dataframe().style
 
-    def plot(self) -> None:
+    def plot(self, block=True) -> None:
         """
         Plot the counterfactual result.
         """
@@ -139,7 +139,7 @@ class CounterfactualResult(ExplanationResults):
                 x="features", color={"proposed": colour, "original": "black"}
             )
             plot.set_title("Counterfactual")
-            plt.show()
+            plt.show(block=block)
 
 
 class CounterfactualExplainer:

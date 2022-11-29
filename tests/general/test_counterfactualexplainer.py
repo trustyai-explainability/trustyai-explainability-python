@@ -1,5 +1,6 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, R0801
 """Test suite for counterfactual explanations"""
+import pytest
 
 from common import *
 
@@ -92,7 +93,7 @@ def test_counterfactual_match_python_model():
                                                                                                         rel=3)
 
 
-def test_counterfactual_plot():
+def counterfactual_plot(block):
     """Test if there's a valid counterfactual with a Python model"""
     GOAL_VALUE = 1000
     goal = np.array([[GOAL_VALUE]])
@@ -110,7 +111,16 @@ def test_counterfactual_plot():
         goal=goal,
         model=model)
 
-    result.plot()
+    result.plot(block=block)
+
+
+@pytest.mark.blocking
+def test_counterfactual_plot_blocking():
+    counterfactual_plot(True)
+
+
+def test_counterfactual_plot():
+    counterfactual_plot(False)
 
 
 def test_counterfactual_v2():
