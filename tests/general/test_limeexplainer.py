@@ -112,7 +112,7 @@ def test_lime_v2():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
-    model = Model(predict_function, dataframe_input=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True)
     explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
     explanation = explainer.explain(inputs=data, outputs=model(data), model=model)
     for score in explanation.as_dataframe()["output-0_score"]:

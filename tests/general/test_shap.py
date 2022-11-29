@@ -40,7 +40,7 @@ def test_shap_arrow():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
-    model = Model(predict_function, dataframe_input=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
@@ -60,7 +60,7 @@ def test_shap_plots():
 
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2 * np.dot(x.values, model_weights)], -1)
-    model = Model(predict_function, dataframe_input=True, arrow=False)
+    model = Model(predict_function, dataframe_input=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
@@ -79,7 +79,7 @@ def test_shap_as_df():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
 
-    model = Model(predict_function, arrow=False)
+    model = Model(predict_function, disable_arrow=True)
 
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)

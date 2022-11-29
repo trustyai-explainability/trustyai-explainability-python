@@ -295,7 +295,7 @@ class Model:
     """
 
     def __init__(
-        self, predict_fun, dataframe_input=False, output_names=None, arrow=False
+        self, predict_fun, dataframe_input=False, output_names=None, disable_arrow=False
     ):
         """
         Wrap the model as a TrustyAI :obj:`PredictionProvider` Java class.
@@ -311,39 +311,75 @@ class Model:
         output_names : List[String]:
             If the model outputs a numpy array, you can specify the names of the model outputs
             here.
-        arrow: bool
-            Whether to use Apache arrow to speed up data transfer between Java and Python.
-            In general, set this to ``true`` whenever LIME or SHAP explanations are needed,
-            and ``false`` for counterfactuals.
+        disable_arrow: bool
+            If true, Apache Arrow will not be used to accelerate data transfer between Java
+            and Python. If false, Arrow will be automatically used in situations where it is
+            advantageous to do so.
         """
-        self.arrow = arrow
+        self.disable_arrow = disable_arrow
         self.predict_fun = predict_fun
         self.output_names = output_names
+        self.dataframe_input = dataframe_input
 
-        if arrow:
-            self.prediction_provider = None
-            if not dataframe_input:
-                self.prediction_provider_arrow = PredictionProviderArrow(
-                    lambda x: self._cast_outputs_to_dataframe(predict_fun(x.values))
-                )
-            else:
-                self.prediction_provider_arrow = PredictionProviderArrow(
-                    lambda x: self._cast_outputs_to_dataframe(predict_fun(x))
-                )
+        self.prediction_provider_arrow = None
+        self.prediction_provider_normal = None
+        self.prediction_provider = None
+
+        # set model to use non-arrow by default, as this requires no dataset information
+        self._set_nonarrow()
+
+    def _set_arrow(self, paradigm_input: PredictionInput):
+        """
+        Ready the model for arrow-based prediction communication.
+
+        Parameters
+        ----------
+        paradigm_input: A single :obj:`PredictionInput` by which to establish the arrow schema.
+        All subsequent :obj:`PredictionInput`s communicated must have this schema.
+        """
+        if self.disable_arrow:
+            self._set_nonarrow()
         else:
-            self.prediction_provider_arrow = None
-            if dataframe_input:
-                self.prediction_provider = PredictionProvider(
-                    lambda x: self._cast_outputs(
-                        predict_fun(prediction_object_to_pandas(x))
-                    )
+            if self.prediction_provider_arrow is None:
+                raw_ppa = self._get_arrow_prediction_provider()
+                self.prediction_provider_arrow = raw_ppa.get_as_prediction_provider(
+                    paradigm_input
                 )
-            else:
-                self.prediction_provider = PredictionProvider(
-                    lambda x: self._cast_outputs(
-                        predict_fun(prediction_object_to_numpy(x))
-                    )
+            self.prediction_provider = self.prediction_provider_arrow
+
+    def _set_nonarrow(self):
+        """
+        Ready the model for non-arrow-prediction communication.
+        """
+        if self.prediction_provider_normal is None:
+            self.prediction_provider_normal = self._get_nonarrow_prediction_provider()
+        self.prediction_provider = self.prediction_provider_normal
+
+    def _get_arrow_prediction_provider(self):
+        if not self.dataframe_input:
+            ppa = PredictionProviderArrow(
+                lambda x: self._cast_outputs_to_dataframe(self.predict_fun(x.values))
+            )
+        else:
+            ppa = PredictionProviderArrow(
+                lambda x: self._cast_outputs_to_dataframe(self.predict_fun(x))
+            )
+        return ppa
+
+    def _get_nonarrow_prediction_provider(self):
+        if self.dataframe_input:
+            ppn = PredictionProvider(
+                lambda x: self._cast_outputs(
+                    self.predict_fun(prediction_object_to_pandas(x))
                 )
+            )
+        else:
+            ppn = PredictionProvider(
+                lambda x: self._cast_outputs(
+                    self.predict_fun(prediction_object_to_numpy(x))
+                )
+            )
+        return ppn
 
     def _cast_outputs(self, output_array):
         return df_to_prediction_object(
@@ -388,12 +424,8 @@ class Model:
         :obj:`CompletableFuture`
             A Java :obj:`CompletableFuture` containing the model outputs.
         """
-        if self.arrow and self.prediction_provider is None:
-            self.prediction_provider = (
-                self.prediction_provider_arrow.get_as_prediction_provider(inputs[0])
-            )
-        out = self.prediction_provider.predictAsync(inputs)
-        return out
+
+        return self.prediction_provider.predictAsync(inputs)
 
     def __call__(self, inputs):
         """
@@ -404,6 +436,51 @@ class Model:
         inputs : Inputs to pass to the model's original `predict_fun`
         """
         return self.predict_fun(inputs)
+
+    class ArrowTransmission:
+        """
+        Context class to ensure all predictAsync calls within the context use arrow.
+
+        Parameters
+        ----------
+        model: The TrustyAI :obj:`Model` or PredictionProvider
+        paradigm_input: A single :obj:`PredictionInput` by which to establish the arrow schema.
+         All subsequent :obj:`PredictionInput`s communicated must have this schema.
+        """
+
+        def __init__(self, model, paradigm_input: OneInputUnionType):
+            self.model = model
+            self.model_is_python = isinstance(model, Model)
+            self.paradigm_input = one_input_convert(paradigm_input)
+            self.previous_model_state = None
+
+        def __enter__(self):
+            if self.model_is_python:
+                self.previous_model_state = self.model.prediction_provider
+                self.model._set_arrow(self.paradigm_input)
+
+        def __exit__(self, exit_type, value, traceback):
+            if self.model_is_python:
+                self.model.prediction_provider = self.previous_model_state
+
+    class NonArrowTransmission:
+        """
+        Context class to ensure all predictAsync calls within the context DO NOT use arrow.
+        """
+
+        def __init__(self, model):
+            self.model = model
+            self.model_is_python = isinstance(model, Model)
+            self.previous_model_state = None
+
+        def __enter__(self):
+            if self.model_is_python:
+                self.previous_model_state = self.model.prediction_provider
+                self.model._set_nonarrow()
+
+        def __exit__(self, exit_type, value, traceback):
+            if self.model_is_python:
+                self.model.prediction_provider = self.previous_model_state
 
 
 @_jcustomizer.JImplementationFor("org.kie.trustyai.explainability.model.Output")
