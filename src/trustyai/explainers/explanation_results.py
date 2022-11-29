@@ -29,7 +29,7 @@ class SaliencyResults(ExplanationResults):
         """Return the Saliencies as a dictionary, keyed by output name"""
 
     @abstractmethod
-    def _matplotlib_plot(self, output_name: str) -> None:
+    def _matplotlib_plot(self, output_name: str, block: bool) -> None:
         """Plot the saliencies of a particular output in matplotlib"""
 
     @abstractmethod
