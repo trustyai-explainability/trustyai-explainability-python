@@ -29,7 +29,8 @@ def test_tyrus_series():
         model,
         data.iloc[100],
         predictions.iloc[100],
-        background=data.iloc[:100]
+        background=data.iloc[:100],
+        filepath=os.getcwd()
     )
 
     # launch dashboard
@@ -66,7 +67,4 @@ def test_tyrus_numpy():
     tyrus.run()
 
     # see if dashboard html exists
-    assert "trustyai_dashboard.html" in os.listdir()
-
-    # cleanup
-    os.remove("trustyai_dashboard.html")
+    assert "trustyai_dashboard.html" in os.listdir(tyrus.filepath)

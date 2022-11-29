@@ -2,6 +2,8 @@
 # pylint: disable = too-few-public-methods, wrong-import-order, protected-access, cell-var-from-loop
 # pylint: disable = too-many-instance-attributes, import-error. too-many-locals
 # pylint: disable = consider-using-f-string
+import tempfile
+
 import numpy as np
 import pandas as pd
 from bokeh.io import show, output_file, output_notebook, reset_output
@@ -110,13 +112,20 @@ class Tyrus:
             The set of background datapoints as a: {}
         Keyword Arguments:
             * fraction_counterfactuals_to_display  : float
-                (Default=0.1) The fraction of found byproduct counterfactuals to display in the
+                (default=`0.1`) The fraction of found byproduct counterfactuals to display in the
                 dashboard, as a float between 0 and 1. Choose a larger number to see more,
                 but this will make plot rendering more expensive.
-            * notebook : bool
-                (Default=False) If true, Tyrus will launch the visualizations inline in a
+            * notebook : `bool
+                (default=`False`) If true, Tyrus will launch the visualizations inline in a
                 Jupyter notebook. If false, the visualizations will be saved as HTML and opened
                 automatically in your default browser.
+            * filepath : str
+                (default=`None`) If `notebook==False`, the Tyrus HTML will be generated in
+                a temporary directory, the path of which can be accessed by `Tyrus.filepath`. Note
+                that this temporary directory will be *deleted* when the Tyrus object is deleted/
+                goes out of scope. Passing a value to `filepath` will manually specify the location
+                which to generate the Tyrus HTML file, which will
+                remain there after execution is finished.
         """
         self.model = model
         self.inputs = one_input_convert(inputs)
@@ -131,7 +140,15 @@ class Tyrus:
         if self.notebook:
             output_notebook()
         else:
-            output_file(filename="trustyai_dashboard.html", title="TrustyAI Dashboard")
+            if kwargs.get("filepath") is None:
+                self.tmp_dir = tempfile.TemporaryDirectory() # pylint: disable=consider-using-with
+                self.filepath = self.tmp_dir.name
+            else:
+                self.filepath = kwargs["filepath"]
+            output_file(
+                filename=
+                self.filepath+"/trustyai_dashboard.html",
+                title="TrustyAI Dashboard")
 
         self.cfdict = None
         self.shap_saliencies = None
