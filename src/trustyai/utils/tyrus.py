@@ -142,8 +142,8 @@ class Tyrus:
         else:
             if kwargs.get("filepath") is None:
                 self.tmp_dir = (
-                    tempfile.TemporaryDirectory()
-                )  # pylint: disable=consider-using-with
+                    tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+                )
                 self.filepath = self.tmp_dir.name
             else:
                 self.filepath = kwargs["filepath"]
