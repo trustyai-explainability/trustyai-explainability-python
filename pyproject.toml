@@ -59,9 +59,9 @@ build-backend = "setuptools.build_meta"
 package-dir = { "" = "src" }
 
 [tool.pytest.ini_options]
-addopts = '-m="not blocking"'
+addopts = '-m="not block_plots"'
 markers = [
-    "blocking: Test plots will block execution of subsequent tests until closed"
+    "block_plots: Test plots will block execution of subsequent tests until closed"
 ]
 
 [tool.setuptools.packages.find]

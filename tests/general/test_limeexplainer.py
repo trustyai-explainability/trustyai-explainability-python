@@ -106,7 +106,7 @@ def lime_plots(block):
     explanation.plot(block=block, output_name="sum-but0", render_bokeh=True)
 
 
-@pytest.mark.blocking
+@pytest.mark.block_plots
 def test_lime_plots_blocking():
     lime_plots(True)
 

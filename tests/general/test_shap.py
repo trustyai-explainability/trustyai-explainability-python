@@ -69,7 +69,7 @@ def shap_plots(block):
     explanation.plot(block=block, output_name='output-0', render_bokeh=True)
 
 
-@pytest.mark.blocking
+@pytest.mark.block_plots
 def test_shap_plots_blocking():
     shap_plots(block=True)
 

@@ -114,7 +114,7 @@ def counterfactual_plot(block):
     result.plot(block=block)
 
 
-@pytest.mark.blocking
+@pytest.mark.block_plots
 def test_counterfactual_plot_blocking():
     counterfactual_plot(True)
 
