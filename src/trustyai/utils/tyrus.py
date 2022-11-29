@@ -141,14 +141,16 @@ class Tyrus:
             output_notebook()
         else:
             if kwargs.get("filepath") is None:
-                self.tmp_dir = tempfile.TemporaryDirectory() # pylint: disable=consider-using-with
+                self.tmp_dir = (
+                    tempfile.TemporaryDirectory()
+                )  # pylint: disable=consider-using-with
                 self.filepath = self.tmp_dir.name
             else:
                 self.filepath = kwargs["filepath"]
             output_file(
-                filename=
-                self.filepath+"/trustyai_dashboard.html",
-                title="TrustyAI Dashboard")
+                filename=self.filepath + "/trustyai_dashboard.html",
+                title="TrustyAI Dashboard",
+            )
 
         self.cfdict = None
         self.shap_saliencies = None
