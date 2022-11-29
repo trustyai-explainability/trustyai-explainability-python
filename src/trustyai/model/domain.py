@@ -60,7 +60,6 @@ def feature_domain(values: Optional[Union[Tuple, List]]) -> Optional[FeatureDoma
             domain = NumericalFeatureDomain.create(values[0], values[1])
 
         elif isinstance(values, list):
-            print(values[0], isinstance(values[0], str))
             java_array = _jclass.JClass("java.util.Arrays").asList(values)
             if isinstance(values[0], bool) and isinstance(values[1], bool):
                 domain = ObjectFeatureDomain.create(java_array)
