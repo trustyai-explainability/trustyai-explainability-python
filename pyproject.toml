@@ -26,7 +26,7 @@ dependencies = [
     "matplotlib==3.5.1",
     "pandas==1.2.5",
     "numpy",
-    "bokeh"
+    "bokeh==2.4.3"
 ]
 
 [project.optional-dependencies]
