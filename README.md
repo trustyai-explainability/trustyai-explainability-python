@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/version-0.2.6-green) [![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml)
+![version](https://img.shields.io/badge/version-0.2.7-green) [![Tests](https://github.com/trustyai-python/module/actions/workflows/workflow.yml/badge.svg)](https://github.com/trustyai-python/examples/actions/workflows/workflow.yml)
 
 # python-trustyai
 
