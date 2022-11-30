@@ -502,33 +502,35 @@ class BackgroundGenerator:
             The number of background datapoints to generate per goal.
         Keyword Arguments:
             * k_seeds: int
-                (default=5) For each goal, a number of starting seeds from `datapoints` are used
+                (default=`5`) For each goal, a number of starting seeds from `datapoints` are used
                 to start the search from. These are the `k_seeds` points within `datapoint`
                 whose corresponding outputs are closet to the goal output. Choose a larger
                 number to get a more diverse background dataset, but the search might require
                 larger `max_attempt_count`, `step_count`, and `timeout_seconds` to get good results.
             * goal_threshold: float
-                (default=.01) The distance (percentage) threshold defining whether
+                (default=`.01`) The distance (percentage) threshold defining whether
                 a particular output satisfies the goal. Set to 0 to require an exact match, but
-                this will likey require larger `max_attempt_count`, `step_count`,
+                this will likely require larger `max_attempt_count`, `step_count`,
                 and `timeout_seconds` to get good results.
             * chain: boolean
-                (default=False) If chaining is set to `true`, found counterfactual datapoints
+                (default=`False`) If chaining is set to `true`, found counterfactual datapoints
                 will be added to the search seeds for subsequent searches. This is useful when a
                 range of counterfactual outputs is desired; for example, if the desired goals are
-                [0, 1, 2, 3], whichever goal is closest to the closest point within `datapoints` will
-                be searched for first. The found counterfactuals from that search are then included
-                in the search for the second-closest goal, and so on. This is especially helpful
-                if the extremes of the goal range are far outside the range produced by the
+                [0, 1, 2, 3], whichever goal is closest to the closest point within `datapoints`
+                will be searched for first. The found counterfactuals from that search are then
+                included in the search for the second-closest goal, and so on. This is especially
+                helpful if the extremes of the goal range are far outside the range produced by the
                 `datapoints`. If only
             * max_attempt_count: int
-                If no valid counterfactual can be found for a starting seed in the search, the point
-                is slightly perturbed and search is retried. This parameter sets the maximum
-                number of perturbation-retry cycles are allowed during generation.
+                (default=`5') If no valid counterfactual can be found for a starting seed in the
+                search, the point is slightly perturbed and search is retried. This parameter sets
+                the maximum number of perturbation-retry cycles are allowed during generation.
             * step_count: int
-                (default=10,000) The number of datapoints to evaluate during the search
+                (default=`5_000`) The number of datapoints to evaluate during the search
             * timeout_seconds: int
-                (default=30) The maximum number of seconds allowed for each counterfactual search
+                (default=`3`) The maximum number of seconds allowed for each counterfactual search.
+                This will set the maximum runtime of the search to roughly
+                `timeout_seconds` * `max_attempt_count` * `k_per_goal` * `len(goals)`
 
         Returns
         -------
@@ -610,19 +612,19 @@ class SHAPExplainer:
             Otherwise, choose ``IDENTITY``.
         Keyword Arguments:
             * samples: int
-                (default=None) The number of samples to use when computing SHAP values. Higher
+                (default=`None`) The number of samples to use when computing SHAP values. Higher
                 values will increase explanation accuracy, at the  cost of runtime. If none,
                 samples will equal 2048 + 2*n_features
             * seed: int
-                (default=0) The random seed to be used when generating explanations.
+                (default=`0`) The random seed to be used when generating explanations.
             * batchSize: int
-                (default=20) The number of batches passed to the PredictionProvider at once.
+                (default=`20`) The number of batches passed to the PredictionProvider at once.
                 When uusing :class:`~Model` with `arrow=False` this parameter has no effect.
                 If `arrow=True`, `batch_sizes` of around
                 :math:`\frac{{2000}}{{\mathtt{{len(background)}}}}` can produce significant
                 performance gains.
             * trackCounterfactuals : bool
-                (default=False) Keep track of produced byproduct counterfactuals during SHAP run.
+                (default=`False`) Keep track of produced byproduct counterfactuals during SHAP run.
 
         Returns
         -------

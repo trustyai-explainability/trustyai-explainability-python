@@ -110,11 +110,11 @@ class Tyrus:
             The set of background datapoints as a: {}
         Keyword Arguments:
             * fraction_counterfactuals_to_display  : float
-                (Default=0.1) The fraction of found byproduct counterfactuals to display in the
+                (default=`0.1`) The fraction of found byproduct counterfactuals to display in the
                 dashboard, as a float between 0 and 1. Choose a larger number to see more,
                 but this will make plot rendering more expensive.
             * notebook : bool
-                (Default=False) If true, Tyrus will launch the visualizations inline in a
+                (default=`False`) If true, Tyrus will launch the visualizations inline in a
                 Jupyter notebook. If false, the visualizations will be saved as HTML and opened
                 automatically in your default browser.
         """
