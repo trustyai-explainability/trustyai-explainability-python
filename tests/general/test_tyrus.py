@@ -22,7 +22,7 @@ def test_tyrus_series():
 
     predictions = predict_function(data)
 
-    model = Model(predict_function, dataframe_input=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True)
 
     # create Tyrus instance
     tyrus = Tyrus(
@@ -52,7 +52,7 @@ def test_tyrus_numpy():
 
     predictions = predict_function(data)
 
-    model = Model(predict_function, dataframe_input=False, arrow=True)
+    model = Model(predict_function, dataframe_input=False)
 
     # create Tyrus instance
     tyrus = Tyrus(
