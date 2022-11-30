@@ -29,7 +29,7 @@ class SaliencyResults(ExplanationResults):
         """Return the Saliencies as a dictionary, keyed by output name"""
 
     @abstractmethod
-    def _matplotlib_plot(self, output_name: str) -> None:
+    def _matplotlib_plot(self, output_name: str, block: bool) -> None:
         """Plot the saliencies of a particular output in matplotlib"""
 
     @abstractmethod
@@ -44,7 +44,7 @@ class SaliencyResults(ExplanationResults):
             for output_name in self.saliency_map().keys()
         }
 
-    def plot(self, output_name=None, render_bokeh=False) -> None:
+    def plot(self, output_name=None, render_bokeh=False, block=True) -> None:
         """
         Plot the found feature saliencies.
 
@@ -55,15 +55,17 @@ class SaliencyResults(ExplanationResults):
             be displayed
         render_bokeh : bool
             (default: false) Whether to render as bokeh (true) or matplotlib (false)
+        block: bool
+            (default: true) Whether displaying the plot blocks subsequent code execution
         """
         if output_name is None:
             for output_name_iterator in self.saliency_map().keys():
                 if render_bokeh:
                     show(self._get_bokeh_plot(output_name_iterator))
                 else:
-                    self._matplotlib_plot(output_name_iterator)
+                    self._matplotlib_plot(output_name_iterator, block)
         else:
             if render_bokeh:
                 show(self._get_bokeh_plot(output_name))
             else:
-                self._matplotlib_plot(output_name)
+                self._matplotlib_plot(output_name, block)

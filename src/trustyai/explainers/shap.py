@@ -218,7 +218,7 @@ class SHAPResults(SaliencyResults):
             )
         return df_dict
 
-    def _matplotlib_plot(self, output_name) -> None:
+    def _matplotlib_plot(self, output_name, block=True) -> None:
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
         one per output."""
         with mpl.rc_context(drcp):
@@ -272,7 +272,7 @@ class SHAPResults(SaliencyResults):
             plt.ylabel(self.saliency_map()[output_name].getOutput().getName())
             plt.xlabel("Feature SHAP Value")
             plt.title(f"Explanation of {output_name}")
-            plt.show()
+            plt.show(block=block)
 
     def _get_bokeh_plot(self, output_name):
         fnull = self.get_fnull()[output_name]

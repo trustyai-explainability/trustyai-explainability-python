@@ -9,7 +9,6 @@ import numpy as np
 np.random.seed(0)
 
 import pytest
-
 from trustyai.explainers import SHAPExplainer
 from trustyai.model import feature, Model
 from trustyai.utils.data_conversions import numpy_to_prediction_object
@@ -51,7 +50,7 @@ def test_shap_arrow():
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
 
-def test_shap_plots():
+def shap_plots(block):
     """Test SHAP plots"""
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
@@ -64,10 +63,19 @@ def test_shap_plots():
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
-    explanation.plot()
-    explanation.plot(render_bokeh=True)
-    explanation.plot(output_name='output-0')
-    explanation.plot(output_name='output-0', render_bokeh=True)
+    explanation.plot(block=block)
+    explanation.plot(block=block, render_bokeh=True)
+    explanation.plot(block=block, output_name='output-0')
+    explanation.plot(block=block, output_name='output-0', render_bokeh=True)
+
+
+@pytest.mark.block_plots
+def test_shap_plots_blocking():
+    shap_plots(block=True)
+
+
+def test_shap_plots():
+    shap_plots(block=False)
 
 
 def test_shap_as_df():
