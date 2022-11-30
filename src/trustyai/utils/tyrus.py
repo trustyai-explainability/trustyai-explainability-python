@@ -2,6 +2,7 @@
 # pylint: disable = too-few-public-methods, wrong-import-order, protected-access, cell-var-from-loop
 # pylint: disable = too-many-instance-attributes, import-error. too-many-locals
 # pylint: disable = consider-using-f-string
+import os
 import tempfile
 
 import numpy as np
@@ -148,7 +149,7 @@ class Tyrus:
             else:
                 self.filepath = kwargs["filepath"]
             output_file(
-                filename=self.filepath + "/trustyai_dashboard.html",
+                filename=os.path.join(self.filepath, "trustyai_dashboard.html"),
                 title="TrustyAI Dashboard",
             )
 
