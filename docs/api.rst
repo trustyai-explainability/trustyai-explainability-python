@@ -46,22 +46,37 @@ Model Classes
 
 trustyai.explainers
 -------------------
+LIME
+####
 .. currentmodule:: trustyai.explainers
 .. explainers_api:
 .. autosummary::
 	:toctree: generated/
 
-	CounterfactualExplainer
-	CounterfactualResult
 	LimeExplainer
 	LimeResults
+
+SHAP
+####
+.. autosummary::
+	:toctree: generated/
+
 	SHAPExplainer
+	BackgroundGenerator
 	SHAPResults
 
+Counterfactuals
+###############
+.. autosummary::
+	:toctree: generated/
+
+	CounterfactualExplainer
+	CounterfactualResult
+
 trustyai.utils
--------------------
+--------------
 .. currentmodule:: trustyai.utils.tyrus
-.. explainers_api:
+.. utils_api:
 .. autosummary::
 	:toctree: generated/
 

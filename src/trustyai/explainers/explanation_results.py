@@ -54,7 +54,7 @@ class SaliencyResults(ExplanationResults):
             (default=`None`) The name of the output to be explainer. If `None`, all outputs will
             be displayed
         render_bokeh : bool
-            (default: `False`) Whether to render as bokeh (true) or matplotlib (false)
+            (default: `False`) If true, render plot in bokeh, otherwise use matplotlib.
         """
         if output_name is None:
             for output_name_iterator in self.saliency_map().keys():
