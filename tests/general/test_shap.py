@@ -9,7 +9,6 @@ import numpy as np
 np.random.seed(0)
 
 import pytest
-
 from trustyai.explainers import SHAPExplainer
 from trustyai.model import feature, Model
 from trustyai.utils.data_conversions import numpy_to_prediction_object
@@ -40,7 +39,7 @@ def test_shap_arrow():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
-    model = Model(predict_function, dataframe_input=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
@@ -51,7 +50,7 @@ def test_shap_arrow():
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
 
-def test_shap_plots():
+def shap_plots(block):
     """Test SHAP plots"""
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
@@ -60,14 +59,23 @@ def test_shap_plots():
 
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2 * np.dot(x.values, model_weights)], -1)
-    model = Model(predict_function, dataframe_input=True, arrow=False)
+    model = Model(predict_function, dataframe_input=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
-    explanation.plot()
-    explanation.plot(render_bokeh=True)
-    explanation.plot(output_name='output-0')
-    explanation.plot(output_name='output-0', render_bokeh=True)
+    explanation.plot(block=block)
+    explanation.plot(block=block, render_bokeh=True)
+    explanation.plot(block=block, output_name='output-0')
+    explanation.plot(block=block, output_name='output-0', render_bokeh=True)
+
+
+@pytest.mark.block_plots
+def test_shap_plots_blocking():
+    shap_plots(block=True)
+
+
+def test_shap_plots():
+    shap_plots(block=False)
 
 
 def test_shap_as_df():
@@ -79,7 +87,7 @@ def test_shap_as_df():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
 
-    model = Model(predict_function, arrow=False)
+    model = Model(predict_function, disable_arrow=True)
 
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)

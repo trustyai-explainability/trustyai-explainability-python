@@ -1,6 +1,6 @@
 [project]
 name = "trustyai"
-version = "0.3.0"
+version = "0.2.7"
 description = "Python bindings to the TrustyAI explainability library."
 authors = [{ name = "Rui Vieira", email = "rui@redhat.com" }]
 license = { file = "LICENSE" }
@@ -21,7 +21,12 @@ classifiers = [
 ]
 
 dependencies = [
-    "Jpype1", "pyarrow", "matplotlib", "pandas", "numpy"
+    "Jpype1==1.4.1",
+    "pyarrow==7.0.0",
+    "matplotlib==3.5.1",
+    "pandas==1.2.5",
+    "numpy",
+    "bokeh==2.4.3"
 ]
 
 [project.optional-dependencies]
@@ -57,6 +62,12 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+
+[tool.pytest.ini_options]
+addopts = '-m="not block_plots"'
+markers = [
+    "block_plots: Test plots will block execution of subsequent tests until closed"
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

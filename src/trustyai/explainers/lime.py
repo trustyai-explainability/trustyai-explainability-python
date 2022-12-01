@@ -1,7 +1,7 @@
 """Explainers.lime module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument, duplicate-code, consider-using-f-string, invalid-name
-from typing import Dict
+from typing import Dict, Union
 
 import bokeh.models
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ from trustyai.utils.data_conversions import (
 )
 
 from .explanation_results import SaliencyResults
-from trustyai.model import simple_prediction
+from trustyai.model import simple_prediction, Model
 
 from org.kie.trustyai.explainability.local.lime import (
     LimeConfig as _LimeConfig,
@@ -41,6 +41,7 @@ from org.kie.trustyai.explainability.model import (
 )
 
 from java.util import Random
+
 
 LimeConfig = _LimeConfig
 
@@ -113,7 +114,7 @@ class LimeResults(SaliencyResults):
         """
         return self.as_dataframe().style
 
-    def _matplotlib_plot(self, output_name: str) -> None:
+    def _matplotlib_plot(self, output_name: str, block=True) -> None:
         """Plot the LIME saliencies."""
         with mpl.rc_context(drcp):
             dictionary = {}
@@ -139,7 +140,7 @@ class LimeResults(SaliencyResults):
             )
             plt.yticks(range(len(dictionary)), list(dictionary.keys()))
             plt.tight_layout()
-            plt.show()
+            plt.show(block=block)
 
     def _get_bokeh_plot(self, output_name) -> bokeh.models.Plot:
         lime_data_source = pd.DataFrame(
@@ -263,7 +264,7 @@ class LimeExplainer:
         self,
         inputs: OneInputUnionType,
         outputs: OneOutputUnionType,
-        model: PredictionProvider,
+        model: Union[PredictionProvider, Model],
     ) -> LimeResults:
         """Produce a LIME explanation.
 
@@ -284,4 +285,6 @@ class LimeExplainer:
             Object containing the results of the LIME explanation.
         """
         _prediction = simple_prediction(inputs, outputs)
-        return LimeResults(self._explainer.explainAsync(_prediction, model).get())
+
+        with Model.ArrowTransmission(model, inputs):
+            return LimeResults(self._explainer.explainAsync(_prediction, model).get())

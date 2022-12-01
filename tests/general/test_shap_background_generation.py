@@ -50,7 +50,7 @@ def test_counterfactual_generation_single_goal():
     seed = 0
     np.random.seed(seed)
     data = np.random.rand(100, 5)
-    model = Model(lambda x: x.sum(1), arrow=False)
+    model = Model(lambda x: x.sum(1))
     goal = np.array([1.0])
 
     # check that undomained backgrounds are caught
@@ -76,7 +76,7 @@ def test_counterfactual_generation_multi_goal():
     seed = 0
     np.random.seed(seed)
     data = np.random.rand(100, 5)
-    model = Model(lambda x: x.sum(1), arrow=False)
+    model = Model(lambda x: x.sum(1))
     goals = np.arange(1, 10).reshape(-1, 1)
     domains = [feature_domain((-10, 10)) for _ in range(5)]
     background_ta = BackgroundGenerator(data, domains, seed)\

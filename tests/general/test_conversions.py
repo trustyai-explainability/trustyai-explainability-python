@@ -1,10 +1,12 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, invalid-name
 """Implicit conversion test suite"""
+from typing import List
+
 from common import *
 
 from jpype import _jclass
 
-from trustyai.model import feature
+from trustyai.model import feature, full_text_feature
 from trustyai.model.domain import feature_domain
 from trustyai.utils.data_conversions import (
     one_input_convert,
@@ -14,6 +16,7 @@ from trustyai.utils.data_conversions import (
 )
 from org.kie.trustyai.explainability.model import Type
 
+from trustyai.utils import text
 
 
 def test_list_python_to_java():
@@ -92,6 +95,7 @@ def test_categorical_domain_tuple():
     assert jdomain.getCategories().size() == 3
     assert jdomain.getCategories().containsAll(domain)
 
+
 def test_feature_function():
     """Test helper method to create features"""
     f1 = feature(name="f-1", value=1.0, dtype="number")
@@ -113,6 +117,21 @@ def test_feature_function():
     assert f4.name == "f-4"
     assert f4.value.as_number() == 5
     assert f4.type == Type.CATEGORICAL
+
+    @text.tokenizer
+    def tokenizer(x: str) -> List[str]:
+        return x.split(" ")
+
+    values = "you just requested to change your password"
+    f5 = full_text_feature(name="f-5", value=values, tokenizer=tokenizer)
+    assert f5.name == "f-5"
+    assert len(f5.value.as_obj()) == 7
+    sub_features = f5.value.as_obj()
+    tokens = values.split(" ")
+    for i in range(7):
+        assert sub_features[i].name == "f-5_" + str(i + 1)
+        assert sub_features[i].value.as_string() == tokens[i]
+    assert f5.type == Type.COMPOSITE
 
 
 def test_feature_domains():
@@ -248,7 +267,7 @@ def test_many_inputs_conversion_domained():
 
     domain_bounds = [[np.random.rand(), np.random.rand()] for _ in range(n_feats)]
     domains = [feature_domain((lb, ub)) for lb, ub in domain_bounds]
-    numpy1 = np.arange(0, n_feats*n_datapoints).reshape(-1, n_feats)
+    numpy1 = np.arange(0, n_feats * n_datapoints).reshape(-1, n_feats)
     df = pd.DataFrame(numpy1, columns=["input-{}".format(i) for i in range(n_feats)])
 
     ta_numpy1 = many_inputs_convert(numpy1, feature_domains=domains)

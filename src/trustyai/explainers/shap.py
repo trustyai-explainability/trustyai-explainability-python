@@ -1,7 +1,7 @@
 """Explainers.shap module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument, consider-using-f-string, invalid-name
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from bokeh.models import ColumnDataSource, HoverTool
@@ -21,9 +21,7 @@ from trustyai.utils._visualisation import (
     output_html,
     feature_html,
 )
-from trustyai.model import (
-    simple_prediction,
-)
+from trustyai.model import simple_prediction, Model
 from trustyai.utils.data_conversions import (
     OneInputUnionType,
     OneOutputUnionType,
@@ -54,6 +52,8 @@ from java.util import Random
 
 
 # pylint: disable=invalid-name
+
+
 class SHAPResults(SaliencyResults):
     """Wraps SHAP results. This object is returned by the :class:`~SHAPExplainer`,
     and provides a variety of methods to visualize and interact with the explanation.
@@ -218,7 +218,7 @@ class SHAPResults(SaliencyResults):
             )
         return df_dict
 
-    def _matplotlib_plot(self, output_name) -> None:
+    def _matplotlib_plot(self, output_name, block=True) -> None:
         """Visualize the SHAP explanation of each output as a set of candlestick plots,
         one per output."""
         with mpl.rc_context(drcp):
@@ -272,7 +272,7 @@ class SHAPResults(SaliencyResults):
             plt.ylabel(self.saliency_map()[output_name].getOutput().getName())
             plt.xlabel("Feature SHAP Value")
             plt.title(f"Explanation of {output_name}")
-            plt.show()
+            plt.show(block=block)
 
     def _get_bokeh_plot(self, output_name):
         fnull = self.get_fnull()[output_name]
@@ -654,7 +654,7 @@ class SHAPExplainer:
         self,
         inputs: OneInputUnionType,
         outputs: OneOutputUnionType,
-        model: PredictionProvider,
+        model: Union[PredictionProvider, Model],
     ) -> SHAPResults:
         """Produce a SHAP explanation.
 
@@ -674,6 +674,8 @@ class SHAPExplainer:
             Object containing the results of the SHAP explanation.
         """
         _prediction = simple_prediction(inputs, outputs)
-        return SHAPResults(
-            self._explainer.explainAsync(_prediction, model).get(), self.background
-        )
+
+        with Model.ArrowTransmission(model, inputs):
+            return SHAPResults(
+                self._explainer.explainAsync(_prediction, model).get(), self.background
+            )

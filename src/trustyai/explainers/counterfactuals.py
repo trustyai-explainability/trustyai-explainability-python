@@ -1,7 +1,7 @@
 """Explainers.countefactual module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument
-from typing import Optional
+from typing import Optional, Union
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
@@ -17,6 +17,7 @@ from trustyai.utils._visualisation import (
 from trustyai.model import (
     counterfactual_prediction,
     PredictionInput,
+    Model,
 )
 
 from trustyai.utils.data_conversions import (
@@ -117,7 +118,7 @@ class CounterfactualResult(ExplanationResults):
         """
         return self.as_dataframe().style
 
-    def plot(self) -> None:
+    def plot(self, block=True) -> None:
         """
         Plot the counterfactual result.
         """
@@ -139,7 +140,7 @@ class CounterfactualResult(ExplanationResults):
                 x="features", color={"proposed": colour, "original": "black"}
             )
             plot.set_title("Counterfactual")
-            plt.show()
+            plt.show(block=block)
 
 
 class CounterfactualExplainer:
@@ -179,7 +180,7 @@ class CounterfactualExplainer:
         self,
         inputs: OneInputUnionType,
         goal: OneOutputUnionType,
-        model: PredictionProvider,
+        model: Union[PredictionProvider, Model],
         data_distribution: Optional[DataDistribution] = None,
         uuid: Optional[_uuid.UUID] = None,
         timeout: Optional[float] = None,
@@ -215,6 +216,8 @@ class CounterfactualExplainer:
             uuid=uuid,
             timeout=timeout,
         )
-        return CounterfactualResult(
-            self._explainer.explainAsync(_prediction, model).get()
-        )
+
+        with Model.NonArrowTransmission(model):
+            return CounterfactualResult(
+                self._explainer.explainAsync(_prediction, model).get()
+            )
