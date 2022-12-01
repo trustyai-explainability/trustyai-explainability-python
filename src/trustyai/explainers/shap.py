@@ -423,7 +423,7 @@ class BackgroundGenerator:
     r"""Generate a background for the SHAP explainer
 
     Generate a background for the SHAP explainer via one of three algorithms:
-    
+
     * `sample`: Randomly sample a set of provided points
     * `kmeans`: Summarize a set of provided points into k centroids
     * `counterfactual`: Generate a set of background points that meet certain criteria
