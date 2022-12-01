@@ -1,4 +1,5 @@
 # pylint: disable = import-error, import-outside-toplevel, dangerous-default-value, invalid-name, R0801
+# pylint: disable = deprecated-module
 """Main TrustyAI Python bindings"""
 from distutils.sysconfig import get_python_lib
 import glob
@@ -14,6 +15,10 @@ import jpype
 import jpype.imports
 from jpype import _jcustomizer, _jclass
 
+DEFAULT_ARGS = (
+    "--add-opens=java.base/java.nio=ALL-UNNAMED",
+)  # see https://arrow.apache.org/docs/java/install.html#java-compatibility
+
 
 def _get_default_path():
     try:
@@ -22,15 +27,10 @@ def _get_default_path():
         default_dep_path = os.path.join(get_python_lib(), "trustyai", "dep")
 
     core_deps = [
-        f"{default_dep_path}/org/trustyai/explainability-core-2.0.0-SNAPSHOT.jar",
-        f"{default_dep_path}/org/trustyai/explainability-core-2.0.0-SNAPSHOT-tests.jar",
+        f"{default_dep_path}/org/trustyai/explainability-arrow-999-SNAPSHOT.jar",
     ]
 
-    arrow_deps = [
-        f"{default_dep_path}/org/trustyai/arrow-converters-0.0.1.jar",
-    ]
-
-    return core_deps + arrow_deps, default_dep_path
+    return core_deps, default_dep_path
 
 
 def init(*args, path=None):
@@ -51,7 +51,6 @@ def init(*args, path=None):
     path: list[str]
         List of jar files to add the Java class path. By default, this will add the necessary
         dependencies of the TrustyAI Java library.
-
     """
     # Launch the JVM
     try:
@@ -73,7 +72,8 @@ def init(*args, path=None):
             else:
                 logging.error("JAR %s not found.", jar_path)
 
-        jpype.startJVM(*args, classpath=path)
+        _args = args + DEFAULT_ARGS
+        jpype.startJVM(*_args, classpath=path)
 
         from java.lang import Thread
 

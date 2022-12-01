@@ -35,8 +35,6 @@ Data Objects
 .. autosummary::
 	:toctree: generated/
 
-	simple_prediction
-	counterfactual_prediction
 	Dataset
 
 Model Classes
@@ -59,6 +57,15 @@ trustyai.explainers
 	LimeResults
 	SHAPExplainer
 	SHAPResults
+
+trustyai.utils
+-------------------
+.. currentmodule:: trustyai.utils.tyrus
+.. explainers_api:
+.. autosummary::
+	:toctree: generated/
+
+	Tyrus
 
 
 

@@ -16,22 +16,21 @@
 set -e
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
-TMP_DIR=$(mktemp -d)
 
-EXP_CORE="trustyai-explainability"
+EXP_CORE_DEST=$1
 
-EXP_CORE_DEST="${TMP_DIR}/${EXP_CORE}"
-if [ ! -d "${EXP_CORE_DEST}" ]
+if [[ "$EXP_CORE_DEST" == "" ]]
 then
-  echo "Cloning trustyai-explainability into ${EXP_CORE_DEST}"
-  git clone --branch main https://github.com/${EXP_CORE}/${EXP_CORE}.git "${EXP_CORE_DEST}"
-  echo "Copying JARs from ${EXP_CORE_DEST} into ${ROOT_DIR}/dep/org/trustyai/"
-  mvn install package -DskipTests -f "${EXP_CORE_DEST}"/pom.xml -Pshaded
-  mv "${EXP_CORE_DEST}"/explainability-arrow/target/explainability-arrow-*.jar "${ROOT_DIR}"/src/trustyai/dep/org/trustyai/
+  EXP_CORE_DEST="../trustyai-explainability"
+  echo "No argument provided, building trustyai-explainability from ${EXP_CORE_DEST}"
 else
-    echo "Directory ${EXP_CORE_DEST} already exists. Please delete it or move it."
-    exit 1
+  echo "Building trustyai-explainability from ${EXP_CORE_DEST}"
 fi
+
+echo "Copying JARs from ${EXP_CORE_DEST} into ${ROOT_DIR}/dep/org/trustyai/"
+mvn install package -DskipTests -f "${EXP_CORE_DEST}"/pom.xml -Pshaded
+mv "${EXP_CORE_DEST}"/explainability-arrow/target/explainability-arrow-*.jar "${ROOT_DIR}"/src/trustyai/dep/org/trustyai/
+
 
 if [[ "$VIRTUAL_ENV" != "" ]]
 then

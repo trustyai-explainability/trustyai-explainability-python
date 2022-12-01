@@ -4,7 +4,7 @@ click==8.0.4
 joblib==1.2.0
 jupyter==1.0.0
 scikit-learn==0.24.2
-pylint==2.9.0
+pylint==2.15.6
 pytest==6.2.4
 setuptools
 wheel
@@ -14,5 +14,6 @@ pyarrow==7.0.0
 numpydoc
 matplotlib==3.5.1
 pandas==1.2.5
-pytest-xdist
+pytest-xdist==2.5.0
 pytest-benchmark
+bokeh==2.4.3

@@ -9,9 +9,9 @@ import numpy as np
 np.random.seed(0)
 
 import pytest
-
 from trustyai.explainers import SHAPExplainer
-from trustyai.model import feature, Model, Dataset
+from trustyai.model import feature, Model
+from trustyai.utils.data_conversions import numpy_to_prediction_object
 from trustyai.utils import TestModels
 
 
@@ -20,11 +20,11 @@ def test_no_variance_one_output():
     model = TestModels.getSumSkipModel(0)
 
     background = np.array([[1.0, 2.0, 3.0] for _ in range(2)])
-    prediction_outputs = model.predictAsync(Dataset.numpy_to_prediction_object(background, feature)).get()
+    prediction_outputs = model.predictAsync(numpy_to_prediction_object(background, feature)).get()
     shap_explainer = SHAPExplainer(background=background)
     for i in range(2):
         explanation = shap_explainer.explain(inputs=background[i], outputs=prediction_outputs[i].outputs, model=model)
-        for _, saliency in explanation.get_saliencies().items():
+        for _, saliency in explanation.saliency_map().items():
             for feature_importance in saliency.getPerFeatureImportance()[:-1]:
                 assert feature_importance.getScore() == 0.0
 
@@ -39,17 +39,18 @@ def test_shap_arrow():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
 
-    model = Model(predict_function, dataframe_input=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
+
     answers = [-.152, -.114, 0.00304, .0525, -.0725]
-    for _, saliency in explanation.get_saliencies().items():
+    for _, saliency in explanation.saliency_map().items():
         for i, feature_importance in enumerate(saliency.getPerFeatureImportance()[:-1]):
             assert answers[i] - 1e-2 <= feature_importance.getScore() <= answers[i] + 1e-2
 
 
-def test_shap_plots():
+def shap_plots(block):
     """Test SHAP plots"""
     np.random.seed(0)
     data = pd.DataFrame(np.random.rand(101, 5))
@@ -58,11 +59,23 @@ def test_shap_plots():
 
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x.values, model_weights), 2 * np.dot(x.values, model_weights)], -1)
-    model = Model(predict_function, dataframe_input=True, arrow=False)
+    model = Model(predict_function, dataframe_input=True)
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
-    explanation.candlestick_plot()
+    explanation.plot(block=block)
+    explanation.plot(block=block, render_bokeh=True)
+    explanation.plot(block=block, output_name='output-0')
+    explanation.plot(block=block, output_name='output-0', render_bokeh=True)
+
+
+@pytest.mark.block_plots
+def test_shap_plots_blocking():
+    shap_plots(block=True)
+
+
+def test_shap_plots():
+    shap_plots(block=False)
 
 
 def test_shap_as_df():
@@ -74,7 +87,7 @@ def test_shap_as_df():
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
 
-    model = Model(predict_function, arrow=False)
+    model = Model(predict_function, disable_arrow=True)
 
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
