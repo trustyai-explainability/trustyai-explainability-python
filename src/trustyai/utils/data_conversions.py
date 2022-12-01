@@ -2,11 +2,13 @@
 # pylint: disable = import-error, line-too-long, trailing-whitespace, unused-import, cyclic-import
 # pylint: disable = consider-using-f-string, invalid-name, wrong-import-order
 
-from typing import Union, List
+from typing import Union, List, Optional
+from itertools import filterfalse
 
 import trustyai.model
 from trustyai.model.domain import feature_domain
 from org.kie.trustyai.explainability.model import (
+    Dataframe,
     Feature,
     Output,
     PredictionInput,
@@ -112,7 +114,7 @@ _conversion_docstrings = {
 
 # === Domain Inserter ==============================================================================
 def domain_insertion(
-    undomained_input: PredictionInput, feature_domains: List[FeatureDomain]
+        undomained_input: PredictionInput, feature_domains: List[FeatureDomain]
 ):
     """Given a PredictionInput and a corresponding list of feature domains, where
     `len(feature_domains) == len(PredictionInput.getFeatures()`, return a PredictionInput
@@ -137,7 +139,7 @@ def domain_insertion(
 
 # === input functions ==============================================================================
 def one_input_convert(
-    python_inputs: OneInputUnionType, feature_domains: FeatureDomain = None
+        python_inputs: OneInputUnionType, feature_domains: FeatureDomain = None
 ) -> PredictionInput:
     """Convert an object of OneInputUnionType into a PredictionInput."""
     if isinstance(python_inputs, np.ndarray):
@@ -162,7 +164,7 @@ def one_input_convert(
 
 
 def many_inputs_convert(
-    python_inputs: ManyInputsUnionType, feature_domains: List[FeatureDomain] = None
+        python_inputs: ManyInputsUnionType, feature_domains: List[FeatureDomain] = None
 ) -> List[PredictionInput]:
     """Convert an object of ManyInputsUnionType into a List[PredictionInput]"""
     if isinstance(python_inputs, np.ndarray):
@@ -200,7 +202,7 @@ def one_output_convert(python_outputs: OneOutputUnionType) -> PredictionOutput:
 
 
 def many_outputs_convert(
-    python_outputs: ManyOutputsUnionType,
+        python_outputs: ManyOutputsUnionType,
 ) -> List[PredictionOutput]:
     """Convert an object of ManyOutputsUnionType into a List[PredictionOutput]"""
     if isinstance(python_outputs, np.ndarray):
@@ -215,7 +217,7 @@ def many_outputs_convert(
 
 # === TrustyAI Conversions =========================================================================
 def df_to_prediction_object(
-    df: pd.DataFrame, func
+        df: pd.DataFrame, func
 ) -> Union[List[PredictionInput], List[PredictionOutput]]:
     """
     Convert a Pandas DataFrame into a list of TrustyAI
@@ -249,7 +251,7 @@ def df_to_prediction_object(
 
 
 def numpy_to_prediction_object(
-    array: np.ndarray, func, names=None
+        array: np.ndarray, func, names=None
 ) -> Union[List[PredictionInput], List[PredictionOutput]]:
     """
     Convert a Numpy array into a list of TrustyAI
@@ -293,7 +295,7 @@ def numpy_to_prediction_object(
 
 
 def prediction_object_to_numpy(
-    objects: Union[List[PredictionInput], List[PredictionOutput]]
+        objects: Union[List[PredictionInput], List[PredictionOutput]]
 ) -> np.array:
     """
     Convert a list of TrustyAI
@@ -322,7 +324,7 @@ def prediction_object_to_numpy(
 
 
 def prediction_object_to_pandas(
-    objects: Union[List[PredictionInput], List[PredictionOutput]]
+        objects: Union[List[PredictionInput], List[PredictionOutput]]
 ) -> pd.DataFrame:
     """
     Convert a list of TrustyAI
@@ -354,3 +356,24 @@ def prediction_object_to_pandas(
             ]
         )
     return df
+
+
+def pandas_to_trusty(df: pd.DataFrame, outputs: Optional[List[int]] = None, no_outputs=False) -> Dataframe:
+    df = df.reset_index(drop=True)
+    n_columns = len(df.columns)
+    indices = list(range(n_columns))
+    if not no_outputs:
+        if not outputs:  # If no output column supplied, assume the right-most
+            output_indices = [n_columns - 1]
+            input_indices = list(filterfalse(output_indices.__contains__, indices))
+        else:
+            output_indices = outputs
+            input_indices = list(filterfalse(outputs.__contains__, indices))
+
+        pi = many_inputs_convert(df.iloc[:, input_indices])
+        po = many_outputs_convert(df.iloc[:, output_indices])
+
+        return Dataframe.createFrom(pi, po)
+
+    pi = many_inputs_convert(df)
+    return Dataframe.createFromInputs(pi)
