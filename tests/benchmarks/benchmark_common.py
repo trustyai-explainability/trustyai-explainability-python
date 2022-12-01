@@ -15,10 +15,7 @@ def saliency_impact_score_benchmark(model, input, explainer, k=2, is_model_calla
         output = model.predict([input])[0].outputs
     pred = simple_prediction(input, output)
     explanation = explainer.explain(inputs=input, outputs=output, model=model)
-    if isinstance(explanation, SHAPResults):
-        saliency = list(explanation.get_saliencies().values())[0]
-    else:
-        saliency = list(explanation.map().values())[0]
+    saliency = list(explanation.saliency_map().values())[0]
     top_k_features = saliency.getTopFeatures(k)
     return ExplainabilityMetrics.impactScore(model, pred, top_k_features)
 
