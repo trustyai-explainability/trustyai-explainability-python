@@ -13,6 +13,9 @@ from trustyai.model import (
 )
 from trustyai.utils import TestModels
 
+from src.trustyai.model.domain import feature_domain
+from src.trustyai.utils.data_conversions import one_input_convert
+
 jrandom = Random()
 jrandom.setSeed(0)
 
@@ -140,3 +143,41 @@ def test_counterfactual_v2():
     result_output = model(explanation.proposed_features_dataframe)
     assert result_output < .01
     assert result_output > -.01
+
+
+def test_counterfactual_with_domain_argument():
+    """Test passing domains to counterfactuals"""
+    np.random.seed(0)
+    data = np.random.rand(1, 5)
+    model_weights = np.random.rand(5)
+    model = Model(lambda x: np.dot(x, model_weights))
+    explainer = CounterfactualExplainer(steps=10_000)
+    explanation = explainer.explain(
+        inputs=data,
+        goal=np.array([0]),
+        feature_domains=[feature_domain((-10, 10)) for _ in range(5)],
+        model=model)
+    result_output = model(explanation.proposed_features_dataframe)
+    assert result_output < .01
+    assert result_output > -.01
+
+
+def test_counterfactual_with_domain_argument_overwrite():
+    """Test that passing domains to counterfactuals with already-domained features throws
+     a warning"""
+    np.random.seed(0)
+    data = np.random.rand(1, 5)
+    domained_inputs = one_input_convert(data, [feature_domain((-10, 10)) for _ in range(5)])
+    model_weights = np.random.rand(5)
+    model = Model(lambda x: np.dot(x, model_weights))
+    explainer = CounterfactualExplainer(steps=10_000)
+
+    with pytest.warns(UserWarning):
+        explainer.explain(
+            inputs=domained_inputs,
+            goal=np.array([0]),
+            feature_domains=[feature_domain((-10, 10)) for _ in range(5)],
+            model=model
+        )
+
+

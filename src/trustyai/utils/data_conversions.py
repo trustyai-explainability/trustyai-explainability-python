@@ -1,7 +1,7 @@
 """Data Converters between Python and Java"""
 # pylint: disable = import-error, line-too-long, trailing-whitespace, unused-import, cyclic-import
 # pylint: disable = consider-using-f-string, invalid-name, wrong-import-order
-
+import warnings
 from typing import Union, List
 
 import trustyai.model
@@ -12,7 +12,10 @@ from org.kie.trustyai.explainability.model import (
     PredictionInput,
     PredictionOutput,
 )
-from org.kie.trustyai.explainability.model.domain import FeatureDomain
+from org.kie.trustyai.explainability.model.domain import (
+    FeatureDomain,
+    EmptyFeatureDomain,
+)
 
 import pandas as pd
 import numpy as np
@@ -116,17 +119,29 @@ def domain_insertion(
 ):
     """Given a PredictionInput and a corresponding list of feature domains, where
     `len(feature_domains) == len(PredictionInput.getFeatures()`, return a PredictionInput
-    where the ith feature has the ith domain. If the ith domain is `None`, the feature
-    is constrained."""
-    assert len(undomained_input.getFeatures()) == len(feature_domains)
+    where the ith feature has the ith domain. If the ith domain is `None`, no new domain
+    information will be added to the feature, thus keeping previous domain information or
+    keeping it fixed if none has been supplied"""
+    assert len(undomained_input.getFeatures()) == len(
+        feature_domains
+    ), "input has {} features, but {} feature domains were passed".format(
+        len(undomained_input.getFeatures()), len(feature_domains)
+    )
 
     domained_features = []
     for i, f in enumerate(undomained_input.getFeatures()):
         if feature_domains[i] is None:
             domained_features.append(
-                Feature(f.getName(), f.getType(), f.getValue(), True, None)
+                Feature(f.getName(), f.getType(), f.getValue(), True, f.getDomain())
             )
         else:
+            if not isinstance(f.getDomain(), EmptyFeatureDomain):
+                warning_msg = (
+                    "The supplied feature domain at position {} is specifying a new "
+                    "domain to previously domain'ed {}, this will overwrite the "
+                    "previous domain with the new one.".format(i, f.toString())
+                )
+                warnings.warn(warning_msg)
             domained_features.append(
                 Feature(
                     f.getName(), f.getType(), f.getValue(), False, feature_domains[i]
