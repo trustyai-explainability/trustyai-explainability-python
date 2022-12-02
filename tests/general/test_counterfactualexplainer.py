@@ -12,9 +12,8 @@ from trustyai.model import (
     output, Model, feature,
 )
 from trustyai.utils import TestModels
-
-from src.trustyai.model.domain import feature_domain
-from src.trustyai.utils.data_conversions import one_input_convert
+from trustyai.model.domain import feature_domain
+from trustyai.utils.data_conversions import one_input_convert
 
 jrandom = Random()
 jrandom.setSeed(0)
