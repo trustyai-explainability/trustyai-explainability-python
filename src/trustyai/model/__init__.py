@@ -582,17 +582,17 @@ class _JFeature:
     """Java Feature implicit methods"""
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return name"""
         return self.getName()
 
     @property
-    def type(self):
+    def type(self) -> Type:
         """Return type"""
         return self.getType()
 
     @property
-    def value(self):
+    def value(self) -> Value:
         """Return value"""
         return self.getValue()
 
@@ -605,7 +605,7 @@ class _JFeature:
         return _domain
 
     @property
-    def is_constrained(self):
+    def is_constrained(self) -> bool:
         """Return contraint"""
         return self.isConstrained()
 
@@ -755,7 +755,19 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
     return _Output(name, _type, Value(value), score)
 
 
-def feature(name: str, dtype: str, value=None, domain=None) -> Feature:
+def full_text_feature(
+    name: str, value: str, tokenizer: Callable[[str], List[str]] = None
+) -> Feature:
+    """Create a full-text composite feature using TrustyAI methods"""
+    return FeatureFactory.newFulltextFeature(name, value, tokenizer)
+
+
+def feature(
+    name: str,
+    dtype: str,
+    value=None,
+    domain=None,
+) -> Feature:
     """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the
     individual components (or features) of input data points.
 

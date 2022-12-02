@@ -91,7 +91,7 @@ def test_normalized_weights():
         assert -3.0 < feature_importance.getScore() < 3.0
 
 
-def test_lime_plots():
+def lime_plots(block):
     """Test normalized weights"""
     lime_explainer = LimeExplainer(normalise_weights=False, perturbations=2, samples=10)
     n_features = 15
@@ -100,10 +100,19 @@ def test_lime_plots():
     outputs = model.predict([features])[0].outputs
 
     explanation = lime_explainer.explain(inputs=features, outputs=outputs, model=model)
-    explanation.plot()
-    explanation.plot(render_bokeh=True)
-    explanation.plot(output_name="sum-but0")
-    explanation.plot(output_name="sum-but0", render_bokeh=True)
+    explanation.plot(block=block)
+    explanation.plot(block=block, render_bokeh=True)
+    explanation.plot(block=block, output_name="sum-but0")
+    explanation.plot(block=block, output_name="sum-but0", render_bokeh=True)
+
+
+@pytest.mark.block_plots
+def test_lime_plots_blocking():
+    lime_plots(True)
+
+
+def test_lime_plots():
+    lime_plots(False)
 
 
 def test_lime_v2():
