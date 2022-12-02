@@ -20,10 +20,12 @@ import numpy as np
 # UNION TYPES FOR INPUTS AND OUTPUTS
 # if a TrustyAI function wants AN input/output, it should accept this union type:
 OneInputUnionType = Union[
-    np.ndarray, pd.DataFrame, pd.Series, List[Feature], PredictionInput
+    int, float, np.integer, np.inexact, np.ndarray,
+    pd.DataFrame, pd.Series, List[Feature], PredictionInput,
 ]
 OneOutputUnionType = Union[
-    np.ndarray, pd.DataFrame, pd.Series, List[Output], PredictionOutput
+    int, float, np.integer, np.inexact, np.ndarray,
+    pd.DataFrame, pd.Series, List[Output], PredictionOutput,
 ]
 
 # if a TrustyAI function wants a LIST of inputs/outputs, it should accept this union type:
@@ -64,9 +66,16 @@ def data_conversion_docstring(*keys):
 
 _conversion_docstrings = {
     "one_input": [
-        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, :class:`pandas.Series`, List[:class:`Feature`], or :class:`PredictionInput`",
+        "int, float, :class:`numpy.number`, List[Union[int, float, :class:`numpy.number`]], "
+        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, :class:`pandas.Series`, "
+        "List[:class:`Feature`], or :class:`PredictionInput`",
         """
         
+            * If there's only a single input feature, an ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_ 
+              can be used.
+            * A list of ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_.
             * Numpy array of shape ``[1, n_features]`` or ``[n_features]``
             * Pandas DataFrame with 1 row and ``n_features`` columns
             * Pandas Series with `n_features` rows
@@ -76,9 +85,16 @@ _conversion_docstrings = {
         """,
     ],
     "one_output": [
-        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Output`], or :class:`PredictionOutput`",
+        "int, float, :class:`numpy.number`, List[Union[int, float, :class:`numpy.number`]], "
+        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, :class:`pandas.Series`, "
+        " List[:class:`Output`], or :class:`PredictionOutput`",
         """
         
+            * If there's only a single output, an ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_  
+              can be used.
+            * A list of ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_.
             * Numpy array of shape ``[1, n_outputs]`` or ``[n_outputs]``
             * Pandas DataFrame with 1 row and ``n_outputs`` columns
             * Pandas Series with `n_outputs` rows
@@ -140,7 +156,14 @@ def one_input_convert(
     python_inputs: OneInputUnionType, feature_domains: FeatureDomain = None
 ) -> PredictionInput:
     """Convert an object of OneInputUnionType into a PredictionInput."""
-    if isinstance(python_inputs, np.ndarray):
+    if isinstance(python_inputs, (int, float, np.number)):
+        python_inputs = np.array([[python_inputs]])
+        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+    elif isinstance(python_inputs, list) and \
+        all([isinstance(x,  (int, float, np.number)) for x in python_inputs]):
+        python_inputs = np.array(python_inputs).reshape(1, -1)
+        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+    elif isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
             python_inputs = python_inputs.reshape(1, -1)
         pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
@@ -183,20 +206,29 @@ def many_inputs_convert(
 # === output functions =============================================================================
 def one_output_convert(python_outputs: OneOutputUnionType) -> PredictionOutput:
     """Convert an object of OneOutputUnionType into a PredictionOutput"""
-    if isinstance(python_outputs, np.ndarray):
+    if isinstance(python_outputs, (int, np.integer, float, np.inexact)):
+        python_outputs = np.array([[python_outputs]])
+        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, list) and \
+        all([isinstance(x,  (int, float, np.number)) for x in python_outputs]):
+        python_outputs = np.array(python_outputs).reshape(1, -1)
+        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, np.ndarray):
         if len(python_outputs.shape) == 1:
             python_outputs = python_outputs.reshape(1, -1)
-        return numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
-    if isinstance(python_outputs, pd.DataFrame):
-        return df_to_prediction_object(python_outputs, trustyai.model.output)[0]
-    if isinstance(python_outputs, pd.Series):
-        return df_to_prediction_object(
+        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, pd.DataFrame):
+        po = df_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, pd.Series):
+        po = df_to_prediction_object(
             pd.DataFrame([python_outputs]), trustyai.model.output
         )[0]
-    if isinstance(python_outputs, PredictionOutput):
-        return python_outputs
-    # fallback is List[Output]
-    return PredictionOutput(python_outputs)
+    elif isinstance(python_outputs, PredictionOutput):
+        po = python_outputs
+    else:
+        # fallback is List[Output]
+        po = PredictionOutput(python_outputs)
+    return po
 
 
 def many_outputs_convert(
