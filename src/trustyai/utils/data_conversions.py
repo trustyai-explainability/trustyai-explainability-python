@@ -20,12 +20,26 @@ import numpy as np
 # UNION TYPES FOR INPUTS AND OUTPUTS
 # if a TrustyAI function wants AN input/output, it should accept this union type:
 OneInputUnionType = Union[
-    int, float, np.integer, np.inexact, np.ndarray,
-    pd.DataFrame, pd.Series, List[Feature], PredictionInput,
+    int,
+    float,
+    np.integer,
+    np.inexact,
+    np.ndarray,
+    pd.DataFrame,
+    pd.Series,
+    List[Feature],
+    PredictionInput,
 ]
 OneOutputUnionType = Union[
-    int, float, np.integer, np.inexact, np.ndarray,
-    pd.DataFrame, pd.Series, List[Output], PredictionOutput,
+    int,
+    float,
+    np.integer,
+    np.inexact,
+    np.ndarray,
+    pd.DataFrame,
+    pd.Series,
+    List[Output],
+    PredictionOutput,
 ]
 
 # if a TrustyAI function wants a LIST of inputs/outputs, it should accept this union type:
@@ -159,8 +173,9 @@ def one_input_convert(
     if isinstance(python_inputs, (int, float, np.number)):
         python_inputs = np.array([[python_inputs]])
         pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
-    elif isinstance(python_inputs, list) and \
-        all([isinstance(x,  (int, float, np.number)) for x in python_inputs]):
+    elif isinstance(python_inputs, list) and all(
+        (isinstance(x, (int, float, np.number)) for x in python_inputs)
+    ):
         python_inputs = np.array(python_inputs).reshape(1, -1)
         pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
     elif isinstance(python_inputs, np.ndarray):
@@ -209,8 +224,9 @@ def one_output_convert(python_outputs: OneOutputUnionType) -> PredictionOutput:
     if isinstance(python_outputs, (int, np.integer, float, np.inexact)):
         python_outputs = np.array([[python_outputs]])
         po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
-    elif isinstance(python_outputs, list) and \
-        all([isinstance(x,  (int, float, np.number)) for x in python_outputs]):
+    elif isinstance(python_outputs, list) and all(
+        (isinstance(x, (int, float, np.number)) for x in python_outputs)
+    ):
         python_outputs = np.array(python_outputs).reshape(1, -1)
         po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
     elif isinstance(python_outputs, np.ndarray):
