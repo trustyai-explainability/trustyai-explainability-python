@@ -111,7 +111,7 @@ def classification_fidelity(explainer: Union[LimeExplainer, SHAPExplainer],
         pairs.append(_Pair.of(saliency, simple_prediction(c_input, output)))
     return ExplainabilityMetrics.classificationFidelity(pairs)
 
-
+# pylint: disable = too-many-arguments
 def local_saliency_f1(output_name: str, model: PredictionProvider,
                       explainer: Union[LimeExplainer, SHAPExplainer],
                       distribution: PredictionInputsDataDistribution, k: int,
