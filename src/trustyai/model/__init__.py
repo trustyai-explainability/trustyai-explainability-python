@@ -728,7 +728,7 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
         * ``categorical`` for categorical outputs.
 
         If `dtype` is unspecified or takes a different value than listed above, the
-         feature type will be set as `UNDEFINED`.
+        feature type will be set as `UNDEFINED`.
     value : Any
         The value of this output.
     score : float
