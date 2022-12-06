@@ -139,6 +139,7 @@ def local_saliency_f1(output_name: str, model: PredictionProvider,
         the local saliency f1 metric
     """
     if not isinstance(explainer, LocalExplainer):
+        # pylint: disable = protected-access
         local_explainer = JObject(explainer._explainer, LocalExplainer)
     else:
         local_explainer = explainer
