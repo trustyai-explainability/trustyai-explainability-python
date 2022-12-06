@@ -1,18 +1,28 @@
 # pylint: disable = import-error
 """Saliency evaluation metrics"""
+from typing import Union
+
 from org.apache.commons.lang3.tuple import (
     Pair as _Pair,
 )
 
-from trustyai.model import simple_prediction
-from trustyai.explainers.lime import LimeExplainer
-from trustyai.explainers.shap import SHAPExplainer
-from trustyai.explainers import LocalExplainer
+from org.kie.trustyai.explainability.model import (
+    PredictionInput,
+    PredictionInputsDataDistribution
+)
+from org.kie.trustyai.explainability.local import LocalExplainer
+
+from jpype import JObject
+
+from trustyai.model import simple_prediction, PredictionProvider
+from trustyai.explainers import SHAPExplainer, LimeExplainer
 
 from . import ExplainabilityMetrics
 
 
-def impact_score(model, pred_input, explainer, k, is_model_callable=False):
+def impact_score(model: PredictionProvider, pred_input: PredictionInput,
+                 explainer: Union[LimeExplainer, SHAPExplainer],
+                 k: int, is_model_callable: bool = False):
     """
     Parameters
     ----------
@@ -43,7 +53,8 @@ def impact_score(model, pred_input, explainer, k, is_model_callable=False):
     return ExplainabilityMetrics.impactScore(model, pred, top_k_features)
 
 
-def mean_impact_score(explainer, model, data, is_model_callable=False, k=2):
+def mean_impact_score(explainer: Union[LimeExplainer, SHAPExplainer],
+                      model: PredictionProvider, data: list, is_model_callable=False, k=2):
     """
     Parameters
     ----------
@@ -69,7 +80,9 @@ def mean_impact_score(explainer, model, data, is_model_callable=False, k=2):
     return m_is / len(data)
 
 
-def classification_fidelity(explainer, model, inputs, is_model_callable=False):
+def classification_fidelity(explainer: Union[LimeExplainer, SHAPExplainer],
+                            model: PredictionProvider, inputs: list,
+                            is_model_callable: bool = False):
     """
     Parameters
     ----------
@@ -99,7 +112,10 @@ def classification_fidelity(explainer, model, inputs, is_model_callable=False):
     return ExplainabilityMetrics.classificationFidelity(pairs)
 
 
-def local_saliency_f1(output_name, model, explainer, distribution, k, chunk_size):
+def local_saliency_f1(output_name: str, model: PredictionProvider,
+                      explainer: Union[LimeExplainer, SHAPExplainer],
+                      distribution: PredictionInputsDataDistribution, k: int,
+                      chunk_size: int):
     """
     Parameters
     ----------
@@ -122,15 +138,9 @@ def local_saliency_f1(output_name, model, explainer, distribution, k, chunk_size
     :float:
         the local saliency f1 metric
     """
-    if isinstance(explainer, LimeExplainer):
-        local_explainer = LocalExplainer(explainer._explainer)
-    elif isinstance(explainer, SHAPExplainer):
-        local_explainer = LocalExplainer(explainer._explainer)
-    elif isinstance(explainer, LocalExplainer):
-        local_explainer = explainer
+    if not isinstance(explainer, LocalExplainer):
+        local_explainer = JObject(explainer._explainer, LocalExplainer)
     else:
-        raise ValueError(f"Wrong explainer type '{explainer}', "
-                         f"expected one of [LimeExplainer, SHAPExplainer, LocalExplainer]")
-
+        local_explainer = explainer
     return ExplainabilityMetrics.getLocalSaliencyF1(output_name, model, local_explainer,
                                                     distribution, k, chunk_size)
