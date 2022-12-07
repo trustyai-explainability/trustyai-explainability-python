@@ -7,7 +7,8 @@ import pytest
 
 from trustyai.explainers import LimeExplainer
 from trustyai.utils import TestModels
-from trustyai.model import feature, Model
+from trustyai.model import feature, Model, simple_prediction
+from trustyai.metrics import ExplainabilityMetrics
 
 from org.kie.trustyai.explainability.local import (
     LocalExplanationException,
@@ -126,3 +127,19 @@ def test_lime_v2():
     explanation = explainer.explain(inputs=data, outputs=model(data), model=model)
     for score in explanation.as_dataframe()["output-0_score"]:
         assert score != 0
+
+def test_impact_score():
+    np.random.seed(0)
+    data = pd.DataFrame(np.random.rand(1, 5))
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.dot(x.values, model_weights)
+    model = Model(predict_function, dataframe_input=True)
+    output = model(data)
+    pred = simple_prediction(data, output)
+    explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
+    explanation = explainer.explain(inputs=data, outputs=output, model=model)
+    saliency = list(explanation.saliency_map().values())[0]
+    top_features_t = saliency.getTopFeatures(2)
+    impact = ExplainabilityMetrics.impactScore(model, pred, top_features_t)
+    assert impact > 0
+    return impact
