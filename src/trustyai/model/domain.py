@@ -24,17 +24,17 @@ def feature_domain(values: Optional[Union[Tuple, List]]) -> Optional[FeatureDoma
     Parameters
     ----------
     values : Optional[Union[Tuple, List]]
-        The valid values of the feature. If `values` takes the form of:
+        The valid values of the feature. If ``values`` takes the form of:
 
-        * **A tuple of floats or integers:** The feature domain will be a continuous range from
+        * **A tuple of floats or integers**: The feature domain will be a continuous range from
           ``values[0]`` to ``values[1]``.
-        * **A list of floats or integers:**: The feature domain will be a *numeric* categorical,
-        where `values` contains all possible valid feature values.
-        * **A list of strings:** The feature domain will be a *string* categorical, where `values`
-         contains all possible valid feature values.
-        * **A list of objects:** The feature domain will be an *object* categorical, where `values`
-         contains all possible valid feature values. These may present an issue if the objects
-         are not natively Java serializable.
+        * **A list of floats or integers**: The feature domain will be a *numeric* categorical,
+          where `values` contains all possible valid feature values.
+        * **A list of strings**: The feature domain will be a *string* categorical, where ``values``
+          contains all possible valid feature values.
+        * **A list of objects**: The feature domain will be an *object* categorical, where
+          ``values`` contains all possible valid feature values. These may present an issue if the
+          objects are not natively Java serializable.
 
         Otherwise, the feature domain will be taken as `Empty`, which will mean it will be held
         fixed during the counterfactual explanation.
