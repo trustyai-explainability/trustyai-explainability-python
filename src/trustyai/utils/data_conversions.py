@@ -6,7 +6,6 @@ from typing import Union, List, Optional
 from itertools import filterfalse
 
 import trustyai.model
-from trustyai.model.domain import feature_domain
 from org.kie.trustyai.explainability.model import (
     Dataframe,
     Feature,
@@ -184,21 +183,29 @@ def domain_insertion(
 
 # === input functions ==============================================================================
 def one_input_convert(
-    python_inputs: OneInputUnionType, feature_domains: FeatureDomain = None
+    python_inputs: OneInputUnionType,
+    feature_names: Optional[List[str]] = None,
+    feature_domains: Optional[List[FeatureDomain]] = None,
 ) -> PredictionInput:
     """Convert an object of OneInputUnionType into a PredictionInput."""
     if isinstance(python_inputs, (int, float, np.number)):
         python_inputs = np.array([[python_inputs]])
-        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+        pi = numpy_to_prediction_object(
+            python_inputs, trustyai.model.feature, names=feature_names
+        )[0]
     elif isinstance(python_inputs, list) and all(
         (isinstance(x, (int, float, np.number)) for x in python_inputs)
     ):
         python_inputs = np.array(python_inputs).reshape(1, -1)
-        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+        pi = numpy_to_prediction_object(
+            python_inputs, trustyai.model.feature, names=feature_names
+        )[0]
     elif isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
             python_inputs = python_inputs.reshape(1, -1)
-        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+        pi = numpy_to_prediction_object(
+            python_inputs, trustyai.model.feature, names=feature_names
+        )[0]
     elif isinstance(python_inputs, pd.DataFrame):
         pi = df_to_prediction_object(python_inputs, trustyai.model.feature)[0]
     elif isinstance(python_inputs, pd.Series):
@@ -217,13 +224,17 @@ def one_input_convert(
 
 
 def many_inputs_convert(
-    python_inputs: ManyInputsUnionType, feature_domains: List[FeatureDomain] = None
+    python_inputs: ManyInputsUnionType,
+    feature_names: Optional[List[str]] = None,
+    feature_domains: Optional[List[FeatureDomain]] = None,
 ) -> List[PredictionInput]:
     """Convert an object of ManyInputsUnionType into a List[PredictionInput]"""
     if isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
             python_inputs = python_inputs.reshape(1, -1)
-        pis = numpy_to_prediction_object(python_inputs, trustyai.model.feature)
+        pis = numpy_to_prediction_object(
+            python_inputs, trustyai.model.feature, names=feature_names
+        )
     elif isinstance(python_inputs, pd.DataFrame):
         pis = df_to_prediction_object(python_inputs, trustyai.model.feature)
     else:
@@ -236,20 +247,28 @@ def many_inputs_convert(
 
 
 # === output functions =============================================================================
-def one_output_convert(python_outputs: OneOutputUnionType) -> PredictionOutput:
+def one_output_convert(
+    python_outputs: OneOutputUnionType, names: Optional[List[str]] = None
+) -> PredictionOutput:
     """Convert an object of OneOutputUnionType into a PredictionOutput"""
     if isinstance(python_outputs, (int, np.integer, float, np.inexact)):
         python_outputs = np.array([[python_outputs]])
-        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+        po = numpy_to_prediction_object(
+            python_outputs, trustyai.model.output, names=names
+        )[0]
     elif isinstance(python_outputs, list) and all(
         (isinstance(x, (int, float, np.number)) for x in python_outputs)
     ):
         python_outputs = np.array(python_outputs).reshape(1, -1)
-        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+        po = numpy_to_prediction_object(
+            python_outputs, trustyai.model.output, names=names
+        )[0]
     elif isinstance(python_outputs, np.ndarray):
         if len(python_outputs.shape) == 1:
             python_outputs = python_outputs.reshape(1, -1)
-        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+        po = numpy_to_prediction_object(
+            python_outputs, trustyai.model.output, names=names
+        )[0]
     elif isinstance(python_outputs, pd.DataFrame):
         po = df_to_prediction_object(python_outputs, trustyai.model.output)[0]
     elif isinstance(python_outputs, pd.Series):
@@ -265,13 +284,15 @@ def one_output_convert(python_outputs: OneOutputUnionType) -> PredictionOutput:
 
 
 def many_outputs_convert(
-    python_outputs: ManyOutputsUnionType,
+    python_outputs: ManyOutputsUnionType, names: Optional[List[str]] = None
 ) -> List[PredictionOutput]:
     """Convert an object of ManyOutputsUnionType into a List[PredictionOutput]"""
     if isinstance(python_outputs, np.ndarray):
         if len(python_outputs.shape) == 1:
             python_outputs = python_outputs.reshape(1, -1)
-        return numpy_to_prediction_object(python_outputs, trustyai.model.output)
+        return numpy_to_prediction_object(
+            python_outputs, trustyai.model.output, names=names
+        )
     if isinstance(python_outputs, pd.DataFrame):
         return df_to_prediction_object(python_outputs, trustyai.model.output)
     # fallback case is List[PredictionOutput]

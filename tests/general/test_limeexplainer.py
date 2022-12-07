@@ -165,3 +165,28 @@ def test_lime_as_html():
     explainer = LimeExplainer()
     explainer.explain(inputs=data, outputs=model(data), model=model)
     assert True
+
+    explanation = explainer.explain(inputs=data, outputs=model(data), model=model)
+    for score in explanation.as_dataframe()["output-0_score"]:
+        assert score != 0
+
+
+def test_lime_numpy():
+    np.random.seed(0)
+    data = np.random.rand(101, 5)
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
+    fnames = ['f{}'.format(x) for x in "abcde"]
+    onames = ['o{}'.format(x) for x in "12"]
+    model = Model(predict_function,
+                  feature_names=fnames,
+                  output_names=onames
+                  )
+
+    explainer = LimeExplainer()
+    explanation = explainer.explain(inputs=data[0], outputs=model(data[0]), model=model)
+
+    for oname in onames:
+        assert oname in explanation.as_dataframe().keys()
+        for fname in fnames:
+            assert fname in explanation.as_dataframe()[oname].index
