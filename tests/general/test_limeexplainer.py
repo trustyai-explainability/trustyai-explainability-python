@@ -133,12 +133,12 @@ def test_impact_score():
     data = pd.DataFrame(np.random.rand(1, 5))
     model_weights = np.random.rand(5)
     predict_function = lambda x: np.dot(x.values, model_weights)
-    model = Model(predict_function, dataframe_input=True, arrow=True)
+    model = Model(predict_function, dataframe_input=True)
     output = model(data)
     pred = simple_prediction(data, output)
     explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
     explanation = explainer.explain(inputs=data, outputs=output, model=model)
-    saliency = list(explanation.map().values())[0]
+    saliency = list(explanation.saliency_map().values())[0]
     top_features_t = saliency.getTopFeatures(2)
     impact = ExplainabilityMetrics.impactScore(model, pred, top_features_t)
     assert impact > 0
