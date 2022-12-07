@@ -1,18 +1,23 @@
 """Data Converters between Python and Java"""
 # pylint: disable = import-error, line-too-long, trailing-whitespace, unused-import, cyclic-import
 # pylint: disable = consider-using-f-string, invalid-name, wrong-import-order
-
-from typing import Union, List
+import warnings
+from typing import Union, List, Optional
+from itertools import filterfalse
 
 import trustyai.model
 from trustyai.model.domain import feature_domain
 from org.kie.trustyai.explainability.model import (
+    Dataframe,
     Feature,
     Output,
     PredictionInput,
     PredictionOutput,
 )
-from org.kie.trustyai.explainability.model.domain import FeatureDomain
+from org.kie.trustyai.explainability.model.domain import (
+    FeatureDomain,
+    EmptyFeatureDomain,
+)
 
 import pandas as pd
 import numpy as np
@@ -20,10 +25,26 @@ import numpy as np
 # UNION TYPES FOR INPUTS AND OUTPUTS
 # if a TrustyAI function wants AN input/output, it should accept this union type:
 OneInputUnionType = Union[
-    np.ndarray, pd.DataFrame, pd.Series, List[Feature], PredictionInput
+    int,
+    float,
+    np.integer,
+    np.inexact,
+    np.ndarray,
+    pd.DataFrame,
+    pd.Series,
+    List[Feature],
+    PredictionInput,
 ]
 OneOutputUnionType = Union[
-    np.ndarray, pd.DataFrame, pd.Series, List[Output], PredictionOutput
+    int,
+    float,
+    np.integer,
+    np.inexact,
+    np.ndarray,
+    pd.DataFrame,
+    pd.Series,
+    List[Output],
+    PredictionOutput,
 ]
 
 # if a TrustyAI function wants a LIST of inputs/outputs, it should accept this union type:
@@ -64,9 +85,16 @@ def data_conversion_docstring(*keys):
 
 _conversion_docstrings = {
     "one_input": [
-        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, :class:`pandas.Series`, List[:class:`Feature`], or :class:`PredictionInput`",
+        "int, float, :class:`numpy.number`, List[Union[int, float, :class:`numpy.number`]], "
+        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, :class:`pandas.Series`, "
+        "List[:class:`Feature`], or :class:`PredictionInput`",
         """
         
+            * If there's only a single input feature, an ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_ 
+              can be used.
+            * A list of ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_.
             * Numpy array of shape ``[1, n_features]`` or ``[n_features]``
             * Pandas DataFrame with 1 row and ``n_features`` columns
             * Pandas Series with `n_features` rows
@@ -76,9 +104,16 @@ _conversion_docstrings = {
         """,
     ],
     "one_output": [
-        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, List[:class:`Output`], or :class:`PredictionOutput`",
+        "int, float, :class:`numpy.number`, List[Union[int, float, :class:`numpy.number`]], "
+        ":class:`numpy.ndarray`, :class:`pandas.DataFrame`, :class:`pandas.Series`, "
+        " List[:class:`Output`], or :class:`PredictionOutput`",
         """
         
+            * If there's only a single output, an ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_  
+              can be used.
+            * A list of ``int``, ``float``, or any of the 
+              `Numpy equivalents <https://numpy.org/doc/stable/user/basics.types.html>`_.
             * Numpy array of shape ``[1, n_outputs]`` or ``[n_outputs]``
             * Pandas DataFrame with 1 row and ``n_outputs`` columns
             * Pandas Series with `n_outputs` rows
@@ -116,17 +151,29 @@ def domain_insertion(
 ):
     """Given a PredictionInput and a corresponding list of feature domains, where
     `len(feature_domains) == len(PredictionInput.getFeatures()`, return a PredictionInput
-    where the ith feature has the ith domain. If the ith domain is `None`, the feature
-    is constrained."""
-    assert len(undomained_input.getFeatures()) == len(feature_domains)
+    where the ith feature has the ith domain. If the ith domain is `None`, no new domain
+    information will be added to the feature, thus keeping previous domain information or
+    keeping it fixed if none has been supplied"""
+    assert len(undomained_input.getFeatures()) == len(
+        feature_domains
+    ), "input has {} features, but {} feature domains were passed".format(
+        len(undomained_input.getFeatures()), len(feature_domains)
+    )
 
     domained_features = []
     for i, f in enumerate(undomained_input.getFeatures()):
         if feature_domains[i] is None:
             domained_features.append(
-                Feature(f.getName(), f.getType(), f.getValue(), True, None)
+                Feature(f.getName(), f.getType(), f.getValue(), True, f.getDomain())
             )
         else:
+            if not isinstance(f.getDomain(), EmptyFeatureDomain):
+                warning_msg = (
+                    "The supplied feature domain at position {} is specifying a new "
+                    "domain to previously domain'ed {}, this will overwrite the "
+                    "previous domain with the new one.".format(i, f.toString())
+                )
+                warnings.warn(warning_msg)
             domained_features.append(
                 Feature(
                     f.getName(), f.getType(), f.getValue(), False, feature_domains[i]
@@ -140,7 +187,15 @@ def one_input_convert(
     python_inputs: OneInputUnionType, feature_domains: FeatureDomain = None
 ) -> PredictionInput:
     """Convert an object of OneInputUnionType into a PredictionInput."""
-    if isinstance(python_inputs, np.ndarray):
+    if isinstance(python_inputs, (int, float, np.number)):
+        python_inputs = np.array([[python_inputs]])
+        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+    elif isinstance(python_inputs, list) and all(
+        (isinstance(x, (int, float, np.number)) for x in python_inputs)
+    ):
+        python_inputs = np.array(python_inputs).reshape(1, -1)
+        pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
+    elif isinstance(python_inputs, np.ndarray):
         if len(python_inputs.shape) == 1:
             python_inputs = python_inputs.reshape(1, -1)
         pi = numpy_to_prediction_object(python_inputs, trustyai.model.feature)[0]
@@ -183,20 +238,30 @@ def many_inputs_convert(
 # === output functions =============================================================================
 def one_output_convert(python_outputs: OneOutputUnionType) -> PredictionOutput:
     """Convert an object of OneOutputUnionType into a PredictionOutput"""
-    if isinstance(python_outputs, np.ndarray):
+    if isinstance(python_outputs, (int, np.integer, float, np.inexact)):
+        python_outputs = np.array([[python_outputs]])
+        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, list) and all(
+        (isinstance(x, (int, float, np.number)) for x in python_outputs)
+    ):
+        python_outputs = np.array(python_outputs).reshape(1, -1)
+        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, np.ndarray):
         if len(python_outputs.shape) == 1:
             python_outputs = python_outputs.reshape(1, -1)
-        return numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
-    if isinstance(python_outputs, pd.DataFrame):
-        return df_to_prediction_object(python_outputs, trustyai.model.output)[0]
-    if isinstance(python_outputs, pd.Series):
-        return df_to_prediction_object(
+        po = numpy_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, pd.DataFrame):
+        po = df_to_prediction_object(python_outputs, trustyai.model.output)[0]
+    elif isinstance(python_outputs, pd.Series):
+        po = df_to_prediction_object(
             pd.DataFrame([python_outputs]), trustyai.model.output
         )[0]
-    if isinstance(python_outputs, PredictionOutput):
-        return python_outputs
-    # fallback is List[Output]
-    return PredictionOutput(python_outputs)
+    elif isinstance(python_outputs, PredictionOutput):
+        po = python_outputs
+    else:
+        # fallback is List[Output]
+        po = PredictionOutput(python_outputs)
+    return po
 
 
 def many_outputs_convert(
@@ -354,3 +419,39 @@ def prediction_object_to_pandas(
             ]
         )
     return df
+
+
+def pandas_to_trusty(
+    df: pd.DataFrame, outputs: Optional[List[int]] = None, no_outputs=False
+) -> Dataframe:
+    """
+    Converts a Pandas :class:`pandas.DataFrame` into a TrustyAI :class:`Dataframe`.
+    Either outputs can be provided as a list of column indices or `no_outputs` can be specified, for an inputs-only
+    :class:`Dataframe`.
+
+    Parameters
+    ----------
+    outputs : List[int]
+        Optional list of column indices to be marked as outputs
+
+    no_outputs : bool
+        Specify if the :class:`Dataframe` is inputs-only
+    """
+    df = df.reset_index(drop=True)
+    n_columns = len(df.columns)
+    indices = list(range(n_columns))
+    if not no_outputs:
+        if not outputs:  # If no output column supplied, assume the right-most
+            output_indices = [n_columns - 1]
+            input_indices = list(filterfalse(output_indices.__contains__, indices))
+        else:
+            output_indices = outputs
+            input_indices = list(filterfalse(outputs.__contains__, indices))
+
+        pi = many_inputs_convert(df.iloc[:, input_indices])
+        po = many_outputs_convert(df.iloc[:, output_indices])
+
+        return Dataframe.createFrom(pi, po)
+
+    pi = many_inputs_convert(df)
+    return Dataframe.createFromInputs(pi)

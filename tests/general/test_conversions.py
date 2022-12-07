@@ -153,64 +153,114 @@ def test_feature_domains():
 
 
 def test_one_input_conversion():
+    """Test one input conversions to one PredInput"""
     numpy1 = np.arange(0, 10)
-    numpy2 = np.arange(0, 10).reshape(1, 10)
-    series = pd.Series(numpy1, index=["input-{}".format(i) for i in range(10)])
-    df = pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(10)])
+    numpy2 = numpy1.reshape(1, 10)
 
-    ta_numpy1 = one_input_convert(numpy1)
-    ta_numpy2 = one_input_convert(numpy2)
-    ta_series = one_input_convert(series)
-    ta_df = one_input_convert(df)
+    to_convert = [
+        numpy1,
+        numpy2,
+        pd.Series(numpy1, index=["input-{}".format(i) for i in range(10)]),
+        pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(10)]),
+        numpy1.tolist()
+    ]
 
-    assert ta_numpy1.equals(ta_numpy2)
-    assert ta_numpy2.equals(ta_series)
-    assert ta_series.equals(ta_df)
+    converted = [one_input_convert(x) for x in to_convert]
+
+    for i in range(len(converted)-1):
+        assert converted[i].equals(converted[i+1])
 
 
 def test_one_input_conversion_domained():
+    """Test one input conversions with domains to one PredInput"""
     n_feats = 5
     np.random.seed(0)
-
+    numpy1 = np.arange(0, n_feats)
+    numpy2 = numpy1.reshape(1, n_feats)
     domain_bounds = [[np.random.rand(), np.random.rand()] for _ in range(n_feats)]
     domains = [feature_domain((lb, ub)) for lb, ub in domain_bounds]
-    numpy1 = np.arange(0, n_feats)
-    numpy2 = np.arange(0, n_feats).reshape(1, n_feats)
-    series = pd.Series(numpy1, index=["input-{}".format(i) for i in range(n_feats)])
-    df = pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(n_feats)])
 
-    ta_numpy1 = one_input_convert(numpy1, feature_domains=domains)
-    ta_numpy2 = one_input_convert(numpy2, feature_domains=domains)
-    ta_series = one_input_convert(series, feature_domains=domains)
-    ta_df = one_input_convert(df, feature_domains=domains)
+    to_convert = [
+        numpy1,
+        numpy2,
+        pd.Series(numpy1, index=["input-{}".format(i) for i in range(n_feats)]),
+        pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(n_feats)]),
+        numpy1.tolist()
+    ]
+    converted = [one_input_convert(x, feature_domains=domains) for x in to_convert]
 
-    for converted in [ta_numpy1, ta_numpy2, ta_df, ta_series]:
-        for i in range(n_feats):
-            assert converted.getFeatures().get(i).getDomain().getLowerBound() == domain_bounds[i][0]
-            assert converted.getFeatures().get(i).getDomain().getUpperBound() == domain_bounds[i][1]
+    for i in range(len(converted) - 1):
+        for j in range(n_feats):
+            assert converted[i].getFeatures().get(j).getDomain().getLowerBound()\
+                   == domain_bounds[j][0]
+            assert converted[i].getFeatures().get(j).getDomain().getUpperBound()\
+                   == domain_bounds[j][1]
 
-    assert ta_numpy1.equals(ta_numpy2)
-    assert ta_numpy2.equals(ta_series)
-    assert ta_series.equals(ta_df)
+        assert converted[i].equals(converted[i + 1])
+
+
+def test_one_input_one_feature_conversion():
+    """Test one input, one feature conversions to one PredInput"""
+    numpy1 = np.arange(0, 1)
+    numpy2 = numpy1.reshape(1, 1)
+
+    to_convert = [
+        numpy1,
+        numpy2,
+        pd.Series(numpy1, index=["input-{}".format(i) for i in range(1)]),
+        pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(1)]),
+        numpy1.tolist(),
+        numpy1.tolist()[0]
+    ]
+
+    converted = [one_input_convert(x) for x in to_convert]
+
+    for i in range(len(converted) - 1):
+        assert converted[i].equals(converted[i + 1])
 
 
 def test_one_output_conversion():
+    """Test one output conversions to one PredOutput"""
     numpy1 = np.arange(0, 10)
-    numpy2 = np.arange(0, 10).reshape(1, 10)
-    series = pd.Series(numpy1, index=["output-{}".format(i) for i in range(10)])
-    df = pd.DataFrame(numpy2, columns=["output-{}".format(i) for i in range(10)])
+    numpy2 = numpy1.reshape(1, 10)
 
-    ta_numpy1 = one_output_convert(numpy1)
-    ta_numpy2 = one_output_convert(numpy2)
-    ta_series = one_output_convert(series)
-    ta_df = one_output_convert(df)
+    to_convert = [
+        numpy1,
+        numpy2,
+        pd.Series(numpy1, index=["output-{}".format(i) for i in range(10)]),
+        pd.DataFrame(numpy2, columns=["output-{}".format(i) for i in range(10)]),
+        numpy1.tolist()
+    ]
 
-    assert ta_numpy1.equals(ta_numpy2)
-    assert ta_numpy2.equals(ta_series)
-    assert ta_series.equals(ta_df)
+    converted = [one_output_convert(x) for x in to_convert]
+
+    for i in range(len(converted) - 1):
+        assert converted[i].equals(converted[i + 1])
+
+
+def test_one_output_one_value_conversion():
+    """Test one output, one value conversions to one PredOutput"""
+    numpy1 = np.arange(0, 1)
+    numpy2 = numpy1.reshape(1, 1)
+
+    to_convert = [
+        numpy1,
+        numpy2,
+        pd.Series(numpy1, index=["output-{}".format(i) for i in range(1)]),
+        pd.DataFrame(numpy2, columns=["output-{}".format(i) for i in range(1)]),
+        numpy1.tolist(),
+        numpy1.tolist()[0]
+    ]
+
+    converted = [one_output_convert(x) for x in to_convert]
+
+    for i in range(len(converted) - 1):
+        assert converted[i].equals(converted[i + 1])
 
 
 def test_many_outputs_conversion():
+    """Test many output conversions to PredOutputs, using one row to produce
+    List[PredOutputs] with one item"""
     numpy1 = np.arange(0, 10)
     numpy2 = np.arange(0, 10).reshape(1, 10)
     df = pd.DataFrame(numpy2, columns=["output-{}".format(i) for i in range(10)])
@@ -225,6 +275,7 @@ def test_many_outputs_conversion():
 
 
 def test_many_outputs_conversion2():
+    """Test many output conversions to many PredOutputs"""
     numpy1 = np.arange(0, 100).reshape(10, 10)
     df = pd.DataFrame(numpy1, columns=["output-{}".format(i) for i in range(10)])
 
@@ -236,6 +287,8 @@ def test_many_outputs_conversion2():
 
 
 def test_many_inputs_conversion():
+    """Test many input conversions to PredOutputs, using one row to produce
+    List[PredInputs] with one item"""
     numpy1 = np.arange(0, 10)
     numpy2 = np.arange(0, 10).reshape(1, 10)
     df = pd.DataFrame(numpy2, columns=["input-{}".format(i) for i in range(10)])
@@ -250,6 +303,7 @@ def test_many_inputs_conversion():
 
 
 def test_many_inputs_conversion2():
+    """Test many input conversions to many PredInputs"""
     numpy1 = np.arange(0, 100).reshape(10, 10)
     df = pd.DataFrame(numpy1, columns=["input-{}".format(i) for i in range(10)])
 
@@ -261,6 +315,7 @@ def test_many_inputs_conversion2():
 
 
 def test_many_inputs_conversion_domained():
+    """Test many input conversions to many PredInputs with domains"""
     n_feats = 5
     n_datapoints = 100
     np.random.seed(0)
