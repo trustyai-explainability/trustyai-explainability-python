@@ -421,7 +421,22 @@ def prediction_object_to_pandas(
     return df
 
 
-def pandas_to_trusty(df: pd.DataFrame, outputs: Optional[List[int]] = None, no_outputs=False) -> Dataframe:
+def pandas_to_trusty(
+    df: pd.DataFrame, outputs: Optional[List[int]] = None, no_outputs=False
+) -> Dataframe:
+    """
+    Converts a Pandas :class:`pandas.DataFrame` into a TrustyAI :class:`Dataframe`.
+    Either outputs can be provided as a list of column indices or `no_outputs` can be specified, for an inputs-only
+    :class:`Dataframe`.
+
+    Parameters
+    ----------
+    outputs : List[int]
+        Optional list of column indices to be marked as outputs
+
+    no_outputs : bool
+        Specify if the :class:`Dataframe` is inputs-only
+    """
     df = df.reset_index(drop=True)
     n_columns = len(df.columns)
     indices = list(range(n_columns))
