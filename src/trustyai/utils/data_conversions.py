@@ -2,11 +2,13 @@
 # pylint: disable = import-error, line-too-long, trailing-whitespace, unused-import, cyclic-import
 # pylint: disable = consider-using-f-string, invalid-name, wrong-import-order
 import warnings
-from typing import Union, List
+from typing import Union, List, Optional
+from itertools import filterfalse
 
 import trustyai.model
 from trustyai.model.domain import feature_domain
 from org.kie.trustyai.explainability.model import (
+    Dataframe,
     Feature,
     Output,
     PredictionInput,
@@ -417,3 +419,39 @@ def prediction_object_to_pandas(
             ]
         )
     return df
+
+
+def pandas_to_trusty(
+    df: pd.DataFrame, outputs: Optional[List[int]] = None, no_outputs=False
+) -> Dataframe:
+    """
+    Converts a Pandas :class:`pandas.DataFrame` into a TrustyAI :class:`Dataframe`.
+    Either outputs can be provided as a list of column indices or `no_outputs` can be specified, for an inputs-only
+    :class:`Dataframe`.
+
+    Parameters
+    ----------
+    outputs : List[int]
+        Optional list of column indices to be marked as outputs
+
+    no_outputs : bool
+        Specify if the :class:`Dataframe` is inputs-only
+    """
+    df = df.reset_index(drop=True)
+    n_columns = len(df.columns)
+    indices = list(range(n_columns))
+    if not no_outputs:
+        if not outputs:  # If no output column supplied, assume the right-most
+            output_indices = [n_columns - 1]
+            input_indices = list(filterfalse(output_indices.__contains__, indices))
+        else:
+            output_indices = outputs
+            input_indices = list(filterfalse(outputs.__contains__, indices))
+
+        pi = many_inputs_convert(df.iloc[:, input_indices])
+        po = many_outputs_convert(df.iloc[:, output_indices])
+
+        return Dataframe.createFrom(pi, po)
+
+    pi = many_inputs_convert(df)
+    return Dataframe.createFromInputs(pi)
