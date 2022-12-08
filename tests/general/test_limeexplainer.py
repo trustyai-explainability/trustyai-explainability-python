@@ -118,15 +118,23 @@ def test_lime_plots():
 
 def test_lime_v2():
     np.random.seed(0)
-    data = pd.DataFrame(np.random.rand(1, 5))
-    model_weights = np.random.rand(5)
-    predict_function = lambda x: np.dot(x.values, model_weights)
+    data = pd.DataFrame(np.random.rand(1, 5)).values
 
-    model = Model(predict_function, dataframe_input=True)
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
+    model = Model(predict_function)
+
     explainer = LimeExplainer(samples=100, perturbations=2, seed=23, normalise_weights=False)
     explanation = explainer.explain(inputs=data, outputs=model(data), model=model)
-    for score in explanation.as_dataframe()["output-0_score"]:
+
+    for score in explanation.as_dataframe()["output-0"]['Saliency']:
         assert score != 0
+
+    for out_name, df in explanation.as_dataframe().items():
+        assert "Feature" in df
+        assert "output" in out_name
+        assert all([x in str(df) for x in "01234"])
+
 
 def test_impact_score():
     np.random.seed(0)
@@ -143,3 +151,17 @@ def test_impact_score():
     impact = ExplainabilityMetrics.impactScore(model, pred, top_features_t)
     assert impact > 0
     return impact
+
+
+def test_lime_as_html():
+    np.random.seed(0)
+    data = np.random.rand(1, 5)
+
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
+
+    model = Model(predict_function, disable_arrow=True)
+
+    explainer = LimeExplainer()
+    explainer.explain(inputs=data, outputs=model(data), model=model)
+    assert True

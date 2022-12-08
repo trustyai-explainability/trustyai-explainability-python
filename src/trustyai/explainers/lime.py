@@ -6,9 +6,11 @@ from typing import Dict, Union
 import bokeh.models
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy as np
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
 from trustyai.utils._visualisation import (
@@ -77,42 +79,62 @@ class LimeResults(SaliencyResults):
         Returns
         -------
         pandas.DataFrame
-            DataFrame containing the results of the LIME explanation. For each model output, the
-            table will contain the following columns:
+            Dictionary of DataFrames, keyed by output name, containing the results of the LIME
+            explanation. For each model output, the table will contain the following columns:
 
-            * ``${output_name}_features``: The names of each input feature.
-            * ``${output_name}_score``: The LIME saliency of this feature.
-            * ``${output_name}_value``: The original value of each feature.
-            * ``${output_name}_confidence``: The confidence of the reported saliency.
+            * ``Feature``: The name of the feature
+            * ``Value``: The value of the feature for this particular input.
+            * ``Saliency``: The importance of this feature to the output.
+            * ``Confidence``: The confidence of this explanation as returned by the explainer.
+
         """
         outputs = self.saliency_map().keys()
 
         data = {}
         for output in outputs:
-            pfis = self.saliency_map().get(output).getPerFeatureImportance()
-            data[f"{output}_features"] = [
-                f"{pfi.getFeature().getName()}" for pfi in pfis
-            ]
-            data[f"{output}_score"] = [pfi.getScore() for pfi in pfis]
-            data[f"{output}_value"] = [
-                pfi.getFeature().getValue().as_number() for pfi in pfis
-            ]
-            data[f"{output}_confidence"] = [pfi.getConfidence() for pfi in pfis]
-
-        return pd.DataFrame.from_dict(data)
+            output_rows = []
+            for pfi in self.saliency_map().get(output).getPerFeatureImportance():
+                output_rows.append(
+                    {
+                        "Feature": str(pfi.getFeature().getName().toString()),
+                        "Value": pfi.getFeature().getValue().getUnderlyingObject(),
+                        "Saliency": pfi.getScore(),
+                        "Confidence": pfi.getConfidence(),
+                    }
+                )
+            data[output] = pd.DataFrame(output_rows)
+        return data
 
     def as_html(self) -> pd.io.formats.style.Styler:
         """
-        Return the LIME result as a Pandas Styler object.
+        Return the LIME results as Pandas Styler objects.
 
         Returns
         -------
-        pandas.Styler
-            Styler containing the results of the LIME explanation, in the same
-            schema as in :func:`as_dataframe`. Currently, no default styles are applied
-            in this particular function, making it equivalent to :code:`self.as_dataframe().style`.
+        Dict[str, pandas.Styler]
+            Dictionary of stylers keyed by output name. Each styler containing the results of the
+            LIME explanation for that particular output, in the same
+            schema as in :func:`as_dataframe`. This will:
+
+            * Color each ``Saliency`` based on how their magnitude.
         """
-        return self.as_dataframe().style
+
+        htmls = {}
+        for k, df in self.as_dataframe().items():
+            htmls[k] = df.style.background_gradient(
+                LinearSegmentedColormap.from_list(
+                    name="rwg",
+                    colors=[
+                        ds["negative_primary_colour"],
+                        ds["neutral_primary_colour"],
+                        ds["positive_primary_colour"],
+                    ],
+                ),
+                subset="Saliency",
+                vmin=-1 * max(np.abs(df["Saliency"])),
+                vmax=max(np.abs(df["Saliency"])),
+            )
+        return htmls
 
     def _matplotlib_plot(self, output_name: str, block=True) -> None:
         """Plot the LIME saliencies."""
