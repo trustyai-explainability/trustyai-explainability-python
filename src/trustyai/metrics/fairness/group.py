@@ -7,7 +7,11 @@ from jpype import JInt
 from org.kie.trustyai.explainability.metrics import FairnessMetrics
 
 from trustyai.model import Value, PredictionProvider, Model
-from trustyai.utils.data_conversions import pandas_to_trusty, OneOutputUnionType, one_output_convert
+from trustyai.utils.data_conversions import (
+    pandas_to_trusty,
+    OneOutputUnionType,
+    one_output_convert,
+)
 
 ColumSelector = Union[List[int], List[str]]
 
@@ -23,10 +27,10 @@ def _column_selector_to_index(columns: ColumSelector, dataframe: pd.DataFrame):
 
 
 def statistical_parity_difference(
-        privileged: pd.DataFrame,
-        unprivileged: pd.DataFrame,
-        favorable: OneOutputUnionType,
-        outputs: Optional[List[int]] = None,
+    privileged: pd.DataFrame,
+    unprivileged: pd.DataFrame,
+    favorable: OneOutputUnionType,
+    outputs: Optional[List[int]] = None,
 ) -> float:
     """Calculate Statistical Parity Difference between privileged and unprivileged dataframes"""
     favorable_prediction_object = one_output_convert(favorable)
@@ -39,11 +43,11 @@ def statistical_parity_difference(
 
 # pylint: disable = line-too-long
 def statistical_parity_difference_model(
-        samples: pd.DataFrame,
-        model: Union[PredictionProvider, Model],
-        privilege_columns: ColumSelector,
-        privilege_values: List[Any],
-        favorable: OneOutputUnionType,
+    samples: pd.DataFrame,
+    model: Union[PredictionProvider, Model],
+    privilege_columns: ColumSelector,
+    privilege_values: List[Any],
+    favorable: OneOutputUnionType,
 ) -> float:
     """Calculate Statistical Parity Difference using a samples dataframe and a model"""
     favorable_prediction_object = one_output_convert(favorable)
@@ -59,10 +63,10 @@ def statistical_parity_difference_model(
 
 
 def disparate_impact_ratio(
-        privileged: pd.DataFrame,
-        unprivileged: pd.DataFrame,
-        favorable: OneOutputUnionType,
-        outputs: Optional[List[int]] = None,
+    privileged: pd.DataFrame,
+    unprivileged: pd.DataFrame,
+    favorable: OneOutputUnionType,
+    outputs: Optional[List[int]] = None,
 ) -> float:
     """Calculate Disparate Impact Ration between privileged and unprivileged dataframes"""
     favorable_prediction_object = one_output_convert(favorable)
@@ -75,11 +79,11 @@ def disparate_impact_ratio(
 
 # pylint: disable = line-too-long
 def disparate_impact_ratio_model(
-        samples: pd.DataFrame,
-        model: Union[PredictionProvider, Model],
-        privilege_columns: ColumSelector,
-        privilege_values: List[Any],
-        favorable: OneOutputUnionType,
+    samples: pd.DataFrame,
+    model: Union[PredictionProvider, Model],
+    privilege_columns: ColumSelector,
+    privilege_values: List[Any],
+    favorable: OneOutputUnionType,
 ) -> float:
     """Calculate Disparate Impact Ration using a samples dataframe and a model"""
     favorable_prediction_object = one_output_convert(favorable)
@@ -96,12 +100,12 @@ def disparate_impact_ratio_model(
 
 # pylint: disable = too-many-arguments
 def average_odds_difference(
-        test: pd.DataFrame,
-        truth: pd.DataFrame,
-        privilege_columns: ColumSelector,
-        privilege_values: OneOutputUnionType,
-        positive_class: List[Any],
-        outputs: Optional[List[int]] = None,
+    test: pd.DataFrame,
+    truth: pd.DataFrame,
+    privilege_columns: ColumSelector,
+    privilege_values: OneOutputUnionType,
+    positive_class: List[Any],
+    outputs: Optional[List[int]] = None,
 ) -> float:
     """Calculate Average Odds between two dataframes"""
     if test.shape != truth.shape:
@@ -122,11 +126,11 @@ def average_odds_difference(
 
 
 def average_odds_difference_model(
-        samples: pd.DataFrame,
-        model: Union[PredictionProvider, Model],
-        privilege_columns: ColumSelector,
-        privilege_values: List[Any],
-        positive_class: List[Any],
+    samples: pd.DataFrame,
+    model: Union[PredictionProvider, Model],
+    privilege_columns: ColumSelector,
+    privilege_values: List[Any],
+    positive_class: List[Any],
 ) -> float:
     """Calculate Average Odds for a sample dataframe using the provided model"""
     _jsamples = pandas_to_trusty(samples, no_outputs=True)
@@ -140,12 +144,12 @@ def average_odds_difference_model(
 
 
 def average_predictive_value_difference(
-        test: pd.DataFrame,
-        truth: pd.DataFrame,
-        privilege_columns: ColumSelector,
-        privilege_values: List[Any],
-        positive_class: List[Any],
-        outputs: Optional[List[int]] = None,
+    test: pd.DataFrame,
+    truth: pd.DataFrame,
+    privilege_columns: ColumSelector,
+    privilege_values: List[Any],
+    positive_class: List[Any],
+    outputs: Optional[List[int]] = None,
 ) -> float:
     """Calculate Average Predictive Value Difference between two dataframes"""
     if test.shape != truth.shape:
@@ -166,11 +170,11 @@ def average_predictive_value_difference(
 
 # pylint: disable = line-too-long
 def average_predictive_value_difference_model(
-        samples: pd.DataFrame,
-        model: Union[PredictionProvider, Model],
-        privilege_columns: ColumSelector,
-        privilege_values: List[Any],
-        positive_class: List[Any],
+    samples: pd.DataFrame,
+    model: Union[PredictionProvider, Model],
+    privilege_columns: ColumSelector,
+    privilege_values: List[Any],
+    positive_class: List[Any],
 ) -> float:
     """Calculate Average Predictive Value Difference for a sample dataframe using the provided model"""
     _jsamples = pandas_to_trusty(samples, no_outputs=True)
