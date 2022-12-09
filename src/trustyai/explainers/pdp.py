@@ -19,12 +19,10 @@ from org.kie.trustyai.explainability.model import (
     PredictionInputsDataDistribution,
     PredictionOutput,
     Output,
-    Type
+    Type,
 )
 
-from trustyai.utils.data_conversions import (
-    ManyInputsUnionType
-)
+from trustyai.utils.data_conversions import ManyInputsUnionType
 
 from .explanation_results import ExplanationResults
 
@@ -48,10 +46,9 @@ class PDPResults(ExplanationResults):
         for pdp_graph in self.pdp_graphs:
             inputs = [x.getUnderlyingObject() for x in pdp_graph.getX()]
             outputs = [y.getUnderlyingObject() for y in pdp_graph.getY()]
-            pdp_dict = dict(zip(inputs,
-                                outputs))
-            pdp_dict['feature'] = '' + str(pdp_graph.getFeature().getName())
-            pdp_series = pd.Series(index=inputs + ['feature'], data=pdp_dict)
+            pdp_dict = dict(zip(inputs, outputs))
+            pdp_dict["feature"] = "" + str(pdp_graph.getFeature().getName())
+            pdp_series = pd.Series(index=inputs + ["feature"], data=pdp_dict)
             pdp_series_list.append(pdp_series)
         pdp_df = pd.DataFrame(pdp_series_list)
         return pdp_df
@@ -75,19 +72,31 @@ class PDPResults(ExplanationResults):
             whether the plotting operation
             should be blocking or not
         """
-        fig, axs = plt.subplots(len(self.pdp_graphs), sharex=True)
+        fig, axs = plt.subplots(len(self.pdp_graphs), sharex=True, constrained_layout=True)
         p_idx = 0
         for pdp_graph in self.pdp_graphs:
-            if output_name is not None and output_name != str(pdp_graph.getOutput().getName()):
+            if output_name is not None and output_name != str(
+                pdp_graph.getOutput().getName()
+            ):
                 continue
             fig.suptitle(str(pdp_graph.getOutput().getName()))
             pdp_data = []
             for i in range(len(pdp_graph.getX())):
-                pdp_data.append([pdp_graph.getX()[i].getUnderlyingObject(),
-                                 pdp_graph.getY()[i].getUnderlyingObject()])
-            axs[p_idx].plot(np.array(pdp_data))
+                pdp_data.append(
+                    [
+                        pdp_graph.getX()[i].getUnderlyingObject(),
+                        pdp_graph.getY()[i].getUnderlyingObject(),
+                    ]
+                )
+            axs[p_idx].plot(
+                np.array(pdp_data)
+            )
+            axs[p_idx].set_title(str(pdp_graph.getFeature().getName()), loc='left', fontsize='small')
+            axs[p_idx].grid()
             p_idx += 1
+        fig.supylabel('Partial Dependence Plot')
         plt.show(block=block)
+
 
 # pylint: disable = too-few-public-methods
 class PDPExplainer:
@@ -101,8 +110,9 @@ class PDPExplainer:
             config = pdp.PartialDependencePlotConfig()
         self._explainer = pdp.PartialDependencePlotExplainer(config)
 
-    def explain(self, model: PredictionProvider, data: ManyInputsUnionType,
-                num_outputs: int = 1) -> PDPResults:
+    def explain(
+        self, model: PredictionProvider, data: ManyInputsUnionType, num_outputs: int = 1
+    ) -> PDPResults:
         """
         Parameters
         ----------
@@ -123,7 +133,9 @@ class PDPExplainer:
         return PDPResults(pdp_graphs)
 
 
-@JImplements("org.kie.trustyai.explainability.model.PredictionProviderMetadata", deferred=True)
+@JImplements(
+    "org.kie.trustyai.explainability.model.PredictionProviderMetadata", deferred=True
+)
 class PredictionProviderMetadata:
     """
     Implementation of org.kie.trustyai.explainability.model.PredictionProviderMetadata interface
