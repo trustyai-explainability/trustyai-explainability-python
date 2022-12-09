@@ -1,44 +1,19 @@
 """Explainers.pdp module"""
 
-from typing import Dict, Union
-
-import bokeh.models
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from bokeh.models import ColumnDataSource, HoverTool
-from bokeh.plotting import figure
 import pandas as pd
 import numpy as np
 from pandas.io.formats.style import Styler
-
-from trustyai.utils._visualisation import (
-    DEFAULT_STYLE as ds,
-    DEFAULT_RC_PARAMS as drcp,
-    bold_red_html,
-    bold_green_html,
-    output_html,
-    feature_html,
-)
-
-from trustyai.utils.data_conversions import (
-    OneInputUnionType,
-    data_conversion_docstring,
-    OneOutputUnionType,
-)
-from trustyai.utils.data_conversions import (
-    ManyInputsUnionType
-)
 
 from jpype import (
     JImplements,
     JOverride,
 )
 
+# pylint: disable = import-error
 from org.kie.trustyai.explainability.global_ import pdp
 
-from .explanation_results import ExplanationResults
-from trustyai.model import simple_prediction, Model
-
+# pylint: disable = import-error
 from org.kie.trustyai.explainability.model import (
     PredictionProvider,
     PredictionInputsDataDistribution,
@@ -47,37 +22,28 @@ from org.kie.trustyai.explainability.model import (
     Type
 )
 
-from java.util import Random
+from trustyai.utils.data_conversions import (
+    ManyInputsUnionType
+)
 
-
-class PDPExplainer:
-
-    def __init__(self, config=None):
-        if config is None:
-            config = pdp.PartialDependencePlotConfig()
-        self._explainer = pdp.PartialDependencePlotExplainer(config)
-
-
-    def explain(self, model: PredictionProvider, data: ManyInputsUnionType, num_outputs: int = 1):
-        """
-        Parameters
-        ----------
-
-
-        Returns
-        -------
-
-        """
-        pdp_graphs = self._explainer.explainFromMetadata(model, PredictionProviderMetadata(data, num_outputs))
-        return PDPResults(pdp_graphs)
+from .explanation_results import ExplanationResults
 
 
 class PDPResults(ExplanationResults):
+    """
+    Results class for Partial Dependence Plots
+    """
 
     def __init__(self, pdp_graphs):
         self.pdp_graphs = pdp_graphs
 
     def as_dataframe(self) -> pd.DataFrame:
+        """
+        Returns
+        -------
+        a pd.DataFrame holding the model outputs as columns
+        and per feature input value as rows
+        """
         pdp_series_list = []
         for pdp_graph in self.pdp_graphs:
             inputs = [x.getUnderlyingObject() for x in pdp_graph.getX()]
@@ -91,66 +57,119 @@ class PDPResults(ExplanationResults):
         return pdp_df
 
     def as_html(self) -> Styler:
+        """
+        Returns
+        -------
+        Style object from the PDP pd.DataFrame (see as_dataframe)
+        """
         return self.as_dataframe().style
 
-    def _matplotlib_plot(self, output_name, block=True) -> None:
+    def plot(self, output_name=None, block=True) -> None:
+        """
+        Parameters
+        ----------
+        output_name: str
+            name of the output to be plotted
+            Default to None
+        block: bool
+            whether the plotting operation
+            should be blocking or not
+        """
         fig, axs = plt.subplots(len(self.pdp_graphs), sharex=True)
-        p = 0
+        p_idx = 0
         for pdp_graph in self.pdp_graphs:
             if output_name is not None and output_name != str(pdp_graph.getOutput().getName()):
                 continue
             fig.suptitle(str(pdp_graph.getOutput().getName()))
             pdp_data = []
             for i in range(len(pdp_graph.getX())):
-                pdp_data.append([pdp_graph.getX()[i].getUnderlyingObject(), pdp_graph.getY()[i].getUnderlyingObject()])
-            axs[p].plot(np.array(pdp_data))
-            p += 1
+                pdp_data.append([pdp_graph.getX()[i].getUnderlyingObject(),
+                                 pdp_graph.getY()[i].getUnderlyingObject()])
+            axs[p_idx].plot(np.array(pdp_data))
+            p_idx += 1
         plt.show(block=block)
+
+# pylint: disable = too-few-public-methods
+class PDPExplainer:
+    """
+    Partial Dependence Plot explainer.
+    See https://christophm.github.io/interpretable-ml-book/pdp.html
+    """
+
+    def __init__(self, config=None):
+        if config is None:
+            config = pdp.PartialDependencePlotConfig()
+        self._explainer = pdp.PartialDependencePlotExplainer(config)
+
+    def explain(self, model: PredictionProvider, data: ManyInputsUnionType,
+                num_outputs: int = 1) -> PDPResults:
+        """
+        Parameters
+        ----------
+        model: PredictionProvider
+            the model to explain
+        data: ManyInputsUnionType
+            the data used to calculate the PDP
+        num_outputs: int
+            the number of outputs to calculate the PDP for
+
+        Returns
+        -------
+        pdp_results: PDPResults
+            the partial dependence plots associated to the model outputs
+        """
+        metadata = PredictionProviderMetadata(data, num_outputs)
+        pdp_graphs = self._explainer.explainFromMetadata(model, metadata)
+        return PDPResults(pdp_graphs)
 
 
 @JImplements("org.kie.trustyai.explainability.model.PredictionProviderMetadata", deferred=True)
 class PredictionProviderMetadata:
     """
-    Wraps java LocalExplainer interface, delegating the generation of explanations
-    to either LimeExplainer or SHAPExplainer.
+    Implementation of org.kie.trustyai.explainability.model.PredictionProviderMetadata interface
     """
 
     def __init__(self, data: ManyInputsUnionType, size: int):
         """
         Parameters
         ----------
-        wrapped: Union[trustyai.explainer.LimeExplainer, trustyai.explainer.SHAPExplainer]
-            wrapped explainer
+        data: ManyInputsUnionType
+            the data
+        size: int
+            the size of the model output
         """
         self.data = PredictionInputsDataDistribution(data)
         outputs = []
-        for i in range(size):
+        for _ in range(size):
             outputs.append(Output("", Type.UNDEFINED))
         self.pred_out = PredictionOutput(outputs)
 
+    # pylint: disable = invalid-name
     @JOverride
     def getDataDistribution(self):
         """
         Returns
         --------
-
+        the underlying data distribution
         """
         return self.data
 
+    # pylint: disable = invalid-name
     @JOverride
     def getInputShape(self):
         """
         Returns
         --------
-
+        a PredictionInput from the underlying distribution
         """
         return self.data.sample()
 
+    # pylint: disable = invalid-name
     @JOverride
     def getOutputShape(self):
         """
         Returns
         --------
-
+        a PredictionOutput
         """
         return self.pred_out
