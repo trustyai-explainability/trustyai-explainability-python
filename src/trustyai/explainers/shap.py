@@ -101,44 +101,27 @@ class SHAPResults(SaliencyResults):
             ],
             0,
         ).tolist()
-        feature_values = [
-            pfi.getFeature().getValue().asNumber()
-            for pfi in saliency.getPerFeatureImportance()[:-1]
-        ]
-        shap_values = [
-            pfi.getScore() for pfi in saliency.getPerFeatureImportance()[:-1]
-        ]
-        feature_names = [
-            str(pfi.getFeature().getName())
-            for pfi in saliency.getPerFeatureImportance()[:-1]
-        ]
 
-        columns = ["Mean Background Value", "Feature Value", "SHAP Value"]
-        visualizer_data_frame = pd.DataFrame(
-            [background_mean_feature_values, feature_values, shap_values],
-            index=columns,
-            columns=feature_names,
-        ).T
-        fnull = self.get_fnull()[output_name]
+        data_rows = []
+        for i, pfi in enumerate(saliency.getPerFeatureImportance()[:-1]):
+            data_rows.append(
+                {
+                    "Feature": str(pfi.getFeature().getName().toString()),
+                    "Value": pfi.getFeature().getValue().getUnderlyingObject(),
+                    "Mean Background Value": background_mean_feature_values[i],
+                    "SHAP Value": pfi.getScore(),
+                    "Confidence": pfi.getConfidence(),
+                }
+            )
 
-        return (
-            pd.concat(
-                [
-                    pd.DataFrame(
-                        [["-", "-", fnull]], index=["Background"], columns=columns
-                    ),
-                    visualizer_data_frame,
-                    pd.DataFrame(
-                        [[fnull, sum(shap_values) + fnull, sum(shap_values) + fnull]],
-                        index=["Prediction"],
-                        columns=columns,
-                    ),
-                ]
-            ),
-            feature_names,
-            shap_values,
-            background_mean_feature_values,
-        )
+        fnull = {
+            "Feature": "Background",
+            "Value": None,
+            "Mean Background Value": None,
+            "SHAP Value": self.get_fnull()[output_name],
+        }
+
+        return pd.DataFrame([fnull] + data_rows)
 
     def as_dataframe(self) -> Dict[str, pd.DataFrame]:
         """
@@ -148,16 +131,18 @@ class SHAPResults(SaliencyResults):
         -------
         Dict[str, pandas.DataFrame]
             Dictionary of DataFrames, keyed by output name, containing the results of the SHAP
-            explanation. For each model output, the table will contain the following columns,
-            indexed by feature name:
+            explanation. For each model output, the table will contain the following columns:
 
-            * ``Mean Background Value``: The mean value this feature took in the background
+            * ``Feature``: The name of the feature
             * ``Feature Value``: The value of the feature for this particular input.
+            * ``Mean Background Value``: The mean value this feature took in the background
             * ``SHAP Value``: The found SHAP value of this feature.
+            * ``Confidence``: The confidence of this explanation as returned by the explainer.
+
         """
         df_dict = {}
         for output_name, saliency in self.saliency_map().items():
-            df_dict[output_name] = self._saliency_to_dataframe(saliency, output_name)[0]
+            df_dict[output_name] = self._saliency_to_dataframe(saliency, output_name)
         return df_dict
 
     def as_html(self) -> Dict[str, pd.io.formats.style.Styler]:
@@ -179,23 +164,21 @@ class SHAPResults(SaliencyResults):
         def _color_feature_values(feature_values, background_vals):
             """Internal function for the dataframe visualization"""
             formats = []
-            for i, feature_value in enumerate(feature_values[1:-1]):
+            for i, feature_value in enumerate(feature_values[1:]):
                 if feature_value < background_vals[i]:
                     formats.append(f"background-color:{ds['negative_primary_colour']}")
                 elif feature_value > background_vals[i]:
                     formats.append(f"background-color:{ds['positive_primary_colour']}")
                 else:
                     formats.append(None)
-            return [None] + formats + [None]
+            return [None] + formats
 
         df_dict = {}
-        for i, (output_name, saliency) in enumerate(self.saliency_map().items()):
-            (
-                df,
-                feature_names,
-                shap_values,
-                background_mean_feature_values,
-            ) = self._saliency_to_dataframe(saliency, i)
+        for output_name, saliency in self.saliency_map().items():
+            df = self._saliency_to_dataframe(saliency, output_name)
+            shap_values = df["SHAP Value"].values[1:]
+            background_mean_feature_values = df["Mean Background Value"].values[1:]
+
             style = df.style.background_gradient(
                 LinearSegmentedColormap.from_list(
                     name="rwg",
@@ -205,7 +188,7 @@ class SHAPResults(SaliencyResults):
                         ds["positive_primary_colour"],
                     ],
                 ),
-                subset=(slice(feature_names[0], feature_names[-1]), "SHAP Value"),
+                subset=(slice(1, None), "SHAP Value"),
                 vmin=-1 * max(np.abs(shap_values)),
                 vmax=max(np.abs(shap_values)),
             )
@@ -213,7 +196,7 @@ class SHAPResults(SaliencyResults):
             df_dict[output_name] = style.apply(
                 _color_feature_values,
                 background_vals=background_mean_feature_values,
-                subset="Feature Value",
+                subset="Value",
                 axis=0,
             )
         return df_dict

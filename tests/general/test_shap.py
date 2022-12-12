@@ -96,3 +96,19 @@ def test_shap_as_df():
         assert "Mean Background Value" in df
         assert "output" in out_name
         assert all([x in str(df) for x in "01234"])
+
+
+def test_shap_as_html():
+    np.random.seed(0)
+    data = pd.DataFrame(np.random.rand(101, 5))
+    background = data.iloc[:100].values
+    to_explain = data.iloc[100:101].values
+
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
+
+    model = Model(predict_function, disable_arrow=True)
+
+    shap_explainer = SHAPExplainer(background=background)
+    explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
+    assert True
