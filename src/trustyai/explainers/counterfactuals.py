@@ -5,10 +5,10 @@ from typing import Optional, Union, List
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
+from pandas.io.formats.style import Styler
 import uuid as _uuid
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
-from .explanation_results import ExplanationResults
 from trustyai.utils._visualisation import (
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
@@ -50,7 +50,7 @@ SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
 
 
-class CounterfactualResult(ExplanationResults):
+class CounterfactualResult:
     """Wraps Counterfactual results. This object is returned by the
     :class:`~CounterfactualExplainer`, and provides a variety of methods to visualize and interact
     with the results of the counterfactual explanation.

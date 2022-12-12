@@ -72,15 +72,24 @@ class LimeResults(SaliencyResults):
             for entry in self._java_saliency_results.saliencies.entrySet()
         }
 
-    def as_dataframe(self) -> pd.DataFrame:
+    def as_dataframe(
+        self, output_name: str = None
+    ) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
         """
         Return the LIME result as a dataframe.
 
+        Parameters
+        ----------
+        output_name: str
+            If an output_name is passed, that output's explanation is returned as a pandas
+            dataframe. Otherwise, all outputs' explanation dataframes are returned in a dictionary.
+
+
         Returns
         -------
-        pandas.DataFrame
+        pandas.DataFrame or Dict[str, pandas.Dataframe]
             Dictionary of DataFrames, keyed by output name, containing the results of the LIME
-            explanation. For each model output, the table will contain the following columns:
+            explanation. Each dataframe will contain the following columns:
 
             * ``Feature``: The name of the feature
             * ``Value``: The value of the feature for this particular input.
@@ -88,30 +97,44 @@ class LimeResults(SaliencyResults):
             * ``Confidence``: The confidence of this explanation as returned by the explainer.
 
         """
+
         outputs = self.saliency_map().keys()
 
         data = {}
         for output in outputs:
-            output_rows = []
-            for pfi in self.saliency_map().get(output).getPerFeatureImportance():
-                output_rows.append(
-                    {
-                        "Feature": str(pfi.getFeature().getName().toString()),
-                        "Value": pfi.getFeature().getValue().getUnderlyingObject(),
-                        "Saliency": pfi.getScore(),
-                        "Confidence": pfi.getConfidence(),
-                    }
-                )
-            data[output] = pd.DataFrame(output_rows)
+            if output_name is None or output == output_name:
+                output_rows = []
+                for pfi in self.saliency_map().get(output).getPerFeatureImportance():
+                    output_rows.append(
+                        {
+                            "Feature": str(pfi.getFeature().getName().toString()),
+                            "Value": pfi.getFeature().getValue().getUnderlyingObject(),
+                            "Saliency": pfi.getScore(),
+                            "Confidence": pfi.getConfidence(),
+                        }
+                    )
+                data[output] = pd.DataFrame(output_rows)
+
+        if output_name is not None:
+            return data[output_name]
         return data
 
-    def as_html(self) -> pd.io.formats.style.Styler:
+    def as_html(
+        self, output_name: str = None
+    ) -> Union[Dict[str, pd.io.formats.style.Styler], pd.io.formats.style.Styler]:
         """
         Return the LIME results as Pandas Styler objects.
 
+        Parameters
+        ----------
+        output_name: str
+            If an output_name is passed, that output's explanation is returned as a pandas Styler.
+            Otherwise, all outputs' explanation stylers are returned in a dictionary.
+
+
         Returns
         -------
-        Dict[str, pandas.Styler]
+        pandas.Styler or Dict[str, pandas.Styler]
             Dictionary of stylers keyed by output name. Each styler containing the results of the
             LIME explanation for that particular output, in the same
             schema as in :func:`as_dataframe`. This will:
@@ -121,19 +144,25 @@ class LimeResults(SaliencyResults):
 
         htmls = {}
         for k, df in self.as_dataframe().items():
-            htmls[k] = df.style.background_gradient(
-                LinearSegmentedColormap.from_list(
-                    name="rwg",
-                    colors=[
-                        ds["negative_primary_colour"],
-                        ds["neutral_primary_colour"],
-                        ds["positive_primary_colour"],
-                    ],
-                ),
-                subset="Saliency",
-                vmin=-1 * max(np.abs(df["Saliency"])),
-                vmax=max(np.abs(df["Saliency"])),
-            )
+            if output_name is None or k == output_name:
+                style = df.style.background_gradient(
+                    LinearSegmentedColormap.from_list(
+                        name="rwg",
+                        colors=[
+                            ds["negative_primary_colour"],
+                            ds["neutral_primary_colour"],
+                            ds["positive_primary_colour"],
+                        ],
+                    ),
+                    subset="Saliency",
+                    vmin=-1 * max(np.abs(df["Saliency"])),
+                    vmax=max(np.abs(df["Saliency"])),
+                )
+                style.set_caption(f"LIME Explanation of {output_name}")
+                htmls[k] = style
+
+        if output_name is not None:
+            return htmls[output_name]
         return htmls
 
     def _matplotlib_plot(self, output_name: str, block=True) -> None:

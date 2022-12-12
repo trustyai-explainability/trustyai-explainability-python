@@ -123,15 +123,24 @@ class SHAPResults(SaliencyResults):
 
         return pd.DataFrame([fnull] + data_rows)
 
-    def as_dataframe(self) -> Dict[str, pd.DataFrame]:
+    def as_dataframe(
+        self, output_name: str = None
+    ) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
         """
         Return the SHAP results as dataframes.
 
+        Parameters
+        ----------
+        output_name: str
+            If an output_name is passed, that output's explanation is returned as a dataframe.
+            Otherwise, all outputs' explanation dataframe are returned in a dictionary.
+
         Returns
         -------
-        Dict[str, pandas.DataFrame]
-            Dictionary of DataFrames, keyed by output name, containing the results of the SHAP
-            explanation. For each model output, the table will contain the following columns:
+        pandas.Dataframe or Dict[str, pandas.DataFrame]
+            A dataframe or dictionary of DataFrames, keyed by output name. Each dataframe
+            contains the results of the SHAP explanation for a particular output. Each dataframe
+            wiil contain the following columns:
 
             * ``Feature``: The name of the feature
             * ``Feature Value``: The value of the feature for this particular input.
@@ -140,18 +149,33 @@ class SHAPResults(SaliencyResults):
             * ``Confidence``: The confidence of this explanation as returned by the explainer.
 
         """
-        df_dict = {}
-        for output_name, saliency in self.saliency_map().items():
-            df_dict[output_name] = self._saliency_to_dataframe(saliency, output_name)
-        return df_dict
+        if output_name is None:
+            df_dict = {}
+            for output_name_key, saliency in self.saliency_map().items():
+                df_dict[output_name_key] = self._saliency_to_dataframe(
+                    saliency, output_name_key
+                )
+            return df_dict
+        return self._saliency_to_dataframe(
+            self.saliency_map()[output_name], output_name
+        )
 
-    def as_html(self) -> Dict[str, pd.io.formats.style.Styler]:
+    def as_html(
+        self, output_name: str = None
+    ) -> Union[Dict[str, pd.io.formats.style.Styler], pd.io.formats.style.Styler]:
         """
         Return the SHAP results as Pandas Styler objects.
 
+        Parameters
+        ----------
+        output_name: str
+            If an output_name is passed, that output's explanation is returned as a pandas Styler.
+            Otherwise, all outputs' explanation stylers are returned in a dictionary.
+
+
         Returns
         -------
-        Dict[str, pandas.Styler]
+        Pandas Styler or Dict[str, pandas.Styler]
             Dictionary of stylers keyed by output name. Each styler containing the results of the
             SHAP explanation for that particular output, in the same
             schema as in :func:`as_dataframe`. This will:
@@ -174,31 +198,35 @@ class SHAPResults(SaliencyResults):
             return [None] + formats
 
         df_dict = {}
-        for output_name, saliency in self.saliency_map().items():
-            df = self._saliency_to_dataframe(saliency, output_name)
-            shap_values = df["SHAP Value"].values[1:]
-            background_mean_feature_values = df["Mean Background Value"].values[1:]
+        for output_name_key, saliency in self.saliency_map().items():
+            if output_name is None or output_name_key == output_name:
+                df = self._saliency_to_dataframe(saliency, output_name_key)
+                shap_values = df["SHAP Value"].values[1:]
+                background_mean_feature_values = df["Mean Background Value"].values[1:]
 
-            style = df.style.background_gradient(
-                LinearSegmentedColormap.from_list(
-                    name="rwg",
-                    colors=[
-                        ds["negative_primary_colour"],
-                        ds["neutral_primary_colour"],
-                        ds["positive_primary_colour"],
-                    ],
-                ),
-                subset=(slice(1, None), "SHAP Value"),
-                vmin=-1 * max(np.abs(shap_values)),
-                vmax=max(np.abs(shap_values)),
-            )
-            style.set_caption(f"Explanation of {output_name}")
-            df_dict[output_name] = style.apply(
-                _color_feature_values,
-                background_vals=background_mean_feature_values,
-                subset="Value",
-                axis=0,
-            )
+                style = df.style.background_gradient(
+                    LinearSegmentedColormap.from_list(
+                        name="rwg",
+                        colors=[
+                            ds["negative_primary_colour"],
+                            ds["neutral_primary_colour"],
+                            ds["positive_primary_colour"],
+                        ],
+                    ),
+                    subset=(slice(1, None), "SHAP Value"),
+                    vmin=-1 * max(np.abs(shap_values)),
+                    vmax=max(np.abs(shap_values)),
+                )
+                style.set_caption(f"SHAP Explanation of {output_name_key}")
+                df_dict[output_name_key] = style.apply(
+                    _color_feature_values,
+                    background_vals=background_mean_feature_values,
+                    subset="Value",
+                    axis=0,
+                )
+
+        if output_name is not None:
+            return df_dict[output_name]
         return df_dict
 
     def _matplotlib_plot(self, output_name, block=True) -> None:
