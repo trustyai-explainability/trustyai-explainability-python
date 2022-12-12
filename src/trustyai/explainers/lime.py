@@ -153,7 +153,7 @@ class LimeResults(SaliencyResults):
                 else ds["positive_primary_colour"]
                 for i in dictionary.values()
             ]
-            plt.title(f"LIME explanation of {output_name}")
+            plt.title(f"LIME: Feature Importances to {output_name}")
             plt.barh(
                 range(len(dictionary)),
                 dictionary.values(),
@@ -306,7 +306,9 @@ class LimeExplainer:
         :class:`~LimeResults`
             Object containing the results of the LIME explanation.
         """
-        _prediction = simple_prediction(inputs, outputs)
+        feature_names = model.feature_names if isinstance(model, Model) else None
+        output_names = model.output_names if isinstance(model, Model) else None
+        _prediction = simple_prediction(inputs, outputs, feature_names, output_names)
 
         with Model.ArrowTransmission(model, inputs):
             return LimeResults(self._explainer.explainAsync(_prediction, model).get())

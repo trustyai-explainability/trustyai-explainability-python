@@ -254,7 +254,7 @@ class SHAPResults(SaliencyResults):
             plt.xticks(np.arange(len(feature_names)), feature_names)
             plt.ylabel(self.saliency_map()[output_name].getOutput().getName())
             plt.xlabel("Feature SHAP Value")
-            plt.title(f"Explanation of {output_name}")
+            plt.title(f"SHAP: Feature Contributions to {output_name}")
             plt.show(block=block)
 
     def _get_bokeh_plot(self, output_name):
@@ -424,7 +424,9 @@ class BackgroundGenerator:
         seed : int
             The random seed to use in the sampling/generation method
         """
-        self.datapoints = many_inputs_convert(datapoints, feature_domains)
+        self.datapoints = many_inputs_convert(
+            datapoints, feature_domains=feature_domains
+        )
         self.feature_domains = feature_domains
         self.seed = 0
         self._jrandom = Random()
@@ -620,7 +622,7 @@ class SHAPExplainer:
             link_type = _ShapConfig.LinkType.IDENTITY
         self._jrandom = Random()
         self._jrandom.setSeed(kwargs.get("seed", 0))
-        self.background = many_inputs_convert(background)
+        self._raw_background = background
         perturbation_context = PerturbationContext(self._jrandom, 0)
 
         self._configbuilder = (
@@ -628,13 +630,10 @@ class SHAPExplainer:
             .withLink(link_type)
             .withBatchSize(kwargs.get("batch_size", 20))
             .withPC(perturbation_context)
-            .withBackground(self.background)
             .withTrackCounterfactuals(kwargs.get("track_counterfactuals", False))
         )
         if kwargs.get("samples") is not None:
             self._configbuilder.withNSamples(JInt(kwargs["samples"]))
-        self._config = self._configbuilder.build()
-        self._explainer = _ShapKernelExplainer(self._config)
 
     @data_conversion_docstring("one_input", "one_output")
     def explain(
@@ -660,9 +659,14 @@ class SHAPExplainer:
         :class:`~SHAPResults`
             Object containing the results of the SHAP explanation.
         """
-        _prediction = simple_prediction(inputs, outputs)
 
+        feature_names = model.feature_names if isinstance(model, Model) else None
+        output_names = model.output_names if isinstance(model, Model) else None
+        _prediction = simple_prediction(inputs, outputs, feature_names, output_names)
+        _background = many_inputs_convert(self._raw_background, feature_names)
+        config = self._configbuilder.withBackground(_background).build()
+        explainer = _ShapKernelExplainer(config)
         with Model.ArrowTransmission(model, inputs):
             return SHAPResults(
-                self._explainer.explainAsync(_prediction, model).get(), self.background
+                explainer.explainAsync(_prediction, model).get(), _background
             )

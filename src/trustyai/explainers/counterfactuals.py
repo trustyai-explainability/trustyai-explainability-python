@@ -224,9 +224,15 @@ class CounterfactualExplainer:
         :class:`~CounterfactualResult`
             Object containing the results of the counterfactual explanation.
         """
+        feature_names = model.feature_names if isinstance(model, Model) else None
+        output_names = model.output_names if isinstance(model, Model) else None
         _prediction = counterfactual_prediction(
-            input_features=one_input_convert(inputs, feature_domains=feature_domains),
+            input_features=one_input_convert(
+                inputs, feature_names=feature_names, feature_domains=feature_domains
+            ),
             outputs=goal,
+            feature_names=feature_names,
+            output_names=output_names,
             data_distribution=data_distribution,
             uuid=uuid,
             timeout=timeout,

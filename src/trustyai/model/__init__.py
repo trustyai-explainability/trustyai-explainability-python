@@ -294,9 +294,7 @@ class Model:
     predictive model to interface with the TrustyAI Java library.
     """
 
-    def __init__(
-        self, predict_fun, dataframe_input=False, output_names=None, disable_arrow=False
-    ):
+    def __init__(self, predict_fun, **kwargs):
         """
         Wrap the model as a TrustyAI :obj:`PredictionProvider` Java class.
 
@@ -306,20 +304,26 @@ class Model:
             A function that takes in a Numpy array or Pandas DataFrame as input and outputs a
             Pandas DataFrame or Numpy array. In general, the ``model.predict`` functions of
             sklearn-style models meet this requirement.
-        dataframe_input: bool
-            Whether `predict_fun` expects a :class:`pandas.DataFrame` as input.
-        output_names : List[String]:
-            If the model outputs a numpy array, you can specify the names of the model outputs
-            here.
-        disable_arrow: bool
-            If true, Apache Arrow will not be used to accelerate data transfer between Java
-            and Python. If false, Arrow will be automatically used in situations where it is
-            advantageous to do so.
+
+        Keyword Arguments:
+            * dataframe_input: bool
+                (default= ``False``) Whether `predict_fun` expects a :class:`pandas.DataFrame`
+                as input.
+            * feature_names : List[String]:
+                (default= ``None`) If the model receives a non-pandas input, you can specify the
+                names of the model input features here, with the ith element of the list
+                corresponding to the name of the ith feature.
+            * output_names : List[String]:
+                (default= ``None`) If the model outputs a non-pandas object, you can specify the
+                names of the model outputs here, with the ith element of the list corresponding to
+                the name of the ith output.
+            * disable_arrow: bool
+                (default= ``False`) If true, Apache Arrow will not be used to accelerate data
+                transfer between Java and Python. If false, Arrow will be automatically used in
+                situations where it is advantageous to do so.
         """
-        self.disable_arrow = disable_arrow
         self.predict_fun = predict_fun
-        self.output_names = output_names
-        self.dataframe_input = dataframe_input
+        self.kwargs = kwargs
 
         self.prediction_provider_arrow = None
         self.prediction_provider_normal = None
@@ -327,6 +331,26 @@ class Model:
 
         # set model to use non-arrow by default, as this requires no dataset information
         self._set_nonarrow()
+
+    @property
+    def dataframe_input(self):
+        """Get dataframe_input kwarg value"""
+        return self.kwargs.get("dataframe_input")
+
+    @property
+    def feature_names(self):
+        """Get feature_names kwarg value"""
+        return self.kwargs.get("feature_names")
+
+    @property
+    def output_names(self):
+        """Get output_names kwarg value"""
+        return self.kwargs.get("output_names")
+
+    @property
+    def disable_arrow(self):
+        """Get disable_arrow kwarg value"""
+        return self.kwargs.get("disable_arrow")
 
     def _set_arrow(self, paradigm_input: PredictionInput):
         """
@@ -825,7 +849,10 @@ def feature(
 # pylint: disable=line-too-long
 @data_conversion_docstring("one_input", "one_output")
 def simple_prediction(
-    input_features: OneInputUnionType, outputs: OneOutputUnionType
+    input_features: OneInputUnionType,
+    outputs: OneOutputUnionType,
+    feature_names: Optional[List[str]] = None,
+    output_names: Optional[List[str]] = None,
 ) -> SimplePrediction:
     """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
     this function will bundle them into Prediction objects for use with the LIME and SHAP
@@ -838,10 +865,15 @@ def simple_prediction(
     outputs : {}
         The desired model outputs to be searched for in the counterfactual explanation.
         These can take the form of a: {}
+    feature_names: Optional[List[str]]
+        The names of the features, in the case where the feature object does not contain them
+    output_names: Optional[List[str]]
+        The names of the outputs, in the case where the outputobject does not contain them
     """
 
     return SimplePrediction(
-        one_input_convert(input_features), one_output_convert(outputs)
+        one_input_convert(input_features, feature_names),
+        one_output_convert(outputs, output_names),
     )
 
 
@@ -850,6 +882,8 @@ def simple_prediction(
 def counterfactual_prediction(
     input_features: OneInputUnionType,
     outputs: OneOutputUnionType,
+    feature_names: Optional[List[str]] = None,
+    output_names: Optional[List[str]] = None,
     data_distribution: Optional[DataDistribution] = None,
     uuid: Optional[_uuid.UUID] = None,
     timeout: Optional[float] = None,
@@ -865,6 +899,10 @@ def counterfactual_prediction(
     outputs : {}
         The desired model outputs to be searched for in the counterfactual explanation.
         These can take the form of a: {}
+    feature_names: Optional[List[str]]
+        The names of the features, in the case where the feature object does not contain them
+    output_names: Optional[List[str]]
+        The names of the outputs, in the case where the outputobject does not contain them
     data_distribution : Optional[:class:`DataDistribution`]
         The :class:`DataDistribution` to use when sampling the inputs.
     uuid : Optional[:class:`_uuid.UUID`]
@@ -878,8 +916,8 @@ def counterfactual_prediction(
         timeout = Long(timeout)
 
     return CounterfactualPrediction(
-        one_input_convert(input_features),
-        one_output_convert(outputs),
+        one_input_convert(input_features, feature_names),
+        one_output_convert(outputs, output_names),
         data_distribution,
         uuid,
         timeout,
