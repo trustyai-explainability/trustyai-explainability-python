@@ -167,7 +167,7 @@ def test_lime_as_html():
     assert True
 
     explanation = explainer.explain(inputs=data, outputs=model(data), model=model)
-    for score in explanation.as_dataframe()["output-0_score"]:
+    for score in explanation.as_dataframe()["output-0"]['Saliency']:
         assert score != 0
 
 
@@ -189,5 +189,5 @@ def test_lime_numpy():
     for oname in onames:
         assert oname in explanation.as_dataframe().keys()
         for fname in fnames:
-            assert fname in explanation.as_dataframe()[oname].index
+            assert fname in explanation.as_dataframe()[oname]['Feature'].values
 

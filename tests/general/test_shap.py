@@ -132,4 +132,4 @@ def test_shap_numpy():
     for oname in onames:
         assert oname in explanation.as_dataframe().keys()
         for fname in fnames:
-            assert fname in explanation.as_dataframe()[oname].index
+            assert fname in explanation.as_dataframe()[oname]['Feature'].values
