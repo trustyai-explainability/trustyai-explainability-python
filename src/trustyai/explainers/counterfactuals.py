@@ -5,7 +5,6 @@ from typing import Optional, Union, List
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
-from pandas.io.formats.style import Styler  # pylint: disable=unused-import
 import uuid as _uuid
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
@@ -19,6 +18,8 @@ from trustyai.model import (
     PredictionInput,
     Model,
 )
+
+from .explanation_results import ExplanationResults
 
 
 from trustyai.utils.data_conversions import (
@@ -50,7 +51,7 @@ SolverConfigBuilder = _SolverConfigBuilder
 CounterfactualConfig = _CounterfactualConfig
 
 
-class CounterfactualResult:
+class CounterfactualResult(ExplanationResults):
     """Wraps Counterfactual results. This object is returned by the
     :class:`~CounterfactualExplainer`, and provides a variety of methods to visualize and interact
     with the results of the counterfactual explanation.

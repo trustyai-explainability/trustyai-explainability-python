@@ -9,6 +9,19 @@ from pandas.io.formats.style import Styler
 
 
 # pylint: disable=too-few-public-methods
+class ExplanationResults(ABC):
+    """Abstract class for non-saliency visualisers"""
+
+    @abstractmethod
+    def as_dataframe(self) -> pd.DataFrame:
+        """Display explanation result as a dataframe"""
+
+    @abstractmethod
+    def as_html(self) -> Styler:
+        """Visualise the styled dataframe"""
+
+
+# pylint: disable=too-few-public-methods
 class SaliencyResults(ABC):
     """Abstract class for saliency visualisers"""
 
