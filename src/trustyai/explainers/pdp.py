@@ -134,7 +134,7 @@ class PDPExplainer:
         pdp_results: PDPResults
             the partial dependence plots associated to the model outputs
         """
-        metadata = PredictionProviderMetadata(many_inputs_convert(data), num_outputs)
+        metadata = _PredictionProviderMetadata(many_inputs_convert(data), num_outputs)
         pdp_graphs = self._explainer.explainFromMetadata(model, metadata)
         return PDPResults(pdp_graphs)
 
@@ -142,7 +142,7 @@ class PDPExplainer:
 @JImplements(
     "org.kie.trustyai.explainability.model.PredictionProviderMetadata", deferred=True
 )
-class PredictionProviderMetadata:
+class _PredictionProviderMetadata:
     """
     Implementation of org.kie.trustyai.explainability.model.PredictionProviderMetadata interface
     """
