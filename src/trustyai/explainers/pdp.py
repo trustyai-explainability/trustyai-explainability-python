@@ -1,8 +1,8 @@
 """Explainers.pdp module"""
 
+import math
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 from pandas.io.formats.style import Styler
 
 from jpype import (
@@ -20,9 +20,10 @@ from org.kie.trustyai.explainability.model import (
     PredictionOutput,
     Output,
     Type,
+    Value,
 )
 
-from trustyai.utils.data_conversions import ManyInputsUnionType
+from trustyai.utils.data_conversions import ManyInputsUnionType, many_inputs_convert
 
 from .explanation_results import ExplanationResults
 
@@ -39,13 +40,13 @@ class PDPResults(ExplanationResults):
         """
         Returns
         -------
-        a pd.DataFrame holding the model outputs as columns
-        and per feature input value as rows
+        a pd.DataFrame with input values and feature name as
+        columns and marginal feature outputs as rows
         """
         pdp_series_list = []
         for pdp_graph in self.pdp_graphs:
-            inputs = [x.getUnderlyingObject() for x in pdp_graph.getX()]
-            outputs = [y.getUnderlyingObject() for y in pdp_graph.getY()]
+            inputs = [self._to_plottable(x) for x in pdp_graph.getX()]
+            outputs = [self._to_plottable(y) for y in pdp_graph.getY()]
             pdp_dict = dict(zip(inputs, outputs))
             pdp_dict["feature"] = "" + str(pdp_graph.getFeature().getName())
             pdp_series = pd.Series(index=inputs + ["feature"], data=pdp_dict)
@@ -80,15 +81,13 @@ class PDPResults(ExplanationResults):
             ):
                 continue
             fig.suptitle(str(pdp_graph.getOutput().getName()))
-            pdp_data = []
+            pdp_x = []
             for i in range(len(pdp_graph.getX())):
-                pdp_data.append(
-                    [
-                        pdp_graph.getX()[i].getUnderlyingObject(),
-                        pdp_graph.getY()[i].getUnderlyingObject(),
-                    ]
-                )
-            axs[p_idx].plot(np.array(pdp_data))
+                pdp_x.append(self._to_plottable(pdp_graph.getX()[i]))
+            pdp_y = []
+            for i in range(len(pdp_graph.getY())):
+                pdp_y.append(self._to_plottable(pdp_graph.getY()[i]))
+            axs[p_idx].plot(pdp_x, pdp_y)
             axs[p_idx].set_title(
                 str(pdp_graph.getFeature().getName()), loc="left", fontsize="small"
             )
@@ -96,6 +95,13 @@ class PDPResults(ExplanationResults):
             p_idx += 1
         fig.supylabel("Partial Dependence Plot")
         plt.show(block=block)
+
+    @staticmethod
+    def _to_plottable(datum: Value):
+        plottable = datum.asNumber()
+        if math.isnan(plottable):
+            plottable = str(datum.asString())
+        return plottable
 
 
 # pylint: disable = too-few-public-methods
@@ -128,7 +134,7 @@ class PDPExplainer:
         pdp_results: PDPResults
             the partial dependence plots associated to the model outputs
         """
-        metadata = PredictionProviderMetadata(data, num_outputs)
+        metadata = PredictionProviderMetadata(many_inputs_convert(data), num_outputs)
         pdp_graphs = self._explainer.explainFromMetadata(model, metadata)
         return PDPResults(pdp_graphs)
 
@@ -141,7 +147,7 @@ class PredictionProviderMetadata:
     Implementation of org.kie.trustyai.explainability.model.PredictionProviderMetadata interface
     """
 
-    def __init__(self, data: ManyInputsUnionType, size: int):
+    def __init__(self, data: list, size: int):
         """
         Parameters
         ----------
