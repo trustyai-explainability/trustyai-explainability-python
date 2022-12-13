@@ -5,7 +5,7 @@ from typing import Optional, Union, List
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
-from pandas.io.formats.style import Styler
+from pandas.io.formats.style import Styler  # pylint: disable=unused-import
 import uuid as _uuid
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
