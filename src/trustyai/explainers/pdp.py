@@ -72,8 +72,7 @@ class PDPResults(ExplanationResults):
             whether the plotting operation
             should be blocking or not
         """
-        fig, axs = plt.subplots(len(self.pdp_graphs), sharex=True,
-                                constrained_layout=True)
+        fig, axs = plt.subplots(len(self.pdp_graphs), constrained_layout=True)
         p_idx = 0
         for pdp_graph in self.pdp_graphs:
             if output_name is not None and output_name != str(
@@ -89,14 +88,13 @@ class PDPResults(ExplanationResults):
                         pdp_graph.getY()[i].getUnderlyingObject(),
                     ]
                 )
-            axs[p_idx].plot(
-                np.array(pdp_data)
+            axs[p_idx].plot(np.array(pdp_data))
+            axs[p_idx].set_title(
+                str(pdp_graph.getFeature().getName()), loc="left", fontsize="small"
             )
-            axs[p_idx].set_title(str(pdp_graph.getFeature().getName()),
-                                 loc='left', fontsize='small')
             axs[p_idx].grid()
             p_idx += 1
-        fig.supylabel('Partial Dependence Plot')
+        fig.supylabel("Partial Dependence Plot")
         plt.show(block=block)
 
 
