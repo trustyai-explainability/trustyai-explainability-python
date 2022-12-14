@@ -2,21 +2,23 @@
 # pylint: disable = import-error
 from typing import List, Optional, Any, Union
 
+import numpy as np
 import pandas as pd
 from jpype import JInt
 from org.kie.trustyai.explainability.metrics import FairnessMetrics
 
 from trustyai.model import Value, PredictionProvider, Model
 from trustyai.utils.data_conversions import (
-    pandas_to_trusty,
     OneOutputUnionType,
     one_output_convert,
+    to_trusty_dataframe,
 )
 
 ColumSelector = Union[List[int], List[str]]
 
 
 def _column_selector_to_index(columns: ColumSelector, dataframe: pd.DataFrame):
+    """Returns a list of input and output indices, given an index size and output indices"""
     if len(columns) == 0:
         raise ValueError("Must specify at least one column")
 
@@ -27,32 +29,40 @@ def _column_selector_to_index(columns: ColumSelector, dataframe: pd.DataFrame):
 
 
 def statistical_parity_difference(
-    privileged: pd.DataFrame,
-    unprivileged: pd.DataFrame,
+    privileged: Union[pd.DataFrame, np.ndarray],
+    unprivileged: Union[pd.DataFrame, np.ndarray],
     favorable: OneOutputUnionType,
     outputs: Optional[List[int]] = None,
+    feature_names: Optional[List[str]] = None,
 ) -> float:
     """Calculate Statistical Parity Difference between privileged and unprivileged dataframes"""
     favorable_prediction_object = one_output_convert(favorable)
     return FairnessMetrics.groupStatisticalParityDifference(
-        pandas_to_trusty(privileged, outputs),
-        pandas_to_trusty(unprivileged, outputs),
+        to_trusty_dataframe(
+            data=privileged, outputs=outputs, feature_names=feature_names
+        ),
+        to_trusty_dataframe(
+            data=unprivileged, outputs=outputs, feature_names=feature_names
+        ),
         favorable_prediction_object.outputs,
     )
 
 
-# pylint: disable = line-too-long
+# pylint: disable = line-too-long, too-many-arguments
 def statistical_parity_difference_model(
-    samples: pd.DataFrame,
+    samples: Union[pd.DataFrame, np.ndarray],
     model: Union[PredictionProvider, Model],
     privilege_columns: ColumSelector,
     privilege_values: List[Any],
     favorable: OneOutputUnionType,
+    feature_names: Optional[List[str]] = None,
 ) -> float:
     """Calculate Statistical Parity Difference using a samples dataframe and a model"""
     favorable_prediction_object = one_output_convert(favorable)
     _privilege_values = [Value(v) for v in privilege_values]
-    _jsamples = pandas_to_trusty(samples, no_outputs=True)
+    _jsamples = to_trusty_dataframe(
+        data=samples, no_outputs=True, feature_names=feature_names
+    )
     return FairnessMetrics.groupStatisticalParityDifference(
         _jsamples,
         model,
@@ -63,32 +73,40 @@ def statistical_parity_difference_model(
 
 
 def disparate_impact_ratio(
-    privileged: pd.DataFrame,
-    unprivileged: pd.DataFrame,
+    privileged: Union[pd.DataFrame, np.ndarray],
+    unprivileged: Union[pd.DataFrame, np.ndarray],
     favorable: OneOutputUnionType,
     outputs: Optional[List[int]] = None,
+    feature_names: Optional[List[str]] = None,
 ) -> float:
     """Calculate Disparate Impact Ration between privileged and unprivileged dataframes"""
     favorable_prediction_object = one_output_convert(favorable)
     return FairnessMetrics.groupDisparateImpactRatio(
-        pandas_to_trusty(privileged, outputs),
-        pandas_to_trusty(unprivileged, outputs),
+        to_trusty_dataframe(
+            data=privileged, outputs=outputs, feature_names=feature_names
+        ),
+        to_trusty_dataframe(
+            data=unprivileged, outputs=outputs, feature_names=feature_names
+        ),
         favorable_prediction_object.outputs,
     )
 
 
 # pylint: disable = line-too-long
 def disparate_impact_ratio_model(
-    samples: pd.DataFrame,
+    samples: Union[pd.DataFrame, np.ndarray],
     model: Union[PredictionProvider, Model],
     privilege_columns: ColumSelector,
     privilege_values: List[Any],
     favorable: OneOutputUnionType,
+    feature_names: Optional[List[str]] = None,
 ) -> float:
     """Calculate Disparate Impact Ration using a samples dataframe and a model"""
     favorable_prediction_object = one_output_convert(favorable)
     _privilege_values = [Value(v) for v in privilege_values]
-    _jsamples = pandas_to_trusty(samples, no_outputs=True)
+    _jsamples = to_trusty_dataframe(
+        data=samples, no_outputs=True, feature_names=feature_names
+    )
     return FairnessMetrics.groupDisparateImpactRatio(
         _jsamples,
         model,
@@ -100,12 +118,13 @@ def disparate_impact_ratio_model(
 
 # pylint: disable = too-many-arguments
 def average_odds_difference(
-    test: pd.DataFrame,
-    truth: pd.DataFrame,
+    test: Union[pd.DataFrame, np.ndarray],
+    truth: Union[pd.DataFrame, np.ndarray],
     privilege_columns: ColumSelector,
     privilege_values: OneOutputUnionType,
     positive_class: List[Any],
     outputs: Optional[List[int]] = None,
+    feature_names: Optional[List[str]] = None,
 ) -> float:
     """Calculate Average Odds between two dataframes"""
     if test.shape != truth.shape:
@@ -117,8 +136,8 @@ def average_odds_difference(
     # determine privileged columns
     _privilege_columns = _column_selector_to_index(privilege_columns, test)
     return FairnessMetrics.groupAverageOddsDifference(
-        pandas_to_trusty(test, outputs),
-        pandas_to_trusty(truth, outputs),
+        to_trusty_dataframe(data=test, outputs=outputs, feature_names=feature_names),
+        to_trusty_dataframe(data=truth, outputs=outputs, feature_names=feature_names),
         _privilege_columns,
         _privilege_values,
         _positive_class,
@@ -126,14 +145,17 @@ def average_odds_difference(
 
 
 def average_odds_difference_model(
-    samples: pd.DataFrame,
+    samples: Union[pd.DataFrame, np.ndarray],
     model: Union[PredictionProvider, Model],
     privilege_columns: ColumSelector,
     privilege_values: List[Any],
     positive_class: List[Any],
+    feature_names: Optional[List[str]] = None,
 ) -> float:
     """Calculate Average Odds for a sample dataframe using the provided model"""
-    _jsamples = pandas_to_trusty(samples, no_outputs=True)
+    _jsamples = to_trusty_dataframe(
+        data=samples, no_outputs=True, feature_names=feature_names
+    )
     _privilege_values = [Value(v) for v in privilege_values]
     _positive_class = [Value(v) for v in positive_class]
     # determine privileged columns
@@ -144,12 +166,13 @@ def average_odds_difference_model(
 
 
 def average_predictive_value_difference(
-    test: pd.DataFrame,
-    truth: pd.DataFrame,
+    test: Union[pd.DataFrame, np.ndarray],
+    truth: Union[pd.DataFrame, np.ndarray],
     privilege_columns: ColumSelector,
     privilege_values: List[Any],
     positive_class: List[Any],
     outputs: Optional[List[int]] = None,
+    feature_names: Optional[List[str]] = None,
 ) -> float:
     """Calculate Average Predictive Value Difference between two dataframes"""
     if test.shape != truth.shape:
@@ -160,8 +183,8 @@ def average_predictive_value_difference(
     _positive_class = [Value(v) for v in positive_class]
     _privilege_columns = _column_selector_to_index(privilege_columns, test)
     return FairnessMetrics.groupAveragePredictiveValueDifference(
-        pandas_to_trusty(test, outputs),
-        pandas_to_trusty(truth, outputs),
+        to_trusty_dataframe(data=test, outputs=outputs, feature_names=feature_names),
+        to_trusty_dataframe(data=truth, outputs=outputs, feature_names=feature_names),
         _privilege_columns,
         _privilege_values,
         _positive_class,
@@ -170,14 +193,14 @@ def average_predictive_value_difference(
 
 # pylint: disable = line-too-long
 def average_predictive_value_difference_model(
-    samples: pd.DataFrame,
+    samples: Union[pd.DataFrame, np.ndarray],
     model: Union[PredictionProvider, Model],
     privilege_columns: ColumSelector,
     privilege_values: List[Any],
     positive_class: List[Any],
 ) -> float:
     """Calculate Average Predictive Value Difference for a sample dataframe using the provided model"""
-    _jsamples = pandas_to_trusty(samples, no_outputs=True)
+    _jsamples = to_trusty_dataframe(samples, no_outputs=True)
     _privilege_values = [Value(v) for v in privilege_values]
     _positive_class = [Value(v) for v in positive_class]
     # determine privileged columns

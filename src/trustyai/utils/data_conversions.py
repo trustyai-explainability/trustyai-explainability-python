@@ -2,7 +2,7 @@
 # pylint: disable = import-error, line-too-long, trailing-whitespace, unused-import, cyclic-import
 # pylint: disable = consider-using-f-string, invalid-name, wrong-import-order
 import warnings
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Tuple
 from itertools import filterfalse
 
 import trustyai.model
@@ -442,8 +442,49 @@ def prediction_object_to_pandas(
     return df
 
 
-def pandas_to_trusty(
-    df: pd.DataFrame, outputs: Optional[List[int]] = None, no_outputs=False
+def __partition_column_indices(
+    size: int, outputs: Optional[List[int]] = None
+) -> Tuple[List[int], List[int]]:
+    indices = list(range(size))
+    if not outputs:  # If no output column supplied, assume the right-most
+        output_indices = [size - 1]
+        input_indices = list(filterfalse(output_indices.__contains__, indices))
+    else:
+        output_indices = outputs
+        input_indices = list(filterfalse(outputs.__contains__, indices))
+    return input_indices, output_indices
+
+
+def to_trusty_dataframe(
+    data: Union[pd.DataFrame, np.ndarray],
+    outputs: Optional[List[int]] = None,
+    no_outputs=False,
+    feature_names: Optional[List[str]] = None,
+) -> Dataframe:
+    """Convert Pandas dataframes or NumPy arrays into TrustyAI dataframes"""
+    if isinstance(data, pd.DataFrame):
+        return df_to_trusty_dataframe(
+            data=data,
+            outputs=outputs,
+            no_outputs=no_outputs,
+            feature_names=feature_names,
+        )
+    if isinstance(data, np.ndarray):
+        return numpy_to_trusty_dataframe(
+            arr=data,
+            outputs=outputs,
+            no_outputs=no_outputs,
+            feature_names=feature_names,
+        )
+
+    raise ValueError("Only Pandas dataframes and NumPy arrays supported at the moment.")
+
+
+def df_to_trusty_dataframe(
+    data: pd.DataFrame,
+    outputs: Optional[List[int]] = None,
+    no_outputs=False,
+    feature_names: Optional[List[str]] = None,
 ) -> Dataframe:
     """
     Converts a Pandas :class:`pandas.DataFrame` into a TrustyAI :class:`Dataframe`.
@@ -457,22 +498,74 @@ def pandas_to_trusty(
 
     no_outputs : bool
         Specify if the :class:`Dataframe` is inputs-only
-    """
-    df = df.reset_index(drop=True)
-    n_columns = len(df.columns)
-    indices = list(range(n_columns))
-    if not no_outputs:
-        if not outputs:  # If no output column supplied, assume the right-most
-            output_indices = [n_columns - 1]
-            input_indices = list(filterfalse(output_indices.__contains__, indices))
-        else:
-            output_indices = outputs
-            input_indices = list(filterfalse(outputs.__contains__, indices))
 
-        pi = many_inputs_convert(df.iloc[:, input_indices])
-        po = many_outputs_convert(df.iloc[:, output_indices])
+    feature_names : Optional[List[str]]
+        Optional list of feature names. If not provided, the Pandas dataframe column names will be used
+    """
+    data = data.reset_index(drop=True)
+    n_columns = len(data.columns)
+    if not no_outputs:
+
+        input_indices, output_indices = __partition_column_indices(n_columns, outputs)
+
+        if feature_names:
+            input_names = [feature_names[i] for i in input_indices]
+            output_names = [feature_names[i] for i in output_indices]
+        else:
+            input_names = None
+            output_names = None
+
+        pi = many_inputs_convert(
+            python_inputs=data.iloc[:, input_indices], feature_names=input_names
+        )
+        po = many_outputs_convert(
+            python_outputs=data.iloc[:, output_indices], names=output_names
+        )
 
         return Dataframe.createFrom(pi, po)
 
-    pi = many_inputs_convert(df)
+    pi = many_inputs_convert(data)
+    return Dataframe.createFromInputs(pi)
+
+
+def numpy_to_trusty_dataframe(
+    arr: np.ndarray,
+    feature_names: List[str],
+    outputs: Optional[List[int]] = None,
+    no_outputs=False,
+) -> Dataframe:
+    """
+    Converts a NumPy :class:`np.ndarray` into a TrustyAI :class:`Dataframe`.
+    Either outputs can be provided as a list of column indices or `no_outputs` can be specified, for an inputs-only
+    :class:`Dataframe`.
+
+    Parameters
+    ----------
+    outputs : List[int]
+        Optional list of column indices to be marked as outputs
+
+    no_outputs : bool
+        Specify if the :class:`Dataframe` is inputs-only
+
+    feature_names : Optional[List[str]]
+        Optional list of feature names. If not provided, the Pandas dataframe column names will be used
+    """
+    n_columns = arr.shape[1]
+    if not no_outputs:
+        input_indices, output_indices = __partition_column_indices(n_columns, outputs)
+
+        input_names = [feature_names[i] for i in input_indices]
+        output_names = [feature_names[i] for i in output_indices]
+        axis = 1
+
+        pi = many_inputs_convert(
+            python_inputs=np.take(arr, input_indices, axis), feature_names=input_names
+        )
+        po = many_outputs_convert(
+            python_outputs=np.take(arr, output_indices, axis), names=output_names
+        )
+
+        return Dataframe.createFrom(pi, po)
+
+    pi = many_inputs_convert(arr)
     return Dataframe.createFromInputs(pi)

@@ -12,7 +12,7 @@ from trustyai.utils.data_conversions import (
     one_input_convert,
     one_output_convert,
     many_inputs_convert,
-    many_outputs_convert
+    many_outputs_convert, to_trusty_dataframe
 )
 from org.kie.trustyai.explainability.model import Type
 
@@ -167,8 +167,8 @@ def test_one_input_conversion():
 
     converted = [one_input_convert(x) for x in to_convert]
 
-    for i in range(len(converted)-1):
-        assert converted[i].equals(converted[i+1])
+    for i in range(len(converted) - 1):
+        assert converted[i].equals(converted[i + 1])
 
 
 def test_one_input_conversion_domained():
@@ -191,9 +191,9 @@ def test_one_input_conversion_domained():
 
     for i in range(len(converted) - 1):
         for j in range(n_feats):
-            assert converted[i].getFeatures().get(j).getDomain().getLowerBound()\
+            assert converted[i].getFeatures().get(j).getDomain().getLowerBound() \
                    == domain_bounds[j][0]
-            assert converted[i].getFeatures().get(j).getDomain().getUpperBound()\
+            assert converted[i].getFeatures().get(j).getDomain().getUpperBound() \
                    == domain_bounds[j][1]
 
         assert converted[i].equals(converted[i + 1])
@@ -341,3 +341,16 @@ def test_many_inputs_conversion_domained():
 
     for i in range(n_datapoints):
         assert ta_numpy1[i].equals(ta_df[i])
+
+
+def test_numpy_to_trusty_dataframe():
+    """Test converting a NumPy array to a TrustyAI dataframe"""
+    arr = create_random_dataframe().to_numpy()
+
+    tdf = to_trusty_dataframe(data=arr, feature_names=["x1", "x2", "y"])
+
+    assert tdf.getColumnDimension() == 3
+    assert tdf.getRowDimension() == 5000
+    assert list(tdf.getColumnNames()) == ["x1", "x2", "y"]
+    assert tdf.getInputsCount() == 2
+    assert tdf.getOutputsCount() == 1
