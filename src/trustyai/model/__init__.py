@@ -325,8 +325,6 @@ class Model:
                 situations where it is advantageous to do so.
         """
 
-
-
         self.predict_fun = self._error_catcher(predict_fun)
         self.kwargs = kwargs
 
@@ -338,12 +336,19 @@ class Model:
         self._set_nonarrow()
 
     def _error_catcher(self, predict_fun):
+        """Wrapper for predict function to capture errors to Python logger before the JVM dies"""
+
         def wrapper(x):
             try:
                 return predict_fun(x)
             except Exception as e:
-                logging.error("ERROR: Fatal runtime error within supplied `predict_func` to trustyai.Model")
-                logging.error("The error message has been captured and reproduced below:")
+                logging.error(
+                    "ERROR: Fatal runtime error within supplied `predict_func`"
+                    " to trustyai.Model"
+                )
+                logging.error(
+                    "The error message has been captured and reproduced below:"
+                )
                 logging.error(traceback.format_exc())
                 raise e
 
@@ -500,7 +505,7 @@ class Model:
                 self.previous_model_state = self.model.prediction_provider
                 self.model._set_arrow(self.paradigm_input)
 
-        def __exit__(self, exit_type, value, traceback):
+        def __exit__(self, exit_type, value, tb):
             if self.model_is_python:
                 self.model.prediction_provider = self.previous_model_state
 
@@ -519,7 +524,7 @@ class Model:
                 self.previous_model_state = self.model.prediction_provider
                 self.model._set_nonarrow()
 
-        def __exit__(self, exit_type, value, traceback):
+        def __exit__(self, exit_type, value, tb):
             if self.model_is_python:
                 self.model.prediction_provider = self.previous_model_state
 
