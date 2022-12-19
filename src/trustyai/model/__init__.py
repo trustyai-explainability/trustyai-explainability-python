@@ -343,7 +343,7 @@ class Model:
                 return predict_fun(x)
             except Exception as e:
                 logging.error(
-                    "ERROR: Fatal runtime error within supplied `predict_func`"
+                    "ERROR: Fatal runtime error within supplied `predict_fun`"
                     " to trustyai.Model"
                 )
                 logging.error(
