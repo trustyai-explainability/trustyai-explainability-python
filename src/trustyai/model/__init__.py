@@ -348,7 +348,7 @@ class Model:
                 logging.error(
                     " The error message has been captured and reproduced below:"
                 )
-                logging.error(" " + str(traceback.format_exc()))
+                logging.error(" %s", traceback.format_exc())
                 raise e
 
         return wrapper
