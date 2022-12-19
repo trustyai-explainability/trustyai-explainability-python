@@ -56,5 +56,5 @@ def test_error_model(caplog):
     except Exception:
         pass
 
-    assert "Fatal runtime error within supplied `predict_func` to trustyai.Model" in caplog.text
+    assert "Fatal runtime error" in caplog.text
     assert "TypeError: unsupported operand type(s) for -: 'str' and 'str'" in caplog.text

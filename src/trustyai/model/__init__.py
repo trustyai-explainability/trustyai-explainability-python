@@ -343,13 +343,12 @@ class Model:
                 return predict_fun(x)
             except Exception as e:
                 logging.error(
-                    "ERROR: Fatal runtime error within supplied `predict_fun`"
-                    " to trustyai.Model"
+                    " Fatal runtime error within the `predict_fun` supplied to trustyai.Model"
                 )
                 logging.error(
-                    "The error message has been captured and reproduced below:"
+                    " The error message has been captured and reproduced below:"
                 )
-                logging.error(traceback.format_exc())
+                logging.error(" " + str(traceback.format_exc()))
                 raise e
 
         return wrapper
