@@ -233,14 +233,11 @@ class LimeExplainer:
     feature that describe how strongly said feature contributed to the model's output.
     """
 
-    def __init__(self, samples=10, **kwargs):
+    def __init__(self, **kwargs):
         r"""Initialize the :class:`LimeExplainer`.
 
         Parameters
         ----------
-        samples: int
-            Number of samples to be generated for the local linear model training.
-
         Keyword Arguments:
             * penalise_sparse_balance : bool
                 (default= ``True``) Whether to penalise features that are likely to produce linearly
@@ -260,21 +257,35 @@ class LimeExplainer:
                 process.
             * trackCounterfactuals : bool
                 (default= ``False``) Keep track of produced byproduct counterfactuals during LIME run.
+            * samples: int
+                (default=``300``) Number of samples to be generated for the local linear model training.
+            * encoding_params: Union[list, tuple]
+                (default=``(0.07, 0.3)``) Lime encoding parameters, as a tuple/list of two float numbers:
+                - encoding_params[0] is the width of the Gaussian filter for clustering number features.
+                - encoding_params[1] is the threshold for clustering number features.
 
         """
         self._jrandom = Random()
         self._jrandom.setSeed(kwargs.get("seed", 0))
-
+        ep = kwargs.get("encoding_params", (0.07, 0.3))
         self._lime_config = (
             LimeConfig()
             .withNormalizeWeights(kwargs.get("normalise_weights", False))
             .withPerturbationContext(
                 PerturbationContext(self._jrandom, kwargs.get("perturbations", 1))
             )
-            .withSamples(samples)
-            .withEncodingParams(EncodingParams(0.07, 0.3))
-            .withAdaptiveVariance(True)
+            .withSamples(kwargs.get("samples", 300))
+            .withNoOfFeatures(kwargs.get("features", 6))
+            .withRetries(kwargs.get("retries", 3))
+            .withProximityFilteredDatasetMinimum(kwargs.get("dataset_minimum", 10))
+            .withSeparableDatasetRatio(kwargs.get("separable_dataset_ratio", 0.1))
+            .withProximityKernelWidth(kwargs.get("kernel_width", 0.5))
+            .withProximityThreshold(kwargs.get("proximity_threshold", 0.83))
+            .withEncodingParams(EncodingParams(ep[0], ep[1]))
+            .withAdaptiveVariance(kwargs.get("adapt_dataset_variance", True))
+            .withFeatureSelection(kwargs.get("feature_selection", True))
             .withPenalizeBalanceSparse(kwargs.get("penalise_sparse_balance", True))
+            .withFilterInterpretable(kwargs.get("filter_interpretable", False))
             .withUseWLRLinearModel(kwargs.get("use_wlr_model", True))
             .withTrackCounterfactuals(kwargs.get("track_counterfactuals", False))
         )
