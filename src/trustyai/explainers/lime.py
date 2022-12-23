@@ -40,7 +40,7 @@ from org.kie.trustyai.explainability.model import (
     PredictionProvider,
     Saliency,
     PerturbationContext,
-    PredictionInputsDataDistribution
+    PredictionInputsDataDistribution,
 )
 
 from java.util import Random
@@ -296,7 +296,9 @@ class LimeExplainer:
                 PerturbationContext(self._jrandom, kwargs.get("perturbations", 1))
             )
             .withSamples(kwargs.get("samples", 300))
-            .withDataDistribution(kwargs.get("data_distribution", PredictionInputsDataDistribution([])))
+            .withDataDistribution(
+                kwargs.get("data_distribution", PredictionInputsDataDistribution([]))
+            )
             .withNoOfFeatures(kwargs.get("features", 6))
             .withRetries(kwargs.get("retries", 3))
             .withProximityFilteredDatasetMinimum(kwargs.get("dataset_minimum", 10))
