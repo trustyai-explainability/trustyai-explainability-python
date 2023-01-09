@@ -2,6 +2,8 @@
 # pylint: disable = unused-import, wrong-import-order
 # pylint: disable = consider-using-f-string
 """General model classes"""
+import logging
+import traceback
 import uuid as _uuid
 from typing import List, Optional, Union, Callable
 import pandas as pd
@@ -322,7 +324,8 @@ class Model:
                 transfer between Java and Python. If false, Arrow will be automatically used in
                 situations where it is advantageous to do so.
         """
-        self.predict_fun = predict_fun
+
+        self.predict_fun = self._error_catcher(predict_fun)
         self.kwargs = kwargs
 
         self.prediction_provider_arrow = None
@@ -331,6 +334,24 @@ class Model:
 
         # set model to use non-arrow by default, as this requires no dataset information
         self._set_nonarrow()
+
+    def _error_catcher(self, predict_fun):
+        """Wrapper for predict function to capture errors to Python logger before the JVM dies"""
+
+        def wrapper(x):
+            try:
+                return predict_fun(x)
+            except Exception as e:
+                logging.error(
+                    " Fatal runtime error within the `predict_fun` supplied to trustyai.Model"
+                )
+                logging.error(
+                    " The error message has been captured and reproduced below:"
+                )
+                logging.error(" %s", traceback.format_exc())
+                raise e
+
+        return wrapper
 
     @property
     def dataframe_input(self):
@@ -483,7 +504,7 @@ class Model:
                 self.previous_model_state = self.model.prediction_provider
                 self.model._set_arrow(self.paradigm_input)
 
-        def __exit__(self, exit_type, value, traceback):
+        def __exit__(self, exit_type, value, tb):
             if self.model_is_python:
                 self.model.prediction_provider = self.previous_model_state
 
@@ -502,7 +523,7 @@ class Model:
                 self.previous_model_state = self.model.prediction_provider
                 self.model._set_nonarrow()
 
-        def __exit__(self, exit_type, value, traceback):
+        def __exit__(self, exit_type, value, tb):
             if self.model_is_python:
                 self.model.prediction_provider = self.previous_model_state
 
