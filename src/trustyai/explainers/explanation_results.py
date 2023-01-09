@@ -1,6 +1,6 @@
 """Generic class for Explanation and Saliency results"""
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, Union
 
 import bokeh.models
 import pandas as pd
@@ -8,8 +8,9 @@ from bokeh.io import show
 from pandas.io.formats.style import Styler
 
 
+# pylint: disable=too-few-public-methods
 class ExplanationResults(ABC):
-    """Abstract class for explanation visualisers"""
+    """Abstract class for non-saliency visualisers"""
 
     @abstractmethod
     def as_dataframe(self) -> pd.DataFrame:
@@ -21,8 +22,18 @@ class ExplanationResults(ABC):
 
 
 # pylint: disable=too-few-public-methods
-class SaliencyResults(ExplanationResults):
+class SaliencyResults(ABC):
     """Abstract class for saliency visualisers"""
+
+    @abstractmethod
+    def as_dataframe(
+        self, output_name=None
+    ) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
+        """Display explanation result as a dataframe"""
+
+    @abstractmethod
+    def as_html(self, output_name=None) -> Union[Dict[str, Styler], Styler]:
+        """Visualise the styled dataframe"""
 
     @abstractmethod
     def saliency_map(self):

@@ -8,7 +8,6 @@ import pandas as pd
 import uuid as _uuid
 
 from trustyai import _default_initializer  # pylint: disable=unused-import
-from .explanation_results import ExplanationResults
 from trustyai.utils._visualisation import (
     DEFAULT_STYLE as ds,
     DEFAULT_RC_PARAMS as drcp,
@@ -19,6 +18,8 @@ from trustyai.model import (
     PredictionInput,
     Model,
 )
+
+from .explanation_results import ExplanationResults
 
 
 from trustyai.utils.data_conversions import (

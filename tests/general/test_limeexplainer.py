@@ -188,6 +188,7 @@ def test_lime_numpy():
 
     for oname in onames:
         assert oname in explanation.as_dataframe().keys()
+        assert len(explanation.as_dataframe(oname)) == 5
         for fname in fnames:
             assert fname in explanation.as_dataframe()[oname]['Feature'].values
 
