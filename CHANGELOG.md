@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [0.2.8] - 2023-01-09
 
 
 ### [FAI-825](https://issues.redhat.com/browse/FAI-825)
@@ -142,6 +142,12 @@ All notable changes to this project will be documented in this file.
 
 
 - Improve API to declare selections in Python fairness ([#132](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/132))
+
+
+### [FAI-917](https://issues.redhat.com/browse/FAI-917)
+
+
+- Add error message capturing within Python models ([#137](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/137))
 
 ## [0.2.5] - 2022-09-14
 
