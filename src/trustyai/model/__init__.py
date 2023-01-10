@@ -6,7 +6,7 @@ import logging
 import traceback
 import uuid as _uuid
 from abc import ABC
-from typing import List, Optional, Union, Callable
+from typing import List, Optional, Union, Callable, Tuple
 import pandas as pd
 import pyarrow as pa
 import numpy as np
@@ -43,7 +43,9 @@ from org.kie.trustyai.explainability.local.counterfactual.entities import (
     CounterfactualEntity,
 )
 from org.kie.trustyai.explainability.local.counterfactual.goal import DefaultCounterfactualGoalCriteria
-from org.kie.trustyai.explainability.local.counterfactual.goal import GoalScore
+from org.kie.trustyai.explainability.local.counterfactual.goal import GoalScore as _GoalScore
+
+GoalScore = _GoalScore
 
 from org.kie.trustyai.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
@@ -296,6 +298,7 @@ class CallableWrapper(ABC):
     Abstract class for Python function wrappers, implementing common functionality.
 
     """
+
     def __init__(self, fn, **kwargs):
         self.fn = self._error_catcher(fn)
         self.kwargs = kwargs
@@ -317,33 +320,6 @@ class CallableWrapper(ABC):
                 raise e
 
         return wrapper
-
-    def _goals_to_df(self, goals: List[Output]) -> pd.DataFrame:
-        """Converts Java Output lists to dataframes"""
-        return pd.DataFrame.from_dict(
-            {goal.name: [goal.value.getUnderlyingObject()] for goal in goals})
-
-    def _cast_outputs_to_dataframe(self, output_array):
-        if isinstance(output_array, pd.DataFrame):
-            out = output_array
-        elif isinstance(output_array, np.ndarray):
-            if self.output_names is None:
-                if len(output_array.shape) == 1:
-                    columns = ["output-0"]
-                else:
-                    columns = [
-                        "output-{}".format(i) for i in range(output_array.shape[1])
-                    ]
-            else:
-                columns = self.output_names
-            out = pd.DataFrame(output_array, columns=columns)
-        else:
-            raise ValueError(
-                "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
-                    type(output_array)
-                )
-            )
-        return out
 
     def __call__(self, inputs):
         """
@@ -500,6 +476,28 @@ class Model(CallableWrapper):
         """
 
         return self.prediction_provider.predictAsync(inputs)
+
+    def _cast_outputs_to_dataframe(self, output_array):
+        if isinstance(output_array, pd.DataFrame):
+            out = output_array
+        elif isinstance(output_array, np.ndarray):
+            if self.output_names is None:
+                if len(output_array.shape) == 1:
+                    columns = ["output-0"]
+                else:
+                    columns = [
+                        "output-{}".format(i) for i in range(output_array.shape[1])
+                    ]
+            else:
+                columns = self.output_names
+            out = pd.DataFrame(output_array, columns=columns)
+        else:
+            raise ValueError(
+                "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
+                    type(output_array)
+                )
+            )
+        return out
 
     class ArrowTransmission:
         """
@@ -929,18 +927,23 @@ class GoalCriteria(CallableWrapper):
     of the explainers.
     """
 
-    def __init__(self, fn: Callable, **kwargs):
+    def __init__(self, fn: Callable[[pd.DataFrame], Tuple[float, float]], **kwargs):
         """
         Create the goal criteria as a TrustyAI :obj:`GoalCriteria` Java class.
 
         Parameters
         ----------
-        fn : Callable[[List[:obj:`Output`]], List[:obj:`GoalScore`]]
-            A function that takes a list of prediction inputs and outputs a list of prediction
-            outputs.
+        fn : Callable[[List[:obj:`DataFrame`]], :obj:`Tuple`]
+            A function that takes a dataframe input and outputs a tuple consisting
+            of the distance and score, relative to our goal, of that input.
 
         """
         super().__init__(fn, **kwargs)
+
+    def _predictions_to_df(self, prediction: List[Output]) -> pd.DataFrame:
+        """Converts Java Output lists to dataframes"""
+        return pd.DataFrame.from_dict(
+            {goal.name: [goal.value.getUnderlyingObject()] for goal in prediction})
 
     @JOverride
     def apply(self, predictions: List[Output]) -> GoalScore:
@@ -959,8 +962,8 @@ class GoalCriteria(CallableWrapper):
             A Java :obj:`GoalScore` containing the input's distance and score.
         """
         # Convert List[Output] do dataframe
-        _goals = self._goals_to_df(predictions)
-        score = self.fn(_goals)
+        _predictions = self._predictions_to_df(predictions)
+        score = self.fn(_predictions)
         return GoalScore.create(JDouble(score[0]), JDouble(score[1]))
 
 
