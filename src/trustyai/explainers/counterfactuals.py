@@ -1,7 +1,7 @@
 """Explainers.countefactual module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument
-from typing import Callable, Optional, Tuple, Union, List
+from typing import Optional, Union, List
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
@@ -17,7 +17,8 @@ from trustyai.utils._visualisation import (
 from trustyai.model import (
     counterfactual_prediction,
     PredictionInput,
-    Model, GoalCriteria,
+    Model,
+    GoalCriteria,
 )
 
 from trustyai.utils.data_conversions import (
@@ -241,7 +242,7 @@ class CounterfactualExplainer:
             data_distribution=data_distribution,
             uuid=uuid,
             timeout=timeout,
-            criteria=criteria
+            criteria=criteria,
         )
 
         with Model.NonArrowTransmission(model):

@@ -12,7 +12,6 @@ import pyarrow as pa
 import numpy as np
 
 from trustyai import _default_initializer
-from trustyai.model.domain import feature_domain
 from trustyai.utils import JImplementsWithDocstring
 from trustyai.utils.data_conversions import (
     one_input_convert,
@@ -25,27 +24,6 @@ from trustyai.utils.data_conversions import (
     prediction_object_to_pandas,
     data_conversion_docstring,
 )
-
-from java.lang import Long
-from java.util.concurrent import CompletableFuture
-from jpype import (
-    JOverride,
-    _jcustomizer,
-    _jclass,
-    JByte,
-    JArray,
-    JDouble,
-    JLong,
-    JInt,
-    JString,
-)
-from org.kie.trustyai.explainability.local.counterfactual.entities import (
-    CounterfactualEntity,
-)
-from org.kie.trustyai.explainability.local.counterfactual.goal import DefaultCounterfactualGoalCriteria
-from org.kie.trustyai.explainability.local.counterfactual.goal import GoalScore as _GoalScore
-
-GoalScore = _GoalScore
 
 from org.kie.trustyai.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
@@ -65,13 +43,35 @@ from org.kie.trustyai.explainability.model import (
     Type as _Type,
     Dataset as _Dataset,
 )
-
+from org.kie.trustyai.explainability.local.counterfactual.entities import (
+    CounterfactualEntity,
+)
+from org.kie.trustyai.explainability.local.counterfactual.goal import (
+    DefaultCounterfactualGoalCriteria,
+    GoalScore as _GoalScore,
+)
 from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
 from org.kie.trustyai.arrow import ArrowConverters, PPAWrapper
 from org.kie.trustyai.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
+    feature_domain,
 )
 
+from java.lang import Long
+from java.util.concurrent import CompletableFuture
+from jpype import (
+    JOverride,
+    _jcustomizer,
+    _jclass,
+    JByte,
+    JArray,
+    JDouble,
+    JLong,
+    JInt,
+    JString,
+)
+
+GoalScore = _GoalScore
 CounterfactualPrediction = _CounterfactualPrediction
 DataDomain = _DataDomain
 FeatureFactory = _FeatureFactory
@@ -177,7 +177,7 @@ class PredictionProvider:
     """
 
     def __init__(
-            self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
+        self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
     ):
         """
         Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
@@ -441,15 +441,11 @@ class Model(CallableWrapper):
     def _get_nonarrow_prediction_provider(self):
         if self.dataframe_input:
             ppn = PredictionProvider(
-                lambda x: self._cast_outputs(
-                    self.fn(prediction_object_to_pandas(x))
-                )
+                lambda x: self._cast_outputs(self.fn(prediction_object_to_pandas(x)))
             )
         else:
             ppn = PredictionProvider(
-                lambda x: self._cast_outputs(
-                    self.fn(prediction_object_to_numpy(x))
-                )
+                lambda x: self._cast_outputs(self.fn(prediction_object_to_numpy(x)))
             )
         return ppn
 
@@ -818,17 +814,17 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
 
 
 def full_text_feature(
-        name: str, value: str, tokenizer: Callable[[str], List[str]] = None
+    name: str, value: str, tokenizer: Callable[[str], List[str]] = None
 ) -> Feature:
     """Create a full-text composite feature using TrustyAI methods"""
     return FeatureFactory.newFulltextFeature(name, value, tokenizer)
 
 
 def feature(
-        name: str,
-        dtype: str,
-        value=None,
-        domain=None,
+    name: str,
+    dtype: str,
+    value=None,
+    domain=None,
 ) -> Feature:
     """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the
     individual components (or features) of input data points.
@@ -887,10 +883,10 @@ def feature(
 # pylint: disable=line-too-long
 @data_conversion_docstring("one_input", "one_output")
 def simple_prediction(
-        input_features: OneInputUnionType,
-        outputs: OneOutputUnionType,
-        feature_names: Optional[List[str]] = None,
-        output_names: Optional[List[str]] = None,
+    input_features: OneInputUnionType,
+    outputs: OneOutputUnionType,
+    feature_names: Optional[List[str]] = None,
+    output_names: Optional[List[str]] = None,
 ) -> SimplePrediction:
     """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
     this function will bundle them into Prediction objects for use with the LIME and SHAP
@@ -916,7 +912,8 @@ def simple_prediction(
 
 
 @JImplementsWithDocstring(
-    "org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria", deferred=False
+    "org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria",
+    deferred=False,
 )
 class GoalCriteria(CallableWrapper):
     """GoalCriteria(fn)
@@ -927,7 +924,9 @@ class GoalCriteria(CallableWrapper):
     of the explainers.
     """
 
-    def __init__(self, fn: Callable[[pd.DataFrame], Tuple[float, float]], **kwargs):
+    def __init__(
+        self, fn: Callable[[pd.DataFrame], Tuple[float, float]], **kwargs
+    ):  # pylint: disable = useless-parent-delegation
         """
         Create the goal criteria as a TrustyAI :obj:`GoalCriteria` Java class.
 
@@ -947,7 +946,8 @@ class GoalCriteria(CallableWrapper):
     def _predictions_to_df(self, prediction: List[Output]) -> pd.DataFrame:
         """Converts Java Output lists to dataframes"""
         return pd.DataFrame.from_dict(
-            {p.name: [p.value.getUnderlyingObject()] for p in prediction})
+            {p.name: [p.value.getUnderlyingObject()] for p in prediction}
+        )
 
     def _predictions_to_numpy(self, prediction: List[Output]) -> np.ndarray:
         """Converts Java Output lists to a 1-D numpy array"""
@@ -981,14 +981,14 @@ class GoalCriteria(CallableWrapper):
 # pylint: disable=too-many-arguments
 @data_conversion_docstring("one_input", "one_output")
 def counterfactual_prediction(
-        input_features: OneInputUnionType,
-        outputs: Optional[OneOutputUnionType] = None,
-        feature_names: Optional[List[str]] = None,
-        output_names: Optional[List[str]] = None,
-        data_distribution: Optional[DataDistribution] = None,
-        uuid: Optional[_uuid.UUID] = None,
-        timeout: Optional[float] = None,
-        criteria: Optional[GoalCriteria] = None
+    input_features: OneInputUnionType,
+    outputs: Optional[OneOutputUnionType] = None,
+    feature_names: Optional[List[str]] = None,
+    output_names: Optional[List[str]] = None,
+    data_distribution: Optional[DataDistribution] = None,
+    uuid: Optional[_uuid.UUID] = None,
+    timeout: Optional[float] = None,
+    criteria: Optional[GoalCriteria] = None,
 ) -> CounterfactualPrediction:
     """Wrap features and outputs into a CounterfactualPrediction. Given a list of features and
     outputs, this function will bundle them into Prediction objects for use with the
@@ -1033,5 +1033,5 @@ def counterfactual_prediction(
         data_distribution,
         uuid,
         timeout,
-        criteria
+        criteria,
     )
