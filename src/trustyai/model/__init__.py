@@ -28,12 +28,12 @@ from trustyai.utils.data_conversions import (
 from java.lang import Long
 from java.util.concurrent import CompletableFuture
 from jpype import (
-    JImplements,
     JOverride,
     _jcustomizer,
     _jclass,
     JByte,
     JArray,
+    JDouble,
     JLong,
     JInt,
     JString,
@@ -41,6 +41,9 @@ from jpype import (
 from org.kie.trustyai.explainability.local.counterfactual.entities import (
     CounterfactualEntity,
 )
+from org.kie.trustyai.explainability.local.counterfactual.goal import DefaultCounterfactualGoalCriteria
+from org.kie.trustyai.explainability.local.counterfactual.goal import GoalScore
+
 from org.kie.trustyai.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
     DataDistribution,
@@ -171,7 +174,7 @@ class PredictionProvider:
     """
 
     def __init__(
-        self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
+            self, predict_fun: Callable[[List[PredictionInput]], List[PredictionOutput]]
     ):
         """
         Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
@@ -801,17 +804,17 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
 
 
 def full_text_feature(
-    name: str, value: str, tokenizer: Callable[[str], List[str]] = None
+        name: str, value: str, tokenizer: Callable[[str], List[str]] = None
 ) -> Feature:
     """Create a full-text composite feature using TrustyAI methods"""
     return FeatureFactory.newFulltextFeature(name, value, tokenizer)
 
 
 def feature(
-    name: str,
-    dtype: str,
-    value=None,
-    domain=None,
+        name: str,
+        dtype: str,
+        value=None,
+        domain=None,
 ) -> Feature:
     """Create a Java :class:`Feature`. The :class:`Feature` class is used to represent the
     individual components (or features) of input data points.
@@ -870,10 +873,10 @@ def feature(
 # pylint: disable=line-too-long
 @data_conversion_docstring("one_input", "one_output")
 def simple_prediction(
-    input_features: OneInputUnionType,
-    outputs: OneOutputUnionType,
-    feature_names: Optional[List[str]] = None,
-    output_names: Optional[List[str]] = None,
+        input_features: OneInputUnionType,
+        outputs: OneOutputUnionType,
+        feature_names: Optional[List[str]] = None,
+        output_names: Optional[List[str]] = None,
 ) -> SimplePrediction:
     """Wrap features and outputs into a SimplePrediction. Given a list of features and outputs,
     this function will bundle them into Prediction objects for use with the LIME and SHAP
@@ -897,17 +900,67 @@ def simple_prediction(
         one_output_convert(outputs, output_names),
     )
 
+@JImplementsWithDocstring(
+    "org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria", deferred=False
+)
+class GoalCriteria:
+    """GoalCriteria(predict_fun)
+    Wrapper for a counterfactual dynamic goal.
+
+    Wrapper for any predictive function to be explained. This implements the TrustyAI Java
+    class :class:`~PredictionProvider`, which is required to interface with any
+    of the explainers.
+    """
+
+    def __init__(self, score_fun: Callable):
+        """
+        Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
+
+        Parameters
+        ----------
+        predict_fun : Callable[[List[:obj:`PredictionInput`]], List[:obj:`PredictionOutput`]]
+            A function that takes a list of prediction inputs and outputs a list of prediction
+            outputs.
+
+        """
+        self.score_fun = score_fun
+
+    @JOverride
+    def apply(self, predictions: List[Output]) -> GoalScore:
+        """
+        Python implementation of the :func:`predictAsync` function with the
+        TrustyAI :obj:`PredictionProvider` interface.
+
+        Parameters
+        ----------
+        predictions : List[:obj:`Output`]
+            A list of inputs.
+
+        Returns
+        -------
+        :obj:`GoalScore`
+            A Java :obj:`GoalScore` containing the input's distance and score.
+        """
+        # Convert List[Output] do dataframe
+        # print("Inside apply")
+        # print(predictions)
+        df = pd.DataFrame.from_dict(
+            {prediction.getName(): [prediction.getValue().getUnderlyingObject()] for prediction in predictions})
+        # print(df)
+        score = self.score_fun(df)
+        return GoalScore.create(JDouble(score[0]), JDouble(score[1]))
 
 # pylint: disable=too-many-arguments
 @data_conversion_docstring("one_input", "one_output")
 def counterfactual_prediction(
-    input_features: OneInputUnionType,
-    outputs: OneOutputUnionType,
-    feature_names: Optional[List[str]] = None,
-    output_names: Optional[List[str]] = None,
-    data_distribution: Optional[DataDistribution] = None,
-    uuid: Optional[_uuid.UUID] = None,
-    timeout: Optional[float] = None,
+        input_features: OneInputUnionType,
+        outputs: Optional[OneOutputUnionType] = None,
+        feature_names: Optional[List[str]] = None,
+        output_names: Optional[List[str]] = None,
+        data_distribution: Optional[DataDistribution] = None,
+        uuid: Optional[_uuid.UUID] = None,
+        timeout: Optional[float] = None,
+        criteria: Optional[GoalCriteria] = None
 ) -> CounterfactualPrediction:
     """Wrap features and outputs into a CounterfactualPrediction. Given a list of features and
     outputs, this function will bundle them into Prediction objects for use with the
@@ -930,16 +983,30 @@ def counterfactual_prediction(
         The UUID to use during search.
     timeout : Optional[float]
         The timeout time in seconds of the counterfactual explanation.
+    criteria : Optional[:class:`GoalCriteria`]
+        An optional custom scoring function, wrapped as a :class:`GoalCriteria`.
+
     """
     if not uuid:
         uuid = _uuid.uuid4()
     if timeout:
         timeout = Long(timeout)
+    if not outputs and not criteria:
+        raise ValueError("Either one goal or criteria must be provided.")
+
+    joutputs = None
+
+    if not criteria: # no custom criteria provided, use default
+        joutputs = one_output_convert(outputs, output_names).outputs
+        criteria = DefaultCounterfactualGoalCriteria.create(joutputs)
 
     return CounterfactualPrediction(
         one_input_convert(input_features, feature_names),
-        one_output_convert(outputs, output_names),
+        joutputs,
         data_distribution,
         uuid,
         timeout,
+        criteria
     )
+
+

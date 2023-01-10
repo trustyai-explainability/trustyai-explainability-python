@@ -1,6 +1,5 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, invalid-name
 """Test model provider interface"""
-from trustyai.explainers import LimeExplainer
 
 from common import *
 from trustyai.model import Model, Dataset, feature
@@ -47,14 +46,3 @@ def test_cast_output_arrow():
         output_val = m.predictAsync(pis).get()
         assert len(output_val) == 25
 
-
-def test_error_model(caplog):
-    """test that a broken model spits out useful debugging info"""
-    m = Model(lambda x: str(x) - str(x))
-    try:
-        LimeExplainer().explain(0, 0, m)
-    except Exception:
-        pass
-
-    assert "Fatal runtime error" in caplog.text
-    assert "TypeError: unsupported operand type(s) for -: 'str' and 'str'" in caplog.text

@@ -1,7 +1,7 @@
 """Explainers.countefactual module"""
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument
-from typing import Optional, Union, List
+from typing import Callable, Optional, Tuple, Union, List
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
@@ -17,9 +17,8 @@ from trustyai.utils._visualisation import (
 from trustyai.model import (
     counterfactual_prediction,
     PredictionInput,
-    Model,
+    Model, GoalCriteria,
 )
-
 
 from trustyai.utils.data_conversions import (
     prediction_object_to_numpy,
@@ -184,12 +183,13 @@ class CounterfactualExplainer:
     def explain(
         self,
         inputs: OneInputUnionType,
-        goal: OneOutputUnionType,
         model: Union[PredictionProvider, Model],
+        goal: Optional[OneOutputUnionType] = None,
         feature_domains: List[FeatureDomain] = None,
         data_distribution: Optional[DataDistribution] = None,
         uuid: Optional[_uuid.UUID] = None,
         timeout: Optional[float] = None,
+        criteria: Optional[GoalCriteria] = None,
     ) -> CounterfactualResult:
         r"""Request for a counterfactual explanation given a list of features, goals and a
         :class:`~PredictionProvider`
@@ -217,7 +217,9 @@ class CounterfactualExplainer:
         uuid : Optional[:class:`_uuid.UUID`]
             The UUID to use during search.
         timeout : Optional[float]
-                The timeout time in seconds of the counterfactual explanation.
+            The timeout time in seconds of the counterfactual explanation.
+        criteria : Optional[:class:`GoalCriteria`]
+            An optional custom scoring function, wrapped as a :class:`GoalCriteria`.
 
         Returns
         -------
@@ -226,6 +228,10 @@ class CounterfactualExplainer:
         """
         feature_names = model.feature_names if isinstance(model, Model) else None
         output_names = model.output_names if isinstance(model, Model) else None
+
+        if not goal and not criteria:
+            raise ValueError("Either one goal or criteria must be provided.")
+
         _prediction = counterfactual_prediction(
             input_features=one_input_convert(
                 inputs, feature_names=feature_names, feature_domains=feature_domains
@@ -236,6 +242,7 @@ class CounterfactualExplainer:
             data_distribution=data_distribution,
             uuid=uuid,
             timeout=timeout,
+            criteria=criteria
         )
 
         with Model.NonArrowTransmission(model):

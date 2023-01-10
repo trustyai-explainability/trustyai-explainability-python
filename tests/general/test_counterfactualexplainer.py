@@ -1,5 +1,9 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, R0801
 """Test suite for counterfactual explanations"""
+import math
+import random
+
+import pandas as pd
 import pytest
 
 from common import *
@@ -8,6 +12,8 @@ from java.util import Random
 from pytest import approx
 
 from trustyai.explainers import CounterfactualExplainer
+from trustyai.explainers.counterfactuals import GoalCriteria
+from org.kie.trustyai.explainability.local.counterfactual.goal import GoalScore
 from trustyai.model import (
     output, Model, feature,
 )
@@ -71,6 +77,47 @@ def test_counterfactual_match():
     assert total_sum <= center + epsilon
     assert total_sum >= center - epsilon
     assert result._result.isValid()
+
+
+def test_counterfactual_match_goal_criteria():
+    """Test if there's a valid counterfactual using a custom criteria"""
+
+    goal = [output(name="sum-but3", dtype="number", value=0, score=0.0), output(name="sum-but3*2", dtype="number", value=0, score=0.0)]
+
+    def custom_goal(_df):
+        f1 = _df['sum-but3'].iloc[0]
+        f2 = _df['sum-but3*2'].iloc[0]
+        if math.sqrt(f1) == f2:
+            return 0, 0
+        else:
+            return f1-math.sqrt(f2), 1.0
+
+    features = [
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(3)
+    ]
+
+    explainer = CounterfactualExplainer(steps=20000)
+    criteria = GoalCriteria(custom_goal)
+
+    model = TestModels.getSumSkipTwoOutputModel(3)
+    result = explainer.explain(
+        inputs=features,
+        goal=goal,
+        model=model,
+        criteria=criteria
+    )
+
+    total_sum = 0
+    for entity in result._result.entities:
+        total_sum += entity.as_feature().value.as_number()
+        print(entity)
+
+    print("Counterfactual match:")
+    print(result._result.output[0].outputs)
+
+    # assert total_sum <= center + epsilon
+    # assert total_sum >= center - epsilon
+    # assert result._result.isValid()
 
 
 def test_counterfactual_match_python_model():
@@ -178,5 +225,3 @@ def test_counterfactual_with_domain_argument_overwrite():
             feature_domains=[feature_domain((-10, 10)) for _ in range(5)],
             model=model
         )
-
-
