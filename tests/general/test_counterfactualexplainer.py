@@ -79,14 +79,47 @@ def test_counterfactual_match():
     assert result._result.isValid()
 
 
-def test_counterfactual_match_goal_criteria():
+def test_counterfactual_match_goal_criteria_df():
     """Test if there's a valid counterfactual using a custom criteria"""
-
-    goal = [output(name="sum-but3", dtype="number", value=0, score=0.0), output(name="sum-but3*2", dtype="number", value=0, score=0.0)]
 
     def custom_goal(_df):
         f1 = _df['sum-but3'].iloc[0]
         f2 = _df['sum-but3*2'].iloc[0]
+        if math.sqrt(f1) == f2:
+            return 0, 0
+        else:
+            return f1-math.sqrt(f2), 1.0
+
+    features = [
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(3)
+    ]
+
+    explainer = CounterfactualExplainer(steps=10000)
+    criteria = GoalCriteria(custom_goal, dataframe_input=True)
+
+    model = TestModels.getSumSkipTwoOutputModel(3)
+    result = explainer.explain(
+        inputs=features,
+        model=model,
+        criteria=criteria
+    )
+
+    total_sum = 0
+    for entity in result._result.entities:
+        total_sum += entity.as_feature().value.as_number()
+        print(entity)
+
+    print("Counterfactual match, (sum-but3)^2==sum-but3*2 :")
+    print(result._result.output[0].outputs)
+
+    assert result.proposed_features_array[0][0] == approx(result.proposed_features_array[0][1]**2, 0.1)
+
+def test_counterfactual_match_goal_criteria_numpy():
+    """Test if there's a valid counterfactual using a custom criteria"""
+
+    def custom_goal(prediction):
+        f1 = prediction[0]
+        f2 = prediction[1]
         if math.sqrt(f1) == f2:
             return 0, 0
         else:
@@ -102,7 +135,6 @@ def test_counterfactual_match_goal_criteria():
     model = TestModels.getSumSkipTwoOutputModel(3)
     result = explainer.explain(
         inputs=features,
-        goal=goal,
         model=model,
         criteria=criteria
     )
@@ -116,6 +148,7 @@ def test_counterfactual_match_goal_criteria():
     print(result._result.output[0].outputs)
 
     assert result.proposed_features_array[0][0] == approx(result.proposed_features_array[0][1]**2, 0.1)
+
 
 
 def test_counterfactual_match_python_model():

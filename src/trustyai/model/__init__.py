@@ -937,13 +937,21 @@ class GoalCriteria(CallableWrapper):
             A function that takes a dataframe input and outputs a tuple consisting
             of the distance and score, relative to our goal, of that input.
 
+        Keyword Arguments:
+            * dataframe_input: bool
+                (default= ``False``) Whether `fn` expects a :class:`pandas.DataFrame`
+                as input.
         """
         super().__init__(fn, **kwargs)
 
     def _predictions_to_df(self, prediction: List[Output]) -> pd.DataFrame:
         """Converts Java Output lists to dataframes"""
         return pd.DataFrame.from_dict(
-            {goal.name: [goal.value.getUnderlyingObject()] for goal in prediction})
+            {p.name: [p.value.getUnderlyingObject()] for p in prediction})
+
+    def _predictions_to_numpy(self, prediction: List[Output]) -> np.ndarray:
+        """Converts Java Output lists to a 1-D numpy array"""
+        return np.array([p.value.getUnderlyingObject() for p in prediction])
 
     @JOverride
     def apply(self, predictions: List[Output]) -> GoalScore:
@@ -962,7 +970,10 @@ class GoalCriteria(CallableWrapper):
             A Java :obj:`GoalScore` containing the input's distance and score.
         """
         # Convert List[Output] do dataframe
-        _predictions = self._predictions_to_df(predictions)
+        if self.dataframe_input:
+            _predictions = self._predictions_to_df(predictions)
+        else:
+            _predictions = self._predictions_to_numpy(predictions)
         score = self.fn(_predictions)
         return GoalScore.create(JDouble(score[0]), JDouble(score[1]))
 
@@ -1009,7 +1020,7 @@ def counterfactual_prediction(
     if timeout:
         timeout = Long(timeout)
     if outputs is None and criteria is None:
-        raise ValueError("Either one goal or criteria must be provided.")
+        raise ValueError("Either a goal or criteria must be provided.")
 
     joutputs = None
     if criteria is None:
