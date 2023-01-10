@@ -149,7 +149,23 @@ def test_counterfactual_match_goal_criteria_numpy():
 
     assert result.proposed_features_array[0][0] == approx(result.proposed_features_array[0][1]**2, 0.1)
 
+def test_counterfactual_missing_goal_criteria():
+    """Must throw an error if both goals and criteria are missing"""
+    features = [
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(3)
+    ]
 
+    explainer = CounterfactualExplainer(steps=10000)
+
+    model = TestModels.getSumSkipTwoOutputModel(3)
+
+    with pytest.raises(Exception) as e:
+        explainer.explain(
+            inputs=features,
+            model=model,
+        )
+
+    assert str(e.value) == 'Either a goal or criteria must be provided.'
 
 def test_counterfactual_match_python_model():
     """Test if there's a valid counterfactual with a Python model"""
