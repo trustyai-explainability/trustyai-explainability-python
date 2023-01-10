@@ -24,6 +24,7 @@ from trustyai.utils.data_conversions import (
     prediction_object_to_pandas,
     data_conversion_docstring,
 )
+from trustyai.model.domain import feature_domain
 
 from org.kie.trustyai.explainability.model import (
     CounterfactualPrediction as _CounterfactualPrediction,
@@ -54,7 +55,6 @@ from org.apache.arrow.vector import VectorSchemaRoot as _VectorSchemaRoot
 from org.kie.trustyai.arrow import ArrowConverters, PPAWrapper
 from org.kie.trustyai.explainability.model.domain import (
     EmptyFeatureDomain as _EmptyFeatureDomain,
-    feature_domain,
 )
 
 from java.lang import Long
