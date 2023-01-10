@@ -228,8 +228,7 @@ class CounterfactualExplainer:
         """
         feature_names = model.feature_names if isinstance(model, Model) else None
         output_names = model.output_names if isinstance(model, Model) else None
-
-        if not goal and not criteria:
+        if goal is None and criteria is None:
             raise ValueError("Either one goal or criteria must be provided.")
 
         _prediction = counterfactual_prediction(

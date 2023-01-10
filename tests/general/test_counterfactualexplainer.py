@@ -96,7 +96,7 @@ def test_counterfactual_match_goal_criteria():
         feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(3)
     ]
 
-    explainer = CounterfactualExplainer(steps=20000)
+    explainer = CounterfactualExplainer(steps=10000)
     criteria = GoalCriteria(custom_goal)
 
     model = TestModels.getSumSkipTwoOutputModel(3)
@@ -112,12 +112,10 @@ def test_counterfactual_match_goal_criteria():
         total_sum += entity.as_feature().value.as_number()
         print(entity)
 
-    print("Counterfactual match:")
+    print("Counterfactual match, (sum-but3)^2==sum-but3*2 :")
     print(result._result.output[0].outputs)
 
-    # assert total_sum <= center + epsilon
-    # assert total_sum >= center - epsilon
-    # assert result._result.isValid()
+    assert result.proposed_features_array[0][0] == approx(result.proposed_features_array[0][1]**2, 0.1)
 
 
 def test_counterfactual_match_python_model():

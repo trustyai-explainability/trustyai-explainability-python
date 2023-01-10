@@ -5,6 +5,7 @@
 import logging
 import traceback
 import uuid as _uuid
+from abc import ABC
 from typing import List, Optional, Union, Callable
 import pandas as pd
 import pyarrow as pa
@@ -289,23 +290,104 @@ class PredictionProviderArrow:
         return PPAWrapper(self, prototype_prediction_input)
 
 
+class CallableWrapper(ABC):
+    """
+
+    Abstract class for Python function wrappers, implementing common functionality.
+
+    """
+    def __init__(self, fn, **kwargs):
+        self.fn = self._error_catcher(fn)
+        self.kwargs = kwargs
+
+    def _error_catcher(self, predict_fun):
+        """Wrapper for a wrapped function to capture errors to Python logger before the JVM dies"""
+
+        def wrapper(x):
+            try:
+                return predict_fun(x)
+            except Exception as e:
+                logging.error(
+                    " Fatal runtime error within the `predict_fun` supplied to trustyai.Model"
+                )
+                logging.error(
+                    " The error message has been captured and reproduced below:"
+                )
+                logging.error(" %s", traceback.format_exc())
+                raise e
+
+        return wrapper
+
+    def _goals_to_df(self, goals: List[Output]) -> pd.DataFrame:
+        """Converts Java Output lists to dataframes"""
+        return pd.DataFrame.from_dict(
+            {goal.name: [goal.value.getUnderlyingObject()] for goal in goals})
+
+    def _cast_outputs_to_dataframe(self, output_array):
+        if isinstance(output_array, pd.DataFrame):
+            out = output_array
+        elif isinstance(output_array, np.ndarray):
+            if self.output_names is None:
+                if len(output_array.shape) == 1:
+                    columns = ["output-0"]
+                else:
+                    columns = [
+                        "output-{}".format(i) for i in range(output_array.shape[1])
+                    ]
+            else:
+                columns = self.output_names
+            out = pd.DataFrame(output_array, columns=columns)
+        else:
+            raise ValueError(
+                "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
+                    type(output_array)
+                )
+            )
+        return out
+
+    def __call__(self, inputs):
+        """
+        Alias of ``model.fn(inputs)``.
+
+        Parameters
+        ----------
+        inputs : Inputs to pass to the model's original `fn`
+        """
+        return self.fn(inputs)
+
+    @property
+    def dataframe_input(self):
+        """Get dataframe_input kwarg value"""
+        return self.kwargs.get("dataframe_input")
+
+    @property
+    def feature_names(self):
+        """Get feature_names kwarg value"""
+        return self.kwargs.get("feature_names")
+
+    @property
+    def output_names(self):
+        """Get output_names kwarg value"""
+        return self.kwargs.get("output_names")
+
+
 @JImplementsWithDocstring(
     "org.kie.trustyai.explainability.model.PredictionProvider", deferred=False
 )
-class Model:
-    """Model(predict_fun, pandas=False, arrow=False)
+class Model(CallableWrapper):
+    """Model(fn, pandas=False, arrow=False)
 
     Wrap any Python predictive model. TrustyAI uses the :class:`Model` class to allow any Python
     predictive model to interface with the TrustyAI Java library.
     """
 
-    def __init__(self, predict_fun, **kwargs):
+    def __init__(self, fn, **kwargs):
         """
         Wrap the model as a TrustyAI :obj:`PredictionProvider` Java class.
 
         Parameters
         ----------
-        predict_fun : Callable[:class:`pandas.DataFrame`] or Callable[:class:`numpy.array`]
+        fn : Callable[:class:`pandas.DataFrame`] or Callable[:class:`numpy.array`]
             A function that takes in a Numpy array or Pandas DataFrame as input and outputs a
             Pandas DataFrame or Numpy array. In general, the ``model.predict`` functions of
             sklearn-style models meet this requirement.
@@ -328,8 +410,7 @@ class Model:
                 situations where it is advantageous to do so.
         """
 
-        self.predict_fun = self._error_catcher(predict_fun)
-        self.kwargs = kwargs
+        super().__init__(fn, **kwargs)
 
         self.prediction_provider_arrow = None
         self.prediction_provider_normal = None
@@ -337,39 +418,6 @@ class Model:
 
         # set model to use non-arrow by default, as this requires no dataset information
         self._set_nonarrow()
-
-    def _error_catcher(self, predict_fun):
-        """Wrapper for predict function to capture errors to Python logger before the JVM dies"""
-
-        def wrapper(x):
-            try:
-                return predict_fun(x)
-            except Exception as e:
-                logging.error(
-                    " Fatal runtime error within the `predict_fun` supplied to trustyai.Model"
-                )
-                logging.error(
-                    " The error message has been captured and reproduced below:"
-                )
-                logging.error(" %s", traceback.format_exc())
-                raise e
-
-        return wrapper
-
-    @property
-    def dataframe_input(self):
-        """Get dataframe_input kwarg value"""
-        return self.kwargs.get("dataframe_input")
-
-    @property
-    def feature_names(self):
-        """Get feature_names kwarg value"""
-        return self.kwargs.get("feature_names")
-
-    @property
-    def output_names(self):
-        """Get output_names kwarg value"""
-        return self.kwargs.get("output_names")
 
     @property
     def disable_arrow(self):
@@ -406,11 +454,11 @@ class Model:
     def _get_arrow_prediction_provider(self):
         if not self.dataframe_input:
             ppa = PredictionProviderArrow(
-                lambda x: self._cast_outputs_to_dataframe(self.predict_fun(x.values))
+                lambda x: self._cast_outputs_to_dataframe(self.fn(x.values))
             )
         else:
             ppa = PredictionProviderArrow(
-                lambda x: self._cast_outputs_to_dataframe(self.predict_fun(x))
+                lambda x: self._cast_outputs_to_dataframe(self.fn(x))
             )
         return ppa
 
@@ -418,13 +466,13 @@ class Model:
         if self.dataframe_input:
             ppn = PredictionProvider(
                 lambda x: self._cast_outputs(
-                    self.predict_fun(prediction_object_to_pandas(x))
+                    self.fn(prediction_object_to_pandas(x))
                 )
             )
         else:
             ppn = PredictionProvider(
                 lambda x: self._cast_outputs(
-                    self.predict_fun(prediction_object_to_numpy(x))
+                    self.fn(prediction_object_to_numpy(x))
                 )
             )
         return ppn
@@ -433,28 +481,6 @@ class Model:
         return df_to_prediction_object(
             self._cast_outputs_to_dataframe(output_array), output
         )
-
-    def _cast_outputs_to_dataframe(self, output_array):
-        if isinstance(output_array, pd.DataFrame):
-            out = output_array
-        elif isinstance(output_array, np.ndarray):
-            if self.output_names is None:
-                if len(output_array.shape) == 1:
-                    columns = ["output-0"]
-                else:
-                    columns = [
-                        "output-{}".format(i) for i in range(output_array.shape[1])
-                    ]
-            else:
-                columns = self.output_names
-            out = pd.DataFrame(output_array, columns=columns)
-        else:
-            raise ValueError(
-                "Unsupported output type: {}, must be numpy.ndarray or pandas.DataFrame".format(
-                    type(output_array)
-                )
-            )
-        return out
 
     @JOverride
     def predictAsync(self, inputs: List[PredictionInput]) -> CompletableFuture:
@@ -474,16 +500,6 @@ class Model:
         """
 
         return self.prediction_provider.predictAsync(inputs)
-
-    def __call__(self, inputs):
-        """
-        Alias of ``model.predict_fun(inputs)``.
-
-        Parameters
-        ----------
-        inputs : Inputs to pass to the model's original `predict_fun`
-        """
-        return self.predict_fun(inputs)
 
     class ArrowTransmission:
         """
@@ -900,11 +916,12 @@ def simple_prediction(
         one_output_convert(outputs, output_names),
     )
 
+
 @JImplementsWithDocstring(
     "org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria", deferred=False
 )
-class GoalCriteria:
-    """GoalCriteria(predict_fun)
+class GoalCriteria(CallableWrapper):
+    """GoalCriteria(fn)
     Wrapper for a counterfactual dynamic goal.
 
     Wrapper for any predictive function to be explained. This implements the TrustyAI Java
@@ -912,24 +929,24 @@ class GoalCriteria:
     of the explainers.
     """
 
-    def __init__(self, score_fun: Callable):
+    def __init__(self, fn: Callable, **kwargs):
         """
-        Create the model as a TrustyAI :obj:`PredictionProvider` Java class.
+        Create the goal criteria as a TrustyAI :obj:`GoalCriteria` Java class.
 
         Parameters
         ----------
-        predict_fun : Callable[[List[:obj:`PredictionInput`]], List[:obj:`PredictionOutput`]]
+        fn : Callable[[List[:obj:`Output`]], List[:obj:`GoalScore`]]
             A function that takes a list of prediction inputs and outputs a list of prediction
             outputs.
 
         """
-        self.score_fun = score_fun
+        super().__init__(fn, **kwargs)
 
     @JOverride
     def apply(self, predictions: List[Output]) -> GoalScore:
         """
-        Python implementation of the :func:`predictAsync` function with the
-        TrustyAI :obj:`PredictionProvider` interface.
+        Python implementation of the :func:`apply` function with the
+        TrustyAI :obj:`GoalCriteria` interface.
 
         Parameters
         ----------
@@ -942,13 +959,10 @@ class GoalCriteria:
             A Java :obj:`GoalScore` containing the input's distance and score.
         """
         # Convert List[Output] do dataframe
-        # print("Inside apply")
-        # print(predictions)
-        df = pd.DataFrame.from_dict(
-            {prediction.getName(): [prediction.getValue().getUnderlyingObject()] for prediction in predictions})
-        # print(df)
-        score = self.score_fun(df)
+        _goals = self._goals_to_df(predictions)
+        score = self.fn(_goals)
         return GoalScore.create(JDouble(score[0]), JDouble(score[1]))
+
 
 # pylint: disable=too-many-arguments
 @data_conversion_docstring("one_input", "one_output")
@@ -991,14 +1005,13 @@ def counterfactual_prediction(
         uuid = _uuid.uuid4()
     if timeout:
         timeout = Long(timeout)
-    if not outputs and not criteria:
+    if outputs is None and criteria is None:
         raise ValueError("Either one goal or criteria must be provided.")
 
     joutputs = None
-
-    if not criteria: # no custom criteria provided, use default
-        joutputs = one_output_convert(outputs, output_names).outputs
-        criteria = DefaultCounterfactualGoalCriteria.create(joutputs)
+    if criteria is None:
+        joutputs = one_output_convert(outputs, output_names)
+        criteria = DefaultCounterfactualGoalCriteria.create(joutputs.outputs)
 
     return CounterfactualPrediction(
         one_input_convert(input_features, feature_names),
@@ -1008,5 +1021,3 @@ def counterfactual_prediction(
         timeout,
         criteria
     )
-
-
