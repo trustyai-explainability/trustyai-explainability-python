@@ -1,5 +1,9 @@
 # pylint: disable=import-error, wrong-import-position, wrong-import-order, R0801
 """Test suite for counterfactual explanations"""
+import math
+import random
+
+import pandas as pd
 import pytest
 
 from common import *
@@ -8,6 +12,8 @@ from java.util import Random
 from pytest import approx
 
 from trustyai.explainers import CounterfactualExplainer
+from trustyai.explainers.counterfactuals import GoalCriteria
+from org.kie.trustyai.explainability.local.counterfactual.goal import GoalScore
 from trustyai.model import (
     output, Model, feature,
 )
@@ -72,6 +78,94 @@ def test_counterfactual_match():
     assert total_sum >= center - epsilon
     assert result._result.isValid()
 
+
+def test_counterfactual_match_goal_criteria_df():
+    """Test if there's a valid counterfactual using a custom criteria"""
+
+    def custom_goal(_df):
+        f1 = _df['sum-but3'].iloc[0]
+        f2 = _df['sum-but3*2'].iloc[0]
+        if math.sqrt(f1) == f2:
+            return 0, 0
+        else:
+            return f1-math.sqrt(f2), 1.0
+
+    features = [
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(3)
+    ]
+
+    explainer = CounterfactualExplainer(steps=10000)
+    criteria = GoalCriteria(custom_goal, dataframe_input=True)
+
+    model = TestModels.getSumSkipTwoOutputModel(3)
+    result = explainer.explain(
+        inputs=features,
+        model=model,
+        criteria=criteria
+    )
+
+    total_sum = 0
+    for entity in result._result.entities:
+        total_sum += entity.as_feature().value.as_number()
+        print(entity)
+
+    print("Counterfactual match, (sum-but3)^2==sum-but3*2 :")
+    print(result._result.output[0].outputs)
+
+    assert result.proposed_features_array[0][0] == approx(result.proposed_features_array[0][1]**2, 0.1)
+
+def test_counterfactual_match_goal_criteria_numpy():
+    """Test if there's a valid counterfactual using a custom criteria"""
+
+    def custom_goal(prediction):
+        f1 = prediction[0]
+        f2 = prediction[1]
+        if math.sqrt(f1) == f2:
+            return 0, 0
+        else:
+            return f1-math.sqrt(f2), 1.0
+
+    features = [
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(3)
+    ]
+
+    explainer = CounterfactualExplainer(steps=10000)
+    criteria = GoalCriteria(custom_goal)
+
+    model = TestModels.getSumSkipTwoOutputModel(3)
+    result = explainer.explain(
+        inputs=features,
+        model=model,
+        criteria=criteria
+    )
+
+    total_sum = 0
+    for entity in result._result.entities:
+        total_sum += entity.as_feature().value.as_number()
+        print(entity)
+
+    print("Counterfactual match, (sum-but3)^2==sum-but3*2 :")
+    print(result._result.output[0].outputs)
+
+    assert result.proposed_features_array[0][0] == approx(result.proposed_features_array[0][1]**2, 0.1)
+
+def test_counterfactual_missing_goal_criteria():
+    """Must throw an error if both goals and criteria are missing"""
+    features = [
+        feature(name=f"f-num{i + 1}", value=10.0, dtype="number", domain=(0.0, 1000.0)) for i in range(3)
+    ]
+
+    explainer = CounterfactualExplainer(steps=10000)
+
+    model = TestModels.getSumSkipTwoOutputModel(3)
+
+    with pytest.raises(Exception) as e:
+        explainer.explain(
+            inputs=features,
+            model=model,
+        )
+
+    assert str(e.value) == 'Either a goal or criteria must be provided.'
 
 def test_counterfactual_match_python_model():
     """Test if there's a valid counterfactual with a Python model"""
@@ -178,5 +272,3 @@ def test_counterfactual_with_domain_argument_overwrite():
             feature_domains=[feature_domain((-10, 10)) for _ in range(5)],
             model=model
         )
-
-
