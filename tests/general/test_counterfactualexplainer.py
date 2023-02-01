@@ -11,7 +11,7 @@ from common import *
 from java.util import Random
 from pytest import approx
 
-from trustyai.explainers import CounterfactualExplainer
+from trustyai.explainers import CounterfactualExplainer, LimeExplainer
 from trustyai.explainers.counterfactuals import GoalCriteria
 from org.kie.trustyai.explainability.local.counterfactual.goal import GoalScore
 from trustyai.model import (
@@ -272,3 +272,42 @@ def test_counterfactual_with_domain_argument_overwrite():
             feature_domains=[feature_domain((-10, 10)) for _ in range(5)],
             model=model
         )
+
+
+def test_counterfactual_with_object_counterfactual():
+    """Test categorical objects work with as_dataframe"""
+    np.random.seed(0)
+
+    # will output 5 * 1 * 2 * 2 == 20
+    # goal is 5 + 1 + 2 + 2 == 10
+    data = pd.DataFrame([{"a": 5., "b": 1, "c": "alpha", "d": 2., "e": 2}])
+    feature_domains = [
+        feature_domain((0., 10.)),
+        feature_domain([0, 1, 2]),
+        feature_domain(["alpha", "beta", "gamma"]),
+        feature_domain((0., 200.)),
+        feature_domain([1, 2, 3])
+    ]
+
+    def pred_func(x):
+        out = np.zeros(len(x))
+        for i, row in x.iterrows():
+            if row["c"] == "alpha":
+                out[i] = row["a"] * row["b"] * row["d"] * row["e"]
+            elif row["c"] == "beta":
+                out[i] = row["a"] + row["b"] + row["d"] + row["e"]
+            else:
+                out[i] = -10.
+        return out/1.
+
+    model = Model(pred_func, dataframe_input=True)
+    explainer = CounterfactualExplainer(steps=10_000)
+
+    cf_result = explainer.explain(
+        inputs=data,
+        goal=np.array([10.]),
+        feature_domains=feature_domains,
+        model=model,
+    )
+
+    assert cf_result.as_dataframe().iloc[2]['Difference'] == "alpha -> beta"

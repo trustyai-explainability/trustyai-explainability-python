@@ -5,6 +5,7 @@ import warnings
 from typing import Union, List, Optional, Tuple
 from itertools import filterfalse
 
+import jpype
 import trustyai.model
 from org.kie.trustyai.explainability.model import (
     Dataframe,
@@ -56,9 +57,9 @@ ManyOutputsUnionType = Union[np.ndarray, pd.DataFrame, List[PredictionOutput]]
 
 # trusty type names
 trusty_type_map = {
-    "i": "categorical",
+    "i": "number",
     "U": "categorical",
-    "O": "object",
+    "O": "categorical",
     "f": "number",
     "b": "bool",
 }
@@ -345,7 +346,7 @@ def df_to_prediction_object(
         values = list(row)
         collection = []
         for fv in values:
-            f = func(name=fv[2], dtype=fv[1], value=fv[0])
+            f = func(name=fv[2], dtype=fv[1], value=python_int_capture(fv[0]))
             collection.append(f)
         predictions.append(wrapper(collection))
     return predictions
@@ -389,7 +390,7 @@ def numpy_to_prediction_object(
             f = func(
                 name=names[col_index],
                 dtype=types[col_index],
-                value=array[row_index, col_index],
+                value=python_int_capture(array[row_index, col_index]),
             )
             collection.append(f)
         predictions.append(wrapper(collection))
@@ -546,10 +547,10 @@ def df_to_trusty_dataframe(
         pi = many_inputs_convert(
             python_inputs=data.iloc[:, input_indices], feature_names=input_names
         )
+
         po = many_outputs_convert(
             python_outputs=data.iloc[:, output_indices], names=output_names
         )
-
         return Dataframe.createFrom(pi, po)
 
     pi = many_inputs_convert(data)
@@ -589,6 +590,7 @@ def numpy_to_trusty_dataframe(
         pi = many_inputs_convert(
             python_inputs=np.take(arr, input_indices, axis), feature_names=input_names
         )
+
         po = many_outputs_convert(
             python_outputs=np.take(arr, output_indices, axis), names=output_names
         )
@@ -604,3 +606,11 @@ def java_string_capture(obj):
     pass through unmodified. This prevents incorrect parsing of Java strings to Python
     char tuples"""
     return str(obj) if obj.getClass().getName() == "java.lang.String" else obj
+
+
+def python_int_capture(obj):
+    """Given some arbitrary object, convert it to a Java int if Python int, else
+    pass through unmodified. This prevents incorrect parsing of Python ints to Java longs"""
+    if not isinstance(obj, bool) and isinstance(obj, (int, np.int64)):
+        return jpype.JInt(obj)
+    return obj

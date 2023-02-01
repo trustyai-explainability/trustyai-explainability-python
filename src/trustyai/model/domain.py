@@ -1,8 +1,9 @@
-# pylint: disable = import-error
+# pylint: disable = import-error, unidiomatic-typecheck
 """Conversion method between Python and TrustyAI Java types"""
 from typing import Optional, Tuple, List, Union
 
 import jpype
+import numpy as np
 from jpype import _jclass
 
 from org.kie.trustyai.explainability.model.domain import (
@@ -60,17 +61,17 @@ def feature_domain(values: Optional[Union[Tuple, List]]) -> Optional[FeatureDoma
             domain = NumericalFeatureDomain.create(values[0], values[1])
 
         elif isinstance(values, list):
-            if isinstance(values[0], bool) and isinstance(values[1], bool):
+            if type(values[0]) == bool and type(values[1]) == bool:
                 java_values = [jpype.JBoolean(v) for v in values]
                 java_array = _jclass.JClass("java.util.Arrays").asList(java_values)
                 domain = ObjectFeatureDomain.create(java_array)
-            elif isinstance(values[0], (float, int)) and isinstance(
-                values[1], (float, int)
+            elif isinstance(values[0], (float, int, np.number)) and isinstance(
+                values[1], (float, int, np.number)
             ):
-                if isinstance(values[0], float):
-                    java_values = [jpype.JDouble(v) for v in values]
-                else:
+                if isinstance(values[0], (int, np.int64)):
                     java_values = [jpype.JInt(v) for v in values]
+                else:
+                    java_values = [jpype.JDouble(v) for v in values]
                 java_array = _jclass.JClass("java.util.Arrays").asList(java_values)
                 domain = CategoricalNumericalFeatureDomain.create(java_array)
             else:

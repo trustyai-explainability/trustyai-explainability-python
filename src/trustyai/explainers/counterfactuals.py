@@ -142,7 +142,7 @@ class CounterfactualResult(ExplanationResults):
         Plot the counterfactual result.
         """
         _df = self.as_dataframe().copy()
-        _df = _df[_df["difference"] != 0.0]
+        _df = _df[_df["Difference"] != 0.0]
 
         def change_colour(value):
             if value == 0.0:
@@ -154,9 +154,9 @@ class CounterfactualResult(ExplanationResults):
             return colour
 
         with mpl.rc_context(drcp):
-            colour = _df["difference"].transform(change_colour)
-            plot = _df[["features", "proposed", "original"]].plot.barh(
-                x="features", color={"proposed": colour, "original": "black"}
+            colour = _df["Difference"].transform(change_colour)
+            plot = _df[["Features", "Proposed", "Original"]].plot.barh(
+                x="Features", color={"Proposed": colour, "Original": "black"}
             )
             plot.set_title("Counterfactual")
             plt.show(block=block)

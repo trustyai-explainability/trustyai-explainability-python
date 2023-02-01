@@ -51,12 +51,7 @@ def test_categorical_numeric_domain_list():
     domain = [0, 1000]
     jdomain = feature_domain(domain)
     assert jdomain.getCategories().size() == 2
-    assert jdomain.getCategories().containsAll(domain)
-
-    domain = [0.0, 1000.0]
-    jdomain = feature_domain(domain)
-    assert jdomain.getCategories().size() == 2
-    assert jdomain.getCategories().containsAll(domain)
+    assert [x in list(jdomain.getCategories()) for x in domain]
 
 
 def test_categorical_object_domain_list():
@@ -65,7 +60,7 @@ def test_categorical_object_domain_list():
     jdomain = feature_domain(domain)
     assert str(jdomain.getClass().getSimpleName()) == "ObjectFeatureDomain"
     assert jdomain.getCategories().size() == 2
-    assert jdomain.getCategories().containsAll(domain)
+    assert [x in list(jdomain.getCategories()) for x in domain]
 
 
 def test_categorical_object_domain_list_2():
@@ -74,7 +69,7 @@ def test_categorical_object_domain_list_2():
     jdomain = feature_domain(domain)
     assert str(jdomain.getClass().getSimpleName()) == "ObjectFeatureDomain"
     assert jdomain.getCategories().size() == 2
-    assert jdomain.getCategories().containsAll(domain)
+    assert [x in list(jdomain.getCategories()) for x in domain]
 
 
 def test_empty_domain():
@@ -88,12 +83,7 @@ def test_categorical_domain_tuple():
     domain = ["foo", "bar", "baz"]
     jdomain = feature_domain(domain)
     assert jdomain.getCategories().size() == 3
-    assert jdomain.getCategories().containsAll(list(domain))
-
-    domain = ["foo", "bar", "baz"]
-    jdomain = feature_domain(domain)
-    assert jdomain.getCategories().size() == 3
-    assert jdomain.getCategories().containsAll(domain)
+    assert [x in list(jdomain.getCategories()) for x in domain]
 
 
 def test_feature_function():

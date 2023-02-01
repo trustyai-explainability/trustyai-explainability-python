@@ -12,6 +12,7 @@ from trustyai.utils.data_conversions import (
     OneOutputUnionType,
     one_output_convert,
     to_trusty_dataframe,
+    python_int_capture,
 )
 
 ColumSelector = Union[List[int], List[str]]
@@ -59,7 +60,7 @@ def statistical_parity_difference_model(
 ) -> float:
     """Calculate Statistical Parity Difference using a samples dataframe and a model"""
     favorable_prediction_object = one_output_convert(favorable)
-    _privilege_values = [Value(v) for v in privilege_values]
+    _privilege_values = [Value(python_int_capture(v)) for v in privilege_values]
     _jsamples = to_trusty_dataframe(
         data=samples, no_outputs=True, feature_names=feature_names
     )
@@ -103,7 +104,7 @@ def disparate_impact_ratio_model(
 ) -> float:
     """Calculate Disparate Impact Ration using a samples dataframe and a model"""
     favorable_prediction_object = one_output_convert(favorable)
-    _privilege_values = [Value(v) for v in privilege_values]
+    _privilege_values = [Value(python_int_capture(v)) for v in privilege_values]
     _jsamples = to_trusty_dataframe(
         data=samples, no_outputs=True, feature_names=feature_names
     )
@@ -131,8 +132,8 @@ def average_odds_difference(
         raise ValueError(
             f"Dataframes have different shapes ({test.shape} and {truth.shape})"
         )
-    _privilege_values = [Value(v) for v in privilege_values]
-    _positive_class = [Value(v) for v in positive_class]
+    _privilege_values = [Value(python_int_capture(v)) for v in privilege_values]
+    _positive_class = [Value(python_int_capture(v)) for v in positive_class]
     # determine privileged columns
     _privilege_columns = _column_selector_to_index(privilege_columns, test)
     return FairnessMetrics.groupAverageOddsDifference(
@@ -156,8 +157,8 @@ def average_odds_difference_model(
     _jsamples = to_trusty_dataframe(
         data=samples, no_outputs=True, feature_names=feature_names
     )
-    _privilege_values = [Value(v) for v in privilege_values]
-    _positive_class = [Value(v) for v in positive_class]
+    _privilege_values = [Value(python_int_capture(v)) for v in privilege_values]
+    _positive_class = [Value(python_int_capture(v)) for v in positive_class]
     # determine privileged columns
     _privilege_columns = _column_selector_to_index(privilege_columns, samples)
     return FairnessMetrics.groupAverageOddsDifference(
@@ -179,9 +180,10 @@ def average_predictive_value_difference(
         raise ValueError(
             f"Dataframes have different shapes ({test.shape} and {truth.shape})"
         )
-    _privilege_values = [Value(v) for v in privilege_values]
-    _positive_class = [Value(v) for v in positive_class]
+    _privilege_values = [Value(python_int_capture(v)) for v in privilege_values]
+    _positive_class = [Value(python_int_capture(v)) for v in positive_class]
     _privilege_columns = _column_selector_to_index(privilege_columns, test)
+
     return FairnessMetrics.groupAveragePredictiveValueDifference(
         to_trusty_dataframe(data=test, outputs=outputs, feature_names=feature_names),
         to_trusty_dataframe(data=truth, outputs=outputs, feature_names=feature_names),
@@ -201,8 +203,8 @@ def average_predictive_value_difference_model(
 ) -> float:
     """Calculate Average Predictive Value Difference for a sample dataframe using the provided model"""
     _jsamples = to_trusty_dataframe(samples, no_outputs=True)
-    _privilege_values = [Value(v) for v in privilege_values]
-    _positive_class = [Value(v) for v in positive_class]
+    _privilege_values = [Value(python_int_capture(v)) for v in privilege_values]
+    _positive_class = [Value(python_int_capture(v)) for v in positive_class]
     # determine privileged columns
     _privilege_columns = _column_selector_to_index(privilege_columns, samples)
     return FairnessMetrics.groupAveragePredictiveValueDifference(
