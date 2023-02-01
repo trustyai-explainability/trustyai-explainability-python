@@ -2,7 +2,8 @@
 """Conversion method between Python and TrustyAI Java types"""
 from typing import Optional, Tuple, List, Union
 
-from jpype import _jclass
+import jpype
+from jpype import _jclass, JArray
 
 from org.kie.trustyai.explainability.model.domain import (
     FeatureDomain,
@@ -60,16 +61,21 @@ def feature_domain(values: Optional[Union[Tuple, List]]) -> Optional[FeatureDoma
             domain = NumericalFeatureDomain.create(values[0], values[1])
 
         elif isinstance(values, list):
-            java_array = _jclass.JClass("java.util.Arrays").asList(values)
             if isinstance(values[0], bool) and isinstance(values[1], bool):
+                java_values = [jpype.JBoolean(v) for v in values]
+                java_array = _jclass.JClass("java.util.Arrays").asList(java_values)
                 domain = ObjectFeatureDomain.create(java_array)
             elif isinstance(values[0], (float, int)) and isinstance(
                 values[1], (float, int)
             ):
+                if isinstance(values[0], float):
+                    java_values = [jpype.JDouble(v) for v in values]
+                else:
+                    java_values = [jpype.JInt(v) for v in values]
+                java_array = _jclass.JClass("java.util.Arrays").asList(java_values)
                 domain = CategoricalNumericalFeatureDomain.create(java_array)
-            elif isinstance(values[0], str):
-                domain = CategoricalFeatureDomain.create(java_array)
             else:
+                java_array = _jclass.JClass("java.util.Arrays").asList(values)
                 domain = ObjectFeatureDomain.create(java_array)
 
         else:

@@ -27,7 +27,7 @@ from trustyai.utils.data_conversions import (
     OneInputUnionType,
     OneOutputUnionType,
     data_conversion_docstring,
-    one_input_convert,
+    one_input_convert, java_string_capture,
 )
 
 from org.kie.trustyai.explainability.local.counterfactual import (
@@ -79,6 +79,14 @@ class CounterfactualResult(ExplanationResults):
             [PredictionInput([entity.as_feature() for entity in self._result.entities])]
         )
 
+
+    def _get_feature_difference(self, value_pair):
+        proposed, original = value_pair
+        try:
+            return proposed - original
+        except:
+            return "{} -> {}".format(original, proposed)
+
     def as_dataframe(self) -> pd.DataFrame:
         """
         Return the counterfactual result as a dataframe
@@ -99,15 +107,15 @@ class CounterfactualResult(ExplanationResults):
         features = self._result.getFeatures()
 
         data = {}
-        data["features"] = [f"{entity.as_feature().getName()}" for entity in entities]
-        data["proposed"] = [entity.as_feature().value.as_obj() for entity in entities]
-        data["original"] = [
-            feature.getValue().getUnderlyingObject() for feature in features
+        data["Features"] = [f"{entity.as_feature().getName()}" for entity in entities]
+        data["Proposed"] = [java_string_capture(entity.as_feature().value.as_obj()) for entity in entities]
+        data["Original"] = [
+            java_string_capture(feature.getValue().getUnderlyingObject()) for feature in features
         ]
         data["constrained"] = [feature.is_constrained for feature in features]
 
         dfr = pd.DataFrame.from_dict(data)
-        dfr["difference"] = dfr.proposed - dfr.original
+        dfr["Difference"] = dfr[["Proposed", "Original"]].apply(self._get_feature_difference, 1)
         return dfr
 
     def as_html(self) -> pd.io.formats.style.Styler:

@@ -12,12 +12,16 @@ from org.kie.trustyai.explainability.model import (
     Output,
     PredictionInput,
     PredictionOutput,
+    Type
 )
 from org.kie.trustyai.explainability.model.domain import (
     FeatureDomain,
     EmptyFeatureDomain,
+    NumericalFeatureDomain,
+    CategoricalFeatureDomain,
+    CategoricalNumericalFeatureDomain,
+    ObjectFeatureDomain,
 )
-
 import pandas as pd
 import numpy as np
 
@@ -51,7 +55,20 @@ ManyInputsUnionType = Union[np.ndarray, pd.DataFrame, List[PredictionInput]]
 ManyOutputsUnionType = Union[np.ndarray, pd.DataFrame, List[PredictionOutput]]
 
 # trusty type names
-trusty_type_map = {"i": "number", "O": "categorical", "f": "number", "b": "bool"}
+trusty_type_map = {
+    "i": "categorical",
+    "U": "categorical",
+    "O": "object",
+    "f": "number",
+    "b": "bool"
+}
+
+feature_domain_map = {
+    "NumericalFeatureDomain": Type.NUMBER,
+    "CategoricalFeatureDomain": Type.CATEGORICAL,
+    "CategoricalNumericalFeatureDomain": Type.CATEGORICAL,
+    "ObjectFeatureDomain": Type.CATEGORICAL
+}
 
 
 # universal docstrings for functions that use these data conversions ===============================
@@ -173,13 +190,14 @@ def domain_insertion(
                     "previous domain with the new one.".format(i, f.toString())
                 )
                 warnings.warn(warning_msg)
+            domain_class_name = feature_domains[i].getClass().getSimpleName()
+            new_type = feature_domain_map.get(domain_class_name, f.getType())
             domained_features.append(
                 Feature(
-                    f.getName(), f.getType(), f.getValue(), False, feature_domains[i]
+                    f.getName(), new_type, f.getValue(), False, feature_domains[i]
                 )
             )
     return PredictionInput(domained_features)
-
 
 # === input functions ==============================================================================
 def one_input_convert(
@@ -363,6 +381,7 @@ def numpy_to_prediction_object(
         wrapper = PredictionOutput
     if names is None:
         names = [f"{prefix}-{i}" for i in range(shape[1])]
+
     types = [trusty_type_map[array[:, i].dtype.kind] for i in range(shape[1])]
     predictions = []
     for row_index in range(shape[0]):
@@ -393,14 +412,14 @@ def prediction_object_to_numpy(
     if isinstance(objects[0], PredictionInput):
         arr = np.array(
             [
-                [f.getValue().getUnderlyingObject() for f in pi.getFeatures()]
+                [java_string_capture(f.getValue().getUnderlyingObject()) for f in pi.getFeatures()]
                 for pi in objects
             ]
         )
     else:
         arr = np.array(
             [
-                [o.getValue().getUnderlyingObject() for o in po.getOutputs()]
+                [java_string_capture(o.getValue().getUnderlyingObject()) for o in po.getOutputs()]
                 for po in objects
             ]
         )
@@ -423,7 +442,8 @@ def prediction_object_to_pandas(
         df = pd.DataFrame(
             [
                 {
-                    in_feature.getName(): in_feature.getValue().getUnderlyingObject()
+                    str(in_feature.getName()):
+                        java_string_capture(in_feature.getValue().getUnderlyingObject())
                     for in_feature in pi.getFeatures()
                 }
                 for pi in objects
@@ -433,7 +453,8 @@ def prediction_object_to_pandas(
         df = pd.DataFrame(
             [
                 {
-                    output.getName(): output.getValue().getUnderlyingObject()
+                    str(output.getName()):
+                        java_string_capture(output.getValue().getUnderlyingObject())
                     for output in po.getOutputs()
                 }
                 for po in objects
@@ -569,3 +590,10 @@ def numpy_to_trusty_dataframe(
 
     pi = many_inputs_convert(arr)
     return Dataframe.createFromInputs(pi)
+
+
+def java_string_capture(obj):
+    """Given some arbitrary object, convert it to a Python string if Java string, else
+    pass through unmodified. This prevents incorrect parsing of Java strings to Python
+    char tuples"""
+    return str(obj) if obj.getClass().getName() == "java.lang.String" else obj
