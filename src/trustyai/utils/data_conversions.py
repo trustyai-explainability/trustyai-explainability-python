@@ -12,7 +12,7 @@ from org.kie.trustyai.explainability.model import (
     Output,
     PredictionInput,
     PredictionOutput,
-    Type
+    Type,
 )
 from org.kie.trustyai.explainability.model.domain import (
     FeatureDomain,
@@ -60,14 +60,14 @@ trusty_type_map = {
     "U": "categorical",
     "O": "object",
     "f": "number",
-    "b": "bool"
+    "b": "bool",
 }
 
 feature_domain_map = {
     "NumericalFeatureDomain": Type.NUMBER,
     "CategoricalFeatureDomain": Type.CATEGORICAL,
     "CategoricalNumericalFeatureDomain": Type.CATEGORICAL,
-    "ObjectFeatureDomain": Type.CATEGORICAL
+    "ObjectFeatureDomain": Type.CATEGORICAL,
 }
 
 
@@ -193,11 +193,10 @@ def domain_insertion(
             domain_class_name = feature_domains[i].getClass().getSimpleName()
             new_type = feature_domain_map.get(domain_class_name, f.getType())
             domained_features.append(
-                Feature(
-                    f.getName(), new_type, f.getValue(), False, feature_domains[i]
-                )
+                Feature(f.getName(), new_type, f.getValue(), False, feature_domains[i])
             )
     return PredictionInput(domained_features)
+
 
 # === input functions ==============================================================================
 def one_input_convert(
@@ -412,14 +411,20 @@ def prediction_object_to_numpy(
     if isinstance(objects[0], PredictionInput):
         arr = np.array(
             [
-                [java_string_capture(f.getValue().getUnderlyingObject()) for f in pi.getFeatures()]
+                [
+                    java_string_capture(f.getValue().getUnderlyingObject())
+                    for f in pi.getFeatures()
+                ]
                 for pi in objects
             ]
         )
     else:
         arr = np.array(
             [
-                [java_string_capture(o.getValue().getUnderlyingObject()) for o in po.getOutputs()]
+                [
+                    java_string_capture(o.getValue().getUnderlyingObject())
+                    for o in po.getOutputs()
+                ]
                 for po in objects
             ]
         )
@@ -442,8 +447,9 @@ def prediction_object_to_pandas(
         df = pd.DataFrame(
             [
                 {
-                    str(in_feature.getName()):
-                        java_string_capture(in_feature.getValue().getUnderlyingObject())
+                    str(in_feature.getName()): java_string_capture(
+                        in_feature.getValue().getUnderlyingObject()
+                    )
                     for in_feature in pi.getFeatures()
                 }
                 for pi in objects
@@ -453,8 +459,9 @@ def prediction_object_to_pandas(
         df = pd.DataFrame(
             [
                 {
-                    str(output.getName()):
-                        java_string_capture(output.getValue().getUnderlyingObject())
+                    str(output.getName()): java_string_capture(
+                        output.getValue().getUnderlyingObject()
+                    )
                     for output in po.getOutputs()
                 }
                 for po in objects

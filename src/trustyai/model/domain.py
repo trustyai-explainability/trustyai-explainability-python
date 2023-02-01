@@ -3,12 +3,11 @@
 from typing import Optional, Tuple, List, Union
 
 import jpype
-from jpype import _jclass, JArray
+from jpype import _jclass
 
 from org.kie.trustyai.explainability.model.domain import (
     FeatureDomain,
     NumericalFeatureDomain,
-    CategoricalFeatureDomain,
     CategoricalNumericalFeatureDomain,
     ObjectFeatureDomain,
     EmptyFeatureDomain,
