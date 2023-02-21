@@ -6,7 +6,7 @@ from common import *
 
 from pytest import approx
 import pandas as pd
-from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
 import os
 import joblib
 import pathlib
@@ -24,7 +24,7 @@ TEST_DIR = pathlib.Path(__file__).parent.resolve()
 INCOME_DF_BIASED = pd.read_csv(os.path.join(TEST_DIR, "data/income-biased.zip"), index_col=False)
 INCOME_DF_UNBIASED = pd.read_csv(
     os.path.join(TEST_DIR, "data/income-unbiased.zip"), index_col=False)
-# XGB_MODEL = XGBClassifier()
+
 XGB_MODEL = joblib.load(os.path.join(TEST_DIR, "models/income-xgd-biased.joblib"))
 
 
