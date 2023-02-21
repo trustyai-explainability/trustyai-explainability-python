@@ -295,21 +295,21 @@ class SHAPResults(SaliencyResults):
 
         # create hovertools
         htool_fnull = HoverTool(
-            names=["fnull"],
+            name="fnull",
             tooltips=("<h3>SHAP</h3>Baseline {}: {}").format(
                 output_name, output_html("{:.2f}".format(fnull))
             ),
             line_policy="interp",
         )
         htool_pred = HoverTool(
-            names=["pred"],
+            name="pred",
             tooltips=("<h3>SHAP</h3>Predicted {}: {}").format(
                 output_name, output_html("{:.2f}".format(prediction))
             ),
             line_policy="interp",
         )
         htool_bars = HoverTool(
-            names=["bars"],
+            name="bars",
             tooltips="<h3>SHAP</h3> {} contributions to {}: @saliency_text".format(
                 feature_html("@feature"), output_html(output_name)
             ),

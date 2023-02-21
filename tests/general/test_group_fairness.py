@@ -8,6 +8,7 @@ from pytest import approx
 import pandas as pd
 from xgboost import XGBClassifier
 import os
+import joblib
 import pathlib
 
 from trustyai.metrics.fairness.group import statistical_parity_difference, disparate_impact_ratio, \
@@ -23,8 +24,8 @@ TEST_DIR = pathlib.Path(__file__).parent.resolve()
 INCOME_DF_BIASED = pd.read_csv(os.path.join(TEST_DIR, "data/income-biased.zip"), index_col=False)
 INCOME_DF_UNBIASED = pd.read_csv(
     os.path.join(TEST_DIR, "data/income-unbiased.zip"), index_col=False)
-XGB_MODEL = XGBClassifier()
-XGB_MODEL.load_model(os.path.join(TEST_DIR, "models/income-xgb-biased.ubj"))
+# XGB_MODEL = XGBClassifier()
+XGB_MODEL = joblib.load(os.path.join(TEST_DIR, "models/income-xgd-biased.joblib"))
 
 
 def test_statistical_parity_difference_random():

@@ -191,7 +191,7 @@ class LimeResults(SaliencyResults):
         )
         source = ColumnDataSource(lime_data_source)
         htool = HoverTool(
-            names=["bars"],
+            name="bars",
             tooltips="<h3>LIME</h3> {} saliency to {}: @saliency_colored".format(
                 feature_html("@feature"), output_html(output_name)
             ),
