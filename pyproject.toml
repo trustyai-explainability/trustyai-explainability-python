@@ -5,7 +5,7 @@ description = "Python bindings to the TrustyAI explainability library."
 authors = [{ name = "Rui Vieira", email = "rui@redhat.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
 keywords = ["trustyai", "xai", "explainability", "ml"]
 
@@ -23,32 +23,30 @@ classifiers = [
 dependencies = [
     "Jpype1==1.4.1",
     "pyarrow==7.0.0",
-    "matplotlib==3.5.1",
-    "pandas==1.2.5",
-    "numpy",
-    "bokeh==2.4.3"
+    "matplotlib~=3.6.3",
+    "pandas~=1.5.3",
+    "numpy~=1.24.1",
+    "jupyter-bokeh~=3.0.5"
 ]
 
 [project.optional-dependencies]
 dev = [
     "JPype1==1.4.1",
-    "black==21.6b0",
+    "black~=22.12.0",
     "click==8.0.4",
-    "joblib==1.0.1",
-    "jupyter==1.0.0",
-    "scikit-learn==0.24.2",
-    "pylint==2.15.6",
-    "pytest==6.2.4",
-    "setuptools",
-    "wheel",
-    "xgboost==1.4.2",
-    "twine==3.4.2",
+    "joblib~=1.2.0",
+    "jupyterlab~=3.5.3",
+    "numpydoc==1.5.0",
     "pyarrow==7.0.0",
-    "numpydoc",
-    "matplotlib==3.5.1",
-    "pandas==1.2.5",
-    "pytest-xdist",
-    "pytest-benchmark"
+    "pylint==2.15.6",
+    "pytest~=7.2.1",
+    "pytest-benchmark==4.0.0",
+    "pytest-forked~=1.6.0",
+    "scikit-learn~=1.2.1",
+    "setuptools",
+    "twine==3.4.2",
+    "wheel~=0.38.4",
+    "xgboost==1.4.2"
 ]
 
 [project.urls]
