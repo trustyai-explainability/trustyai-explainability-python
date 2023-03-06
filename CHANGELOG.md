@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.8] - 2023-01-09
+## [0.2.9] - 2023-02-23
 
 
 ### [FAI-825](https://issues.redhat.com/browse/FAI-825)
@@ -148,6 +148,18 @@ All notable changes to this project will be documented in this file.
 
 
 - Add error message capturing within Python models ([#137](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/137))
+
+
+### [FAI-926](https://issues.redhat.com/browse/FAI-926)
+
+
+- Implement custom counterfactual goal criteria ([#140](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/140))
+
+
+### [FAI-952](https://issues.redhat.com/browse/FAI-952)
+
+
+- Change dependencies to align with ODH workbench images ([#143](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/143))
 
 ## [0.2.5] - 2022-09-14
 

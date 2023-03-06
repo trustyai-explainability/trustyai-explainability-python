@@ -14,7 +14,7 @@ from bokeh.models import (
     LinearColorMapper,
     ColorBar,
     Tabs,
-    Panel,
+    TabPanel,
     Div,
     GridBox,
 )
@@ -324,8 +324,8 @@ class Tyrus:
             title = str(k)
             lime_tabbed = Tabs(
                 tabs=[
-                    Panel(child=lime_figures[k], title="LIME"),
-                    Panel(
+                    TabPanel(child=lime_figures[k], title="LIME"),
+                    TabPanel(
                         child=Div(text=LIME_TEXT.format(output_html(title))),
                         title="About LIME",
                     ),
@@ -333,8 +333,8 @@ class Tyrus:
             )
             shap_tabbed = Tabs(
                 tabs=[
-                    Panel(child=shap_figures[k], title="SHAP"),
-                    Panel(
+                    TabPanel(child=shap_figures[k], title="SHAP"),
+                    TabPanel(
                         child=Div(text=SHAP_TEXT.format(output_html(title))),
                         title="About SHAP",
                     ),
@@ -343,8 +343,8 @@ class Tyrus:
 
             cf_tabbed = Tabs(
                 tabs=[
-                    Panel(child=cf_figures[k], title="Available Counterfactuals"),
-                    Panel(
+                    TabPanel(child=cf_figures[k], title="Available Counterfactuals"),
+                    TabPanel(
                         child=Div(
                             text=CF_TEXT.format(output_html(title)),
                         ),
@@ -369,7 +369,7 @@ class Tyrus:
                 trustyai_content,
                 sizing_mode="scale_width",
             )
-            tabs.append(Panel(child=joint, title=title))
+            tabs.append(TabPanel(child=joint, title=title))
 
         full_dash = Tabs(tabs=tabs, sizing_mode="scale_width")
         return full_dash
