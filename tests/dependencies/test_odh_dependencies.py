@@ -1,14 +1,15 @@
+import os
 import urllib.request
 from dparse import parse, filetypes
 
-VERSION = "datascience/ubi9-python-3.9"
+DEFAULT_PIPFILE = "https://raw.githubusercontent.com/opendatahub-io/notebooks/main/jupyter/datascience/ubi9-python-3.9/Pipfile"
+INPUT_PIPFILE = os.getenv("INPUT_PIPFILE", DEFAULT_PIPFILE)
 
-def test_dependencies():
+
+def test_odh_dependencies():
     '''Tests whether TrustyAI's dependencies are compatible with ODH workbench-image's https://github.com/opendatahub-io/notebooks/tree/main/jupyter/datascience/ubi9-python-3.9'''
     # download the pipfile
-    urllib.request.urlretrieve(
-        f"https://raw.githubusercontent.com/opendatahub-io/notebooks/main/jupyter/{VERSION}/Pipfile",
-        "/tmp/Pipfile")
+    urllib.request.urlretrieve(INPUT_PIPFILE, "/tmp/Pipfile")
 
     with open('./requirements.txt', 'r') as file:
         reqtxt = parse(file.read(), file_type=filetypes.requirements_txt)
@@ -31,7 +32,8 @@ def test_dependencies():
             if dependency.specs == trusty_specs:
                 print(f"\tSpecs match ({dependency.specs})")
             else:
-                print(f"\tSpecs do not match ({dependency.specs} ODH vs. {reqtxt_names[dependency.name].specs} TrustyAI)")
+                print(
+                    f"\tSpecs do not match ({dependency.specs} ODH vs. {reqtxt_names[dependency.name].specs} TrustyAI)")
                 mismatched_specs.append(dependency)
         if dependency.name in reqdevtxt_names.keys():
             print(f"{dependency} found")
@@ -39,7 +41,8 @@ def test_dependencies():
             if dependency.specs == trusty_specs:
                 print(f"\tSpecs match ({dependency.specs})")
             else:
-                print(f"\tSpecs do not match ({dependency.specs} ODH vs. {reqtxt_names[dependency.name].specs} TrustyAI)")
+                print(
+                    f"\tSpecs do not match ({dependency.specs} ODH vs. {reqtxt_names[dependency.name].specs} TrustyAI)")
                 mismatched_specs.append(dependency)
 
     assert len(mismatched_specs) == 0

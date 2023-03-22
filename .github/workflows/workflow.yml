@@ -1,6 +1,14 @@
 name: Tests
 
-on: [ push, pull_request ]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+      inputs:
+        pipfile:
+          description: 'Location of Pipfile to validate dependencies'
+          required: false
+          default: 'https://raw.githubusercontent.com/opendatahub-io/notebooks/main/jupyter/datascience/ubi9-python-3.9/Pipfile'
 
 jobs:
   build:
@@ -34,6 +42,16 @@ jobs:
         run: |
           pytest -v -s tests/general
           pytest -v -s tests/initialization --forked
+      - name: Test ODH dependencies
+        if: "${{ github.event.inputs.pipfile != '' }}"
+        uses: ./.github/actions/dependencies
+        with:
+          pipfile: '${{ github.event.inputs.pipfile }}'
+      - name: Test ODH dependencies
+        if: "${{ github.event.inputs.pipfile == '' }}"
+        uses: ./.github/actions/dependencies
+        with:
+          pipfile: 'https://raw.githubusercontent.com/opendatahub-io/notebooks/main/jupyter/datascience/ubi9-python-3.9/Pipfile'
       - name: Style
         run: |
           black --check $(find src/trustyai -type f -name "*.py")
