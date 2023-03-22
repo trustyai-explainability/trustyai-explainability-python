@@ -2,6 +2,9 @@ name: Tests
 
 on: [ push, pull_request ]
 
+env:
+  PIPFILE: ${{ vars.ODH_PIPFILE }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,7 +40,7 @@ jobs:
       - name: Test ODH dependencies
         uses: ./.github/actions/dependencies
         with:
-          pipfile: ${{ vars.ODH_PIPFILE }}
+          pipfile: ${{ env.PIPFILE }}
       - name: Style
         run: |
           black --check $(find src/trustyai -type f -name "*.py")
