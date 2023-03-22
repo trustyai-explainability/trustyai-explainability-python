@@ -37,7 +37,7 @@ jobs:
       - name: Test ODH dependencies
         uses: ./.github/actions/dependencies
         with:
-          pipfile: '${{ vars.ODH_PIPFILE }}'
+          pipfile: ${{ vars.ODH_PIPFILE }}
       - name: Style
         run: |
           black --check $(find src/trustyai -type f -name "*.py")
