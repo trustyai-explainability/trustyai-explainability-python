@@ -2,6 +2,9 @@ name: Tests
 
 on: [ push, pull_request ]
 
+env:
+  PIPFILE: ${{ vars.ODH_PIPFILE || 'https://raw.githubusercontent.com/opendatahub-io/notebooks/main/jupyter/datascience/ubi9-python-3.9/Pipfile' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,7 +40,7 @@ jobs:
       - name: Test ODH dependencies
         uses: ./.github/actions/dependencies
         with:
-          pipfile: ${{ vars.ODH_PIPFILE || "https://raw.githubusercontent.com/opendatahub-io/notebooks/main/jupyter/datascience/ubi9-python-3.9/Pipfile" }}
+          pipfile: ${{ env.PIPFILE }}
       - name: Style
         run: |
           black --check $(find src/trustyai -type f -name "*.py")
