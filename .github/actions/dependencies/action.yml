@@ -3,8 +3,7 @@ description: Test if TrustyAI dependencies match ODH workbench images
 inputs:
   pipfile:
     description: 'Location of the reference Pipfile'
-    required: false
-    default: 'https://raw.githubusercontent.com/opendatahub-io/notebooks/main/jupyter/datascience/ubi9-python-3.9/Pipfile'
+    required: true
 runs:
   using: "composite"
   steps:
