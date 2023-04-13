@@ -17,7 +17,9 @@ from jpype import _jcustomizer, _jclass
 
 DEFAULT_ARGS = (
     "--add-opens=java.base/java.nio=ALL-UNNAMED",
-)  # see https://arrow.apache.org/docs/java/install.html#java-compatibility
+    # see https://arrow.apache.org/docs/java/install.html#java-compatibility
+    "-Dorg.slf4j.simpleLogger.defaultLogLevel=error",
+)
 
 
 def _get_default_path():
