@@ -129,9 +129,9 @@ class Tyrus:
                 remain there after execution is finished.
         """
         self.model = model
-        self.inputs = one_input_convert(inputs)
-        self.outputs = one_output_convert(outputs)
-        self.background = many_inputs_convert(background)
+        self.inputs = one_input_convert(inputs, feature_names=model.feature_names)
+        self.outputs = one_output_convert(outputs, names=model.output_names)
+        self.background = many_inputs_convert(background, feature_names=model.feature_names)
         self.fraction_counterfactuals_to_display = max(
             0, min(1, kwargs.get("fraction_counterfactuals_to_display", 0.1))
         )
