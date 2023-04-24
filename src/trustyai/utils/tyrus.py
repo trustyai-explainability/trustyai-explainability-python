@@ -285,7 +285,7 @@ class Tyrus:
                 title="Available Counterfactuals",
                 tools=["crosshair"],
                 tooltips="@{{Tooltip {}}}".format(output_name),
-                sizing_mode='stretch_both'
+                sizing_mode="stretch_both",
             )
             plot.xgrid.grid_line_color = None
             plot.xaxis.axis_label = "Counterfactual House Value"
@@ -330,12 +330,12 @@ class Tyrus:
                     TabPanel(
                         child=Div(
                             text=LIME_TEXT.format(output_html(title)),
-                            styles={'overflow-y':'scroll'}
+                            styles={"overflow-y": "scroll"},
                         ),
                         title="About LIME",
                     ),
                 ],
-                sizing_mode='stretch_both',
+                sizing_mode="stretch_both",
             )
             shap_tabbed = Tabs(
                 tabs=[
@@ -343,12 +343,12 @@ class Tyrus:
                     TabPanel(
                         child=Div(
                             text=SHAP_TEXT.format(output_html(title)),
-                            styles={'overflow-y': 'scroll'}
+                            styles={"overflow-y": "scroll"},
                         ),
                         title="About SHAP",
                     ),
                 ],
-                sizing_mode='stretch_both'
+                sizing_mode="stretch_both",
             )
 
             cf_tabbed = Tabs(
@@ -361,7 +361,7 @@ class Tyrus:
                         title="About Counterfactuals",
                     ),
                 ],
-                sizing_mode='stretch_both'
+                sizing_mode="stretch_both",
             )
 
             # trustyai_content = row(column(lime_tabbed, shap_tabbed), cf_tabbed)
@@ -372,7 +372,7 @@ class Tyrus:
                     (shap_tabbed, 1, 0, 1, 1),
                     (cf_tabbed, 0, 1, 2, 2),
                 ],
-                sizing_mode='stretch_width'
+                sizing_mode="stretch_width",
             )
             joint = column(
                 Div(
