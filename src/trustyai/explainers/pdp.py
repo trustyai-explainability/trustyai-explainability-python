@@ -62,7 +62,7 @@ class PDPResults(ExplanationResults):
         """
         return self.as_dataframe().style
 
-    def plot(self, output_name=None, block=True) -> None:
+    def plot(self, output_name=None, block=True, call_show=True) -> None:
         """
         Parameters
         ----------
@@ -72,6 +72,10 @@ class PDPResults(ExplanationResults):
         block: bool
             whether the plotting operation
             should be blocking or not
+        call_show: bool
+            (default= 'True') Whether plt.show() will be called by default at the end of
+            the plotting function. If `False`, the plot will be returned to the user for
+            further editing.
         """
         fig, axs = plt.subplots(len(self.pdp_graphs), constrained_layout=True)
         p_idx = 0
@@ -94,7 +98,8 @@ class PDPResults(ExplanationResults):
             axs[p_idx].grid()
             p_idx += 1
         fig.supylabel("Partial Dependence Plot")
-        plt.show(block=block)
+        if call_show:
+            plt.show(block=block)
 
     @staticmethod
     def _to_plottable(datum: Value):

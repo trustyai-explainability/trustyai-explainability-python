@@ -137,7 +137,7 @@ class LimeResults(SaliencyResults):
             )
         return htmls
 
-    def _matplotlib_plot(self, output_name: str, block=True) -> None:
+    def _matplotlib_plot(self, output_name: str, block=True, call_show=True) -> None:
         """Plot the LIME saliencies."""
         with mpl.rc_context(drcp):
             dictionary = {}
@@ -163,7 +163,9 @@ class LimeResults(SaliencyResults):
             )
             plt.yticks(range(len(dictionary)), list(dictionary.keys()))
             plt.tight_layout()
-            plt.show(block=block)
+
+            if call_show:
+                plt.show(block=block)
 
     def _get_bokeh_plot(self, output_name) -> bokeh.models.Plot:
         lime_data_source = pd.DataFrame(
