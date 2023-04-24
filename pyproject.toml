@@ -1,6 +1,6 @@
 [project]
 name = "trustyai"
-version = "0.2.11"
+version = "0.2.12"
 description = "Python bindings to the TrustyAI explainability library."
 authors = [{ name = "Rui Vieira", email = "rui@redhat.com" }]
 license = { file = "LICENSE" }
