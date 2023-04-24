@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.11] - 2023-04-24
+
+
+### Bug Fixes
+
+
+- Fixed null pointer error for Numpy inputs to Tyrus ([#149](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/149))
+
 ## [0.2.10] - 2023-04-13
 
 ## [0.2.9] - 2023-02-23
