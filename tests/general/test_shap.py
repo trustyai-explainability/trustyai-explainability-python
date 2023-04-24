@@ -5,6 +5,7 @@ from common import *
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 np.random.seed(0)
 
@@ -133,3 +134,25 @@ def test_shap_numpy():
         assert oname in explanation.as_dataframe().keys()
         for fname in fnames:
             assert fname in explanation.as_dataframe()[oname]['Feature'].values
+
+
+# deliberately make strange plot to test pre and post-function plot editing
+def test_shap_edit_plot():
+    np.random.seed(0)
+    data = pd.DataFrame(np.random.rand(101, 5))
+    background = data.iloc[:100].values
+    to_explain = data.iloc[100:101].values
+
+    model_weights = np.random.rand(5)
+    predict_function = lambda x: np.stack([np.dot(x, model_weights), 2 * np.dot(x, model_weights)], -1)
+
+    model = Model(predict_function, disable_arrow=True)
+
+    shap_explainer = SHAPExplainer(background=background)
+    explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
+
+    plt.figure(figsize=(32,2))
+    explanation.plot(call_show=False)
+    plt.ylim(0, 123)
+    plt.show()
+
