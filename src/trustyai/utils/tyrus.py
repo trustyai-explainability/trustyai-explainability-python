@@ -8,7 +8,7 @@ import tempfile
 import numpy as np
 import pandas as pd
 from bokeh.io import show, output_file, output_notebook, reset_output
-from bokeh.layouts import row, column, grid
+from bokeh.layouts import column
 from bokeh.models import (
     ColumnDataSource,
     LinearColorMapper,
