@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.12] - 2023-04-24
+
+
+### Bug Fixes
+
+
+- Fixed broken gridding after bokeh 3.0.x update ([#153](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/153))
+
 ## [0.2.11] - 2023-04-24
 
 
