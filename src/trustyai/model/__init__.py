@@ -7,6 +7,8 @@ import traceback
 import uuid as _uuid
 from abc import ABC
 from typing import List, Optional, Union, Callable, Tuple
+
+import jpype
 import pandas as pd
 import pyarrow as pa
 import numpy as np
@@ -23,6 +25,7 @@ from trustyai.utils.data_conversions import (
     prediction_object_to_numpy,
     prediction_object_to_pandas,
     data_conversion_docstring,
+    python_int_capture,
 )
 from trustyai.model.domain import feature_domain
 
@@ -810,7 +813,8 @@ def output(name, dtype, value=None, score=1.0) -> _Output:
         _type = Type.CATEGORICAL
     else:
         _type = Type.UNDEFINED
-    return _Output(name, _type, Value(value), score)
+
+    return _Output(name, _type, Value(python_int_capture(value)), score)
 
 
 def full_text_feature(
@@ -859,12 +863,14 @@ def feature(
     """
 
     if dtype == "categorical":
-        if isinstance(value, int):
+        if isinstance(value, (np.int64, int)):
             _factory = FeatureFactory.newCategoricalNumericalFeature
             value = JInt(value)
-        else:
+        elif isinstance(value, str):
             _factory = FeatureFactory.newCategoricalFeature
             value = JString(value)
+        else:
+            _factory = FeatureFactory.newObjectFeature
     elif dtype == "number":
         _factory = FeatureFactory.newNumericalFeature
     elif dtype == "bool":
