@@ -5,7 +5,12 @@ from typing import List, Optional, Any, Union
 import numpy as np
 import pandas as pd
 from jpype import JInt
-from org.kie.trustyai.explainability.metrics import FairnessMetrics
+from org.kie.trustyai.metrics.fairness.group import (
+    DisparateImpactRatio,
+    GroupStatisticalParityDifference,
+    GroupAverageOddsDifference,
+    GroupAveragePredictiveValueDifference,
+)
 
 from trustyai.model import Value, PredictionProvider, Model
 from trustyai.utils.data_conversions import (
@@ -37,7 +42,7 @@ def statistical_parity_difference(
 ) -> float:
     """Calculate Statistical Parity Difference between privileged and unprivileged dataframes"""
     favorable_prediction_object = one_output_convert(favorable)
-    return FairnessMetrics.groupStatisticalParityDifference(
+    return GroupStatisticalParityDifference.calculate(
         to_trusty_dataframe(
             data=privileged, outputs=outputs, feature_names=feature_names
         ),
@@ -63,7 +68,7 @@ def statistical_parity_difference_model(
     _jsamples = to_trusty_dataframe(
         data=samples, no_outputs=True, feature_names=feature_names
     )
-    return FairnessMetrics.groupStatisticalParityDifference(
+    return GroupStatisticalParityDifference.calculate(
         _jsamples,
         model,
         _column_selector_to_index(privilege_columns, samples),
@@ -81,7 +86,7 @@ def disparate_impact_ratio(
 ) -> float:
     """Calculate Disparate Impact Ration between privileged and unprivileged dataframes"""
     favorable_prediction_object = one_output_convert(favorable)
-    return FairnessMetrics.groupDisparateImpactRatio(
+    return DisparateImpactRatio.calculate(
         to_trusty_dataframe(
             data=privileged, outputs=outputs, feature_names=feature_names
         ),
@@ -107,7 +112,7 @@ def disparate_impact_ratio_model(
     _jsamples = to_trusty_dataframe(
         data=samples, no_outputs=True, feature_names=feature_names
     )
-    return FairnessMetrics.groupDisparateImpactRatio(
+    return DisparateImpactRatio.calculate(
         _jsamples,
         model,
         _column_selector_to_index(privilege_columns, samples),
@@ -135,7 +140,7 @@ def average_odds_difference(
     _positive_class = [Value(v) for v in positive_class]
     # determine privileged columns
     _privilege_columns = _column_selector_to_index(privilege_columns, test)
-    return FairnessMetrics.groupAverageOddsDifference(
+    return GroupAverageOddsDifference.calculate(
         to_trusty_dataframe(data=test, outputs=outputs, feature_names=feature_names),
         to_trusty_dataframe(data=truth, outputs=outputs, feature_names=feature_names),
         _privilege_columns,
@@ -160,7 +165,7 @@ def average_odds_difference_model(
     _positive_class = [Value(v) for v in positive_class]
     # determine privileged columns
     _privilege_columns = _column_selector_to_index(privilege_columns, samples)
-    return FairnessMetrics.groupAverageOddsDifference(
+    return GroupAverageOddsDifference.calculate(
         _jsamples, model, _privilege_columns, _privilege_values, _positive_class
     )
 
@@ -182,7 +187,7 @@ def average_predictive_value_difference(
     _privilege_values = [Value(v) for v in privilege_values]
     _positive_class = [Value(v) for v in positive_class]
     _privilege_columns = _column_selector_to_index(privilege_columns, test)
-    return FairnessMetrics.groupAveragePredictiveValueDifference(
+    return GroupAveragePredictiveValueDifference.calculate(
         to_trusty_dataframe(data=test, outputs=outputs, feature_names=feature_names),
         to_trusty_dataframe(data=truth, outputs=outputs, feature_names=feature_names),
         _privilege_columns,
@@ -205,6 +210,6 @@ def average_predictive_value_difference_model(
     _positive_class = [Value(v) for v in positive_class]
     # determine privileged columns
     _privilege_columns = _column_selector_to_index(privilege_columns, samples)
-    return FairnessMetrics.groupAveragePredictiveValueDifference(
+    return GroupAveragePredictiveValueDifference.calculate(
         _jsamples, model, _privilege_columns, _privilege_values, _positive_class
     )
