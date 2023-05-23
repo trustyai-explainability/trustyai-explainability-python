@@ -1,0 +1,15 @@
+name: Test dependencies match
+description: Test if TrustyAI dependencies match ODH workbench images
+inputs:
+  pipfile:
+    description: 'Location of the reference Pipfile'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Test against ODH dependencies
+      shell: bash
+      env:
+        INPUT_PIPFILE: ${{ inputs.pipfile }}
+      run: |
+        pytest -v -s tests/dependencies/test_odh_dependencies.py
