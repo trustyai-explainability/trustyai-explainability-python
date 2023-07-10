@@ -154,8 +154,8 @@ class TestTSICEExplainer(unittest.TestCase):
         )
 
         # compute explanations
-        explanation = explainer.explain_instance(
-            ts=self.ts_test.iloc[:80],
+        explanation = explainer.explain(
+            inputs=self.ts_test.iloc[:80],
         )
 
         # validate explanation structure
