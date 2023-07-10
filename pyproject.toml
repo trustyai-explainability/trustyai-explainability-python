@@ -49,7 +49,7 @@ dev = [
     "xgboost==1.4.2"
 ]
 extras = [
-    "aix360 [tsice] @ https://github.com/Trusted-AI/AIX360/archive/refs/heads/master.zip"
+    "aix360 [default,tsice] @ https://github.com/Trusted-AI/AIX360/archive/refs/tags/v0.3.0.zip"
 ]
 
 [project.urls]
