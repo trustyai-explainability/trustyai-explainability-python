@@ -50,7 +50,7 @@ class TSICEExplainer(TSICEExplainerAIX):
 
     def __init__(
         self,
-        forecaster: Callable,
+        model: Callable,
         input_length: int,
         forecast_lookahead: int,
         n_variables: int = 1,
@@ -62,7 +62,7 @@ class TSICEExplainer(TSICEExplainerAIX):
         explanation_window_length: int = 10,
     ):
         super().__init__(
-            forecaster=forecaster,
+            forecaster=model,
             input_length=input_length,
             forecast_lookahead=forecast_lookahead,
             n_variables=n_variables,

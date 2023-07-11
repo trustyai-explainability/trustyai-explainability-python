@@ -75,7 +75,7 @@ class TestTSICEExplainer(unittest.TestCase):
         # initialize/fit explainer
         observation_length = 12
         explainer = TSICEExplainer(
-            forecaster=forecaster.predict,
+            model=forecaster.predict,
             explanation_window_start=10,
             explanation_window_length=observation_length,
             features_to_analyze=[
@@ -118,7 +118,7 @@ class TestTSICEExplainer(unittest.TestCase):
         # initialize/fit explainer
         observation_length = 12
         explainer = TSICEExplainer(
-            forecaster=forecaster.predict,
+            model=forecaster.predict,
             explanation_window_start=None,
             explanation_window_length=observation_length,
             features_to_analyze=[
