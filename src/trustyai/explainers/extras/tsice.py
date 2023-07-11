@@ -2,11 +2,45 @@
 Wrapper module for TSICEExplainer from aix360.
 Original at https://github.com/Trusted-AI/AIX360/
 """
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,import-error
 from typing import Callable, List, Optional, Union
 
 from aix360.algorithms.tsice import TSICEExplainer as TSICEExplainerAIX
 from aix360.algorithms.tsutils.tsperturbers import TSPerturber
+import bokeh
+import pandas as pd
+
+from trustyai.model import SaliencyResults
+
+
+class TSICEResults(SaliencyResults):
+    """Wraps TSICE results. This object is returned by the :class:`~TSICEExplainer`,
+    and provides a variety of methods to visualize and interact with the explanation.
+    """
+
+    def __init__(self, explanation):
+        self.explanation = explanation
+
+    def as_dataframe(self) -> pd.DataFrame:
+        """Returns the explanation as a pandas dataframe."""
+        return pd.DataFrame(self.explanation)
+
+    def as_html(self) -> pd.io.formats.style.Styler:
+        """Returns the explanation as an HTML table."""
+        dataframe = self.as_dataframe()
+        return dataframe.style
+
+    def saliency_map(self):
+        """
+        Returns a dictionary of feature names and their total impact.
+        """
+        dict(zip(self.explanation["feature_names"], self.explanation["total_impact"]))
+
+    def _matplotlib_plot(self, output_name: str, block: bool, call_show: bool) -> None:
+        pass
+
+    def _get_bokeh_plot(self, output_name: str) -> bokeh.models.Plot:
+        pass
 
 
 class TSICEExplainer(TSICEExplainerAIX):
@@ -40,8 +74,9 @@ class TSICEExplainer(TSICEExplainerAIX):
             explanation_window_length=explanation_window_length,
         )
 
-    def explain(self, inputs, outputs=None, **kwargs):
+    def explain(self, inputs, outputs=None, **kwargs) -> TSICEResults:
         """
         Explain the model's prediction on X.
         """
-        return super().explain_instance(inputs, y=outputs, **kwargs)
+        _explanation = super().explain_instance(inputs, y=outputs, **kwargs)
+        return TSICEResults(_explanation)

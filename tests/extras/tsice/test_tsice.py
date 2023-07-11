@@ -1,7 +1,6 @@
 """ Tests for :py:mod:`aix360.algorithms.tsice.TSICEExplainer`.
 Original: https://github.com/Trusted-AI/AIX360/blob/master/tests/tsice/test_tsice.py
 """
-import os
 import unittest
 import numpy as np
 import pandas as pd
@@ -11,6 +10,7 @@ from aix360.algorithms.tsutils.tsframe import tsFrame
 from aix360.datasets import SunspotDataset
 from aix360.algorithms.tsutils.tsperturbers import BlockBootstrapPerturber
 from trustyai.explainers.extras.tsice import TSICEExplainer
+
 
 # transform a time series dataset into a supervised learning dataset
 # below sample forecaster is from: https://machinelearningmastery.com/random-forest-for-time-series-forecasting/
@@ -22,12 +22,12 @@ class RandomForestUniVariateForecaster:
 
     def fit(self, X):
         train = self._series_to_supervised(X, n_in=self.n_past, n_out=self.n_future)
-        trainX, trainy = train[:, : -self.n_future], train[:, -self.n_future :]
+        trainX, trainy = train[:, : -self.n_future], train[:, -self.n_future:]
         self.model = self.model.fit(trainX, trainy)
         return self
 
     def _series_to_supervised(self, data, n_in=1, n_out=1, dropnan=True):
-        n_vars = 1 if type(data) is list else data.shape[1]
+        1 if type(data) is list else data.shape[1]
         df = pd.DataFrame(data)
         cols = list()
 
@@ -45,14 +45,13 @@ class RandomForestUniVariateForecaster:
         return agg.values
 
     def predict(self, X):
-        row = X[-self.n_past :].flatten()
+        row = X[-self.n_past:].flatten()
         y_pred = self.model.predict(np.asarray([row]))
         return y_pred
 
 
 class TestTSICEExplainer(unittest.TestCase):
     def setUp(self):
-
         # load data
         df, schema = SunspotDataset().load_data()
         ts = tsFrame(
@@ -64,7 +63,6 @@ class TestTSICEExplainer(unittest.TestCase):
         )
 
     def test_tsice_with_range(self):
-
         # load model
         input_length = 24
         forecast_horizon = 4
@@ -92,23 +90,22 @@ class TestTSICEExplainer(unittest.TestCase):
         )
 
         # compute explanations
-        explanation = explainer.explain_instance(
-            ts=self.ts_test.iloc[:80],
+        explanation = explainer.explain(
+            inputs=self.ts_test.iloc[:80],
         )
 
         # validate explanation structure
-        self.assertIn("data_x", explanation)
-        self.assertIn("feature_names", explanation)
-        self.assertIn("feature_values", explanation)
-        self.assertIn("signed_impact", explanation)
-        self.assertIn("total_impact", explanation)
-        self.assertIn("current_forecast", explanation)
-        self.assertIn("current_feature_values", explanation)
-        self.assertIn("perturbations", explanation)
-        self.assertIn("forecasts_on_perturbations", explanation)
+        self.assertIn("data_x", explanation.explanation)
+        self.assertIn("feature_names", explanation.explanation)
+        self.assertIn("feature_values", explanation.explanation)
+        self.assertIn("signed_impact", explanation.explanation)
+        self.assertIn("total_impact", explanation.explanation)
+        self.assertIn("current_forecast", explanation.explanation)
+        self.assertIn("current_feature_values", explanation.explanation)
+        self.assertIn("perturbations", explanation.explanation)
+        self.assertIn("forecasts_on_perturbations", explanation.explanation)
 
     def test_tsice_with_latest(self):
-
         # load model
         input_length = 24
         forecast_horizon = 4
@@ -159,15 +156,15 @@ class TestTSICEExplainer(unittest.TestCase):
         )
 
         # validate explanation structure
-        self.assertIn("data_x", explanation)
-        self.assertIn("feature_names", explanation)
-        self.assertIn("feature_values", explanation)
-        self.assertIn("signed_impact", explanation)
-        self.assertIn("total_impact", explanation)
-        self.assertIn("current_forecast", explanation)
-        self.assertIn("current_feature_values", explanation)
-        self.assertIn("perturbations", explanation)
-        self.assertIn("forecasts_on_perturbations", explanation)
+        self.assertIn("data_x", explanation.explanation)
+        self.assertIn("feature_names", explanation.explanation)
+        self.assertIn("feature_values", explanation.explanation)
+        self.assertIn("signed_impact", explanation.explanation)
+        self.assertIn("total_impact", explanation.explanation)
+        self.assertIn("current_forecast", explanation.explanation)
+        self.assertIn("current_feature_values", explanation.explanation)
+        self.assertIn("perturbations", explanation.explanation)
+        self.assertIn("forecasts_on_perturbations", explanation.explanation)
 
 
 if __name__ == "__main__":
