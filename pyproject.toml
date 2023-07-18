@@ -48,6 +48,9 @@ dev = [
     "wheel~=0.38.4",
     "xgboost==1.4.2"
 ]
+extras = [
+    "aix360 [default,tsice] @ https://github.com/Trusted-AI/AIX360/archive/refs/heads/master.zip"
+]
 
 [project.urls]
 homepage = "https://github.com/trustyai-explainability/trustyai-explainability-python"

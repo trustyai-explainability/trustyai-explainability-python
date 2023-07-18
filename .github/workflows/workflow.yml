@@ -27,12 +27,14 @@ jobs:
         run: |
           pip install .
           pip install ".[dev]"
+          pip install ".[extras]"
       - name: Lint
         run: |
           pylint --ignore-imports=yes $(find src/trustyai -type f -name "*.py")
       - name: Test with pytest
         run: |
           pytest -v -s tests/general
+          pytest -v -s tests/extras
           pytest -v -s tests/initialization --forked
       - name: Style
         run: |
