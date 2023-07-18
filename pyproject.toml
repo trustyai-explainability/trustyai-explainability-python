@@ -24,7 +24,7 @@ dependencies = [
     "Jpype1==1.4.1",
     "pyarrow==12.0.0",
     "matplotlib~=3.6.3",
-    "pandas<=1.4.3",
+    "pandas~=1.5.3",
     "numpy~=1.24.1",
     "jupyter-bokeh~=3.0.5"
 ]
@@ -49,7 +49,7 @@ dev = [
     "xgboost==1.4.2"
 ]
 extras = [
-    "aix360 [default,tsice] @ https://github.com/Trusted-AI/AIX360/archive/refs/tags/v0.3.0.zip"
+    "aix360 [default,tsice] @ https://github.com/Trusted-AI/AIX360/archive/refs/heads/master.zip"
 ]
 
 [project.urls]
