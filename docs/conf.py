@@ -22,7 +22,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # -- Project information -----------------------------------------------------
 
 project = 'TrustyAI'
-copyright = '2022, Rob Geada, Tommaso Teofili, Rui Vieira, Rebecca Whitworth, Daniele Zonca'
+copyright = '2023, Rob Geada, Tommaso Teofili, Rui Vieira, Rebecca Whitworth, Daniele Zonca'
 author = 'Rob Geada, Tommaso Teofili, Rui Vieira, Rebecca Whitworth, Daniele Zonca'
 
 # -- General configuration ---------------------------------------------------
@@ -71,8 +71,8 @@ html_theme_options = {
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
 
-html_favicon = '_static/artwork/trustyai_favicon.png'
-html_logo = '_static/artwork/trustyai_placeholder_logo.png'
+html_favicon = '_static/artwork/favicon.png'
+html_logo = '_static/artwork/logo.png'
 # numpydoc settings
 numpydoc_show_class_members = False
 
