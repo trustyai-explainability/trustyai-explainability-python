@@ -79,14 +79,14 @@ class TestTSICEExplainer(unittest.TestCase):
             explanation_window_start=10,
             explanation_window_length=observation_length,
             features_to_analyze=[
-                "mean",  # analyze mean metric from recent time series of lengh <observation_length>
+                "mean", "std"  # analyze mean metric from recent time series of lengh <observation_length>
             ],
             perturbers=[
                 BlockBootstrapPerturber(window_length=5, block_length=5, block_swap=2),
             ],
             input_length=input_length,
             forecast_lookahead=forecast_horizon,
-            n_perturbations=20,
+            n_perturbations=30,
         )
 
         # compute explanations
