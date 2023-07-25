@@ -103,9 +103,6 @@ class TSICEResults:
         # Display the plot
         plt.show()
 
-        # Return the figure
-        return fig
-
     def _plot_timeseries(self, ts, color="green", ax=None, name="time series"):
         showlegend = True
         if type(ts) == dict:
@@ -177,7 +174,6 @@ class TSICEResults:
         plt.tight_layout()
         plt.subplots_adjust(top=0.95)
         plt.show()
-        return fig
 
 
 class TSICEExplainer(TSICEExplainerAIX):
