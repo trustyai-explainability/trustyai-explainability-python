@@ -20,7 +20,7 @@ from typing import Union
 import pandas as pd
 
 
-class TSICEResults:
+class TSICEResults(ExplanationResults):
     """Wraps TSICE results. This object is returned by the :class:`~TSICEExplainer`,
     and provides a variety of methods to visualize and interact with the explanation.
     """
