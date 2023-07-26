@@ -1,3 +1,8 @@
+"""
+Wrapper module for TSSaliencyExplainer from aix360.
+Original at https://github.com/Trusted-AI/AIX360/
+"""
+
 from typing import Callable, List
 
 import pandas as pd
@@ -18,9 +23,8 @@ class TSSaliencyResults(ExplanationResults):
         self.explanation = explanation
 
     def as_dataframe(self) -> pd.DataFrame:
-        saliencies = self.explanation['saliency'].reshape(-1)
-        df = pd.DataFrame(saliencies, columns=self.explanation['feature_names'])
-        return df
+        saliencies = self.explanation["saliency"].reshape(-1)
+        return pd.DataFrame(saliencies, columns=self.explanation["feature_names"])
 
     def as_html(self) -> Styler:
         """Returns the explanation as an HTML table."""
@@ -29,13 +33,18 @@ class TSSaliencyResults(ExplanationResults):
 
     def plot(self):
         """Plot tssaliency explanation for the test point
-        Based on https://github.com/Trusted-AI/AIX360/blob/master/examples/tssaliency/tssaliency_univariate_demo.ipynb"""
-        max_abs = np.max(np.abs(self.explanation['saliency']))
+        Based on https://github.com/Trusted-AI/AIX360/blob/master/examples/tssaliency"""
+        max_abs = np.max(np.abs(self.explanation["saliency"]))
 
-        plt.imshow(self.explanation['saliency'][np.newaxis, :], aspect='auto', cmap='seismic', vmin=-max_abs,
-                   vmax=max_abs)
+        plt.imshow(
+            self.explanation["saliency"][np.newaxis, :],
+            aspect="auto",
+            cmap="seismic",
+            vmin=-max_abs,
+            vmax=max_abs,
+        )
         plt.colorbar()
-        plt.plot(self.explanation['input_data'])
+        plt.plot(self.explanation["input_data"])
         plt.show()
 
 
@@ -44,16 +53,16 @@ class TSSaliencyExplainer(TSSaliencyExplainerAIX):
     Wrapper for TSSaliencyExplainer from aix360.
     """
 
-    def __init__(
-            self,
-            model: Callable,
-            input_length: int,
-            feature_names: List[str],
-            base_value: List[float] = None,
-            n_samples: int = 50,
-            gradient_samples: int = 25,
-            gradient_function: Callable = None,
-            random_seed: int = 22,
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        model: Callable,
+        input_length: int,
+        feature_names: List[str],
+        base_value: List[float] = None,
+        n_samples: int = 50,
+        gradient_samples: int = 25,
+        gradient_function: Callable = None,
+        random_seed: int = 22,
     ):
         super().__init__(
             model=model,
