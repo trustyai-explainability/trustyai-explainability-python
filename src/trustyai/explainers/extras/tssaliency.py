@@ -31,20 +31,32 @@ class TSSaliencyResults(ExplanationResults):
         dataframe = self.as_dataframe()
         return dataframe.style
 
-    def plot(self):
+    def plot(self, index: int, cpos, window: int = None):
         """Plot tssaliency explanation for the test point
         Based on https://github.com/Trusted-AI/AIX360/blob/master/examples/tssaliency"""
-        max_abs = np.max(np.abs(self.explanation["saliency"]))
+        if window:
+            scores = (
+                np.convolve(
+                    self.explanation["saliency"].flatten(), np.ones(window), mode="same"
+                )
+                / window
+            )
+        else:
+            scores = self.explanation["saliency"]
 
+        vmax = np.max(np.abs(self.explanation["saliency"]))
+
+        plt.figure(layout="constrained")
         plt.imshow(
-            self.explanation["saliency"][np.newaxis, :],
-            aspect="auto",
-            cmap="seismic",
-            vmin=-max_abs,
-            vmax=max_abs,
+            scores[np.newaxis, :], aspect="auto", cmap="seismic", vmin=-vmax, vmax=vmax
         )
         plt.colorbar()
         plt.plot(self.explanation["input_data"])
+        instance = self.explanation["instance_prediction"]
+        plt.title(
+            "Time Series Saliency Explanation Plot for test point"
+            f" i={index} with P(Y={cpos})= {instance}"
+        )
         plt.show()
 
 
