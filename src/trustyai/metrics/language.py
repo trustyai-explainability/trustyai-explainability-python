@@ -1,7 +1,8 @@
 """"Group fairness metrics"""
 from dataclasses import dataclass
+
 # pylint: disable = import-error
-from typing import List, Optional, Any, Union, Callable
+from typing import List, Optional, Union, Callable
 
 from org.kie.trustyai.metrics.language.wer import (
     WordErrorRate as _WordErrorRate,
@@ -13,6 +14,8 @@ from opennlp.tools.tokenize import Tokenizer
 
 @dataclass
 class TokenSequenceAlignmentCounters:
+    """Token Sequence Alignment Counters"""
+
     substitutions: int
     insertions: int
     deletions: int
@@ -30,24 +33,23 @@ class WordErrorRateResult:
 
     @staticmethod
     def convert(wer_result: _WordErrorRateResult):
+        """Converts a Java WordErrorRateResult to a Python WordErrorRateResult"""
         wer = wer_result.getWordErrorRate()
         aligned_reference = wer_result.getAlignedReferenceString()
         aligned_input = wer_result.getAlignedInputString()
         alignment_counters = wer_result.getAlignmentCounters()
-        return WordErrorRateResult(wer=wer,
-                                   aligned_reference=aligned_reference,
-                                   aligned_input=aligned_input,
-                                   alignment_counters=alignment_counters)
+        return WordErrorRateResult(
+            wer=wer,
+            aligned_reference=aligned_reference,
+            aligned_input=aligned_input,
+            alignment_counters=alignment_counters,
+        )
 
 
-"""Word Error Rate metric
-
-This metric calculates the Word Error Rate between two strings.
-"""
 def word_error_rate(
-        reference: str,
-        hypothesis: str,
-        tokenizer: Optional[Union[Tokenizer, Callable[[str], List[str]]]] = None,
+    reference: str,
+    hypothesis: str,
+    tokenizer: Optional[Union[Tokenizer, Callable[[str], List[str]]]] = None,
 ) -> WordErrorRateResult:
     """Calculate Word Error Rate between reference and hypothesis strings"""
     if not tokenizer:
@@ -58,7 +60,9 @@ def word_error_rate(
         tokenized_reference = tokenizer(reference)
         tokenized_hypothesis = tokenizer(hypothesis)
         _wer = _WordErrorRate()
-        return WordErrorRateResult.convert(_wer.calculate(tokenized_reference, tokenized_hypothesis))
+        return WordErrorRateResult.convert(
+            _wer.calculate(tokenized_reference, tokenized_hypothesis)
+        )
     else:
         raise ValueError("Unsupported tokenizer")
     return WordErrorRateResult.convert(_wer.calculate(reference, hypothesis))
