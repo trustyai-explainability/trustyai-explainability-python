@@ -40,6 +40,10 @@ class WordErrorRateResult:
                                    alignment_counters=alignment_counters)
 
 
+"""Word Error Rate metric
+
+This metric calculates the Word Error Rate between two strings.
+"""
 def word_error_rate(
         reference: str,
         hypothesis: str,
