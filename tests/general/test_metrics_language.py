@@ -20,7 +20,7 @@ INPUTS = [
 
 def test_default_tokenizer():
     """Test default tokenizer"""
-    results = [4/7, 1/26, 1]
+    results = [4 / 7, 1 / 26, 1]
     for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
         wer = word_error_rate(reference, hypothesis).wer
         assert math.isclose(wer, results[i], rel_tol=tolerance), \
@@ -31,18 +31,35 @@ def test_commons_stringtokenizer():
     """Test Apache Commons StringTokenizer"""
     from trustyai.utils.tokenizers import CommonsStringTokenizer
     results = [8 / 12., 3 / 66., 1.0]
+
     def tokenizer(text: str) -> List[str]:
         return CommonsStringTokenizer(text).getTokenList()
+
     for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
         wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).wer
         assert math.isclose(wer, results[i], rel_tol=tolerance), \
             f"WER for {reference}, {hypothesis} was {wer}, expected ~{results[i]}."
+
 
 def test_opennlp_tokenizer():
     """Test Apache Commons StringTokenizer"""
     from trustyai.utils.tokenizers import OpenNLPTokenizer
     results = [9 / 14., 3 / 78., 1.0]
     tokenizer = OpenNLPTokenizer()
+    for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
+        wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).wer
+        assert math.isclose(wer, results[i], rel_tol=tolerance), \
+            f"WER for {reference}, {hypothesis} was {wer}, expected ~{results[i]}."
+
+
+def test_python_tokenizer():
+    """Test pure Python whitespace tokenizer"""
+
+    results = [3 / 4., 3 / 66., 1.0]
+
+    def tokenizer(text: str) -> List[str]:
+        return text.split(" ")
+
     for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
         wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).wer
         assert math.isclose(wer, results[i], rel_tol=tolerance), \
