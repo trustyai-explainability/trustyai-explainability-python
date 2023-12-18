@@ -22,7 +22,7 @@ def test_default_tokenizer():
     """Test default tokenizer"""
     results = [4 / 7, 1 / 26, 1]
     for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
-        wer = word_error_rate(reference, hypothesis).wer
+        wer = word_error_rate(reference, hypothesis).value
         assert math.isclose(wer, results[i], rel_tol=tolerance), \
             f"WER for {reference}, {hypothesis} was {wer}, expected ~{results[i]}."
 
@@ -36,7 +36,7 @@ def test_commons_stringtokenizer():
         return CommonsStringTokenizer(text).getTokenList()
 
     for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
-        wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).wer
+        wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).value
         assert math.isclose(wer, results[i], rel_tol=tolerance), \
             f"WER for {reference}, {hypothesis} was {wer}, expected ~{results[i]}."
 
@@ -47,7 +47,7 @@ def test_opennlp_tokenizer():
     results = [9 / 14., 3 / 78., 1.0]
     tokenizer = OpenNLPTokenizer()
     for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
-        wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).wer
+        wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).value
         assert math.isclose(wer, results[i], rel_tol=tolerance), \
             f"WER for {reference}, {hypothesis} was {wer}, expected ~{results[i]}."
 
@@ -61,6 +61,6 @@ def test_python_tokenizer():
         return text.split(" ")
 
     for i, (reference, hypothesis) in enumerate(zip(REFERENCES, INPUTS)):
-        wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).wer
+        wer = word_error_rate(reference, hypothesis, tokenizer=tokenizer).value
         assert math.isclose(wer, results[i], rel_tol=tolerance), \
             f"WER for {reference}, {hypothesis} was {wer}, expected ~{results[i]}."
