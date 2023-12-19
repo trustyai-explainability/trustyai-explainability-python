@@ -80,13 +80,14 @@ class LevenshteinResult:
             axes.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
         )
 
-        for i in range(len(self.hypothesis)):
-            for j in range(len(self.reference)):
+        nrows, ncols = self.matrix.shape
+        for i in range(nrows):
+            for j in range(ncols):
                 color = (
                     "white" if self.matrix[i, j] < self.matrix.max() / 2 else "black"
                 )
-                _ = axes.text(
-                    j, i, self.matrix[i, j], ha="center", va="center", color=color
+                axes.text(
+                    j, i, int(self.matrix[i, j]), ha="center", va="center", color=color
                 )
 
         plt.show()
