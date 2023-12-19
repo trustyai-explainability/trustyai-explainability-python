@@ -1,8 +1,7 @@
 """"Language metrics"""
-from trustyai import _default_initializer  # pylint: disable=unused-import
+# pylint: disable = import-error
 from dataclasses import dataclass
 
-# pylint: disable = import-error
 from typing import List, Optional, Union, Callable
 
 from org.kie.trustyai.metrics.language.levenshtein import (
@@ -10,7 +9,10 @@ from org.kie.trustyai.metrics.language.levenshtein import (
     ErrorRateResult as _ErrorRateResult,
 )
 from opennlp.tools.tokenize import Tokenizer
+from trustyai import _default_initializer  # pylint: disable=unused-import
+
 from .distance import LevenshteinCounters
+
 
 @dataclass
 class ErrorRateResult:
