@@ -1,7 +1,7 @@
-""""Group fairness metrics"""
+""""Language metrics"""
+# pylint: disable = import-error
 from dataclasses import dataclass
 
-# pylint: disable = import-error
 from typing import List, Optional, Union, Callable
 
 from org.kie.trustyai.metrics.language.levenshtein import (
@@ -9,16 +9,9 @@ from org.kie.trustyai.metrics.language.levenshtein import (
     ErrorRateResult as _ErrorRateResult,
 )
 from opennlp.tools.tokenize import Tokenizer
+from trustyai import _default_initializer  # pylint: disable=unused-import
 
-
-@dataclass
-class LevenshteinCounters:
-    """LevenshteinCounters Counters"""
-
-    substitutions: int
-    insertions: int
-    deletions: int
-    correct: int
+from .distance import LevenshteinCounters
 
 
 @dataclass
