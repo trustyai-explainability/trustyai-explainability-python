@@ -42,7 +42,7 @@ argument, indicating what function we are trying to explain:
 	:lineno-start: 7
 
 	from trustyai.model import Model
-	model = Model(predict_fun=linear_model)
+	model = Model(fn=linear_model)
 
 Finally, we'll establish the data point we are explaining by using the the input and output of our
 model, which is what TrustyAI uses to produce explanations:
@@ -82,7 +82,7 @@ Now we can produce and display the explanations:
 	:lineno-start: 17
 
 	lime_explanation = lime_explainer.explain(
-		inputs = model_input
+		inputs = model_input,
 		outputs = model_output, 
 		model = model)
 	print(lime_explanation.as_dataframe())
