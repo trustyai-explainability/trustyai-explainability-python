@@ -2,188 +2,148 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.12] - 2023-04-24
-
+## [unreleased]
 
 ### Bug Fixes
 
+- Fix typo in tutorial.rst (#193)
 
-- Fixed broken gridding after bokeh 3.0.x update ([#153](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/153))
+
+
+### Features
+
+- Publish using PyPi Trusted Providers (#183)
+
+## [0.3.0] - 2023-08-01
+
+## [sprint-1.28] - 2023-05-22
+
+## [0.2.12] - 2023-04-25
+
+### Bug Fixes
+
+- Fixed broken gridding after bokeh 3.0.x update (#153)
 
 ## [0.2.11] - 2023-04-24
 
-
 ### Bug Fixes
 
-
-- Fixed null pointer error for Numpy inputs to Tyrus ([#149](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/149))
+- Fixed null pointer error for Numpy inputs to Tyrus (#149)
 
 ## [0.2.10] - 2023-04-13
 
 ## [0.2.9] - 2023-02-23
 
+### FAI-825
 
-### [FAI-825](https://issues.redhat.com/browse/FAI-825)
+- Add feature and output name specification to models (#130)
 
+### FAI-841
 
-- Add feature and output name specification to models ([#130](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/130))
+- Python benchmarks failing since namespace migration (#82)
 
+### FAI-849
 
-### [FAI-841](https://issues.redhat.com/browse/FAI-841)
+- Tyrus dashboard (#97)
 
+### FAI-855
 
-- Python benchmarks failing since namespace migration ([#82](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/82))
+- Move arrow converters into exp-core (#101)
 
+### FAI-863
 
-### [FAI-849](https://issues.redhat.com/browse/FAI-849)
+- XAI-Bench (#109)
+- XAIbench submodule tracking main branch, fork of xai-bench (#111)
 
+### FAI-864
 
-- Tyrus dashboard ([#97](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/97))
+- Fix failing RtD build after to pip migration (#100)
 
+### FAI-867
 
-### [FAI-855](https://issues.redhat.com/browse/FAI-855)
+- Add Java 9+ Arrow compatibility flags (#103)
 
+### FAI-879
 
-- Move arrow converters into exp-core ([#101](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/101))
+- Sync version with exp-core (#107)
 
+### FAI-880
 
-### [FAI-863](https://issues.redhat.com/browse/FAI-863)
+- Move explainers into separate files (#110)
 
+### FAI-881
 
-- XAI-Bench ([#109](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/109))
-- XAIbench submodule tracking main branch, fork of xai-bench ([#111](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/111))
+- Upgrade Pylint version (#112)
 
+### FAI-882
 
-### [FAI-864](https://issues.redhat.com/browse/FAI-864)
+- Add kwargs to explainers (#113)
 
+### FAI-884
 
-- Fix failing RtD build after to pip migration ([#100](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/100))
+- Add SHAP background generators to bindings (#117)
 
+### FAI-886
 
-### [FAI-867](https://issues.redhat.com/browse/FAI-867)
+- Unified input/output types, conversion functions, and docstrings (#116)
 
+### FAI-887
 
-- Add Java 9+ Arrow compatibility flags ([#103](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/103))
+- Generalize ExplanationResults (#115)
 
+### FAI-889
 
-### [FAI-879](https://issues.redhat.com/browse/FAI-879)
+- Allow non-string categorical feature domains (#118)
 
+### FAI-892
 
-- Sync version with exp-core ([#107](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/107))
+- Tyrus TempDirectory (#121)
 
+### FAI-893
 
-### [FAI-880](https://issues.redhat.com/browse/FAI-880)
+- Make test plots non-blocking by default (#120)
 
+### FAI-896
 
-- Move explainers into separate files ([#110](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/110))
+- Doc standardization and cleanup (#126)
 
+### FAI-897
 
-### [FAI-881](https://issues.redhat.com/browse/FAI-881)
+- Add bokeh dependency (#123)
 
+### FAI-900
 
-- Upgrade Pylint version ([#112](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/112))
+- Added feature domain argument to counterfactuals (#128)
 
+### FAI-901
 
-### [FAI-882](https://issues.redhat.com/browse/FAI-882)
+- Increased input/ouput conversion flexibility (#127)
 
+### FAI-903
 
-- Add kwargs to explainers ([#113](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/113))
+- Add group fairness Python bindings (#129)
 
+### FAI-911
 
-### [FAI-884](https://issues.redhat.com/browse/FAI-884)
+- Improve API to declare selections in Python fairness (#132)
 
+### FAI-917
 
-- Add SHAP background generators to bindings ([#117](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/117))
+- Add error message capturing within Python models (#137)
 
+### FAI-926
 
-### [FAI-886](https://issues.redhat.com/browse/FAI-886)
+- Implement custom counterfactual goal criteria (#140)
 
+### FAI-952
 
-- Unified input/output types, conversion functions, and docstrings ([#116](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/116))
+- Change dependencies to align with ODH workbench images (#143)
 
-
-### [FAI-887](https://issues.redhat.com/browse/FAI-887)
-
-
-- Generalize ExplanationResults ([#115](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/115))
-
-
-### [FAI-889](https://issues.redhat.com/browse/FAI-889)
-
-
-- Allow non-string categorical feature domains ([#118](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/118))
-
-
-### [FAI-892](https://issues.redhat.com/browse/FAI-892)
-
-
-- Tyrus TempDirectory ([#121](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/121))
-
-
-### [FAI-893](https://issues.redhat.com/browse/FAI-893)
-
-
-- Make test plots non-blocking by default ([#120](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/120))
-
-
-### [FAI-896](https://issues.redhat.com/browse/FAI-896)
-
-
-- Doc standardization and cleanup ([#126](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/126))
-
-
-### [FAI-897](https://issues.redhat.com/browse/FAI-897)
-
-
-- Add bokeh dependency ([#123](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/123))
-
-
-### [FAI-900](https://issues.redhat.com/browse/FAI-900)
-
-
-- Added feature domain argument to counterfactuals ([#128](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/128))
-
-
-### [FAI-901](https://issues.redhat.com/browse/FAI-901)
-
-
-- Increased input/ouput conversion flexibility ([#127](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/127))
-
-
-### [FAI-903](https://issues.redhat.com/browse/FAI-903)
-
-
-- Add group fairness Python bindings ([#129](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/129))
-
-
-### [FAI-911](https://issues.redhat.com/browse/FAI-911)
-
-
-- Improve API to declare selections in Python fairness ([#132](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/132))
-
-
-### [FAI-917](https://issues.redhat.com/browse/FAI-917)
-
-
-- Add error message capturing within Python models ([#137](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/137))
-
-
-### [FAI-926](https://issues.redhat.com/browse/FAI-926)
-
-
-- Implement custom counterfactual goal criteria ([#140](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/140))
-
-
-### [FAI-952](https://issues.redhat.com/browse/FAI-952)
-
-
-- Change dependencies to align with ODH workbench images ([#143](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/143))
+## [test-pipeline-1] - 2022-10-12
 
 ## [0.2.5] - 2022-09-14
 
-
 ### Bug Fixes
-
 
 - Fixed linting, adding doc build reqs to requirements-dev
 
@@ -232,9 +192,7 @@ All notable changes to this project will be documented in this file.
 - Fixed broken output casting for 1d output arrays
 
 
-
-### [FAI-797b](https://issues.redhat.com/browse/FAI-797b)
-
+### FAI-797b
 
 - Include doc link in README
 
@@ -242,9 +200,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.3] - 2022-05-12
 
-
 ### Bug Fixes
-
 
 - Fixed missing final newline
 
@@ -255,9 +211,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.0] - 2022-04-22
 
-
 ### Bug Fixes
-
 
 - Fixed linting issues
 
@@ -266,9 +220,7 @@ All notable changes to this project will be documented in this file.
 - Fixed line-too-long linting issue in model/__init__
 
 
-
 ### Refactor
-
 
 - Refactored arrow inclusion; mvn pulls dependencies, then includes precompiled arrowconverters jar
 
