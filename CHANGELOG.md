@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2024-01-15
+
+- feat: Publish using PyPi Trusted Providers (#[183](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/183))
+- Update README.md ([#184](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/184))
+- Update pyarrow and pillow dependencies ([#187](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/187))
+- Add WER metric ([#189](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/189))
+- Change WER signature ([#190](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/190))
+- Add Levenshtein distance ([#191](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/191))
+- fix typo in tutorial.rst ([#193](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/193))
+
+## [0.3.0] - 2023-08-01
+
+This is the first version of Python TrustyAI to include support for external explainability algorithms.
+
+In this release we've included AIX360's `TSICE`, `TSLime` and `TSSaliency` time-series explainers.
+To use these explainers TrustyAI's extra dependencies must be installed with `pip install trustyai[extras]`.
+
+- Refactor TrustyAI fairness metrics namespaces ([#156](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/156))
+- Upgrade pyarrow dependency ([#159](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/159))
+- Initial support for external algorithms ([#160](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/160))
+- Replace deprecated requirements file ([#166](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/166))
+- Update date, logo and favicon ([#168](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/168))
+- Support TSICE explanations as plots ([#169](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/169))
+- Add TSSaliency to Python TrustyAI ([#172](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/172))
+- Add TSLime explainer by ([#174](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/174))
+- Update TSSaliency plots to include smoothing ([#176](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/176))
+- Fix invalid Development Status ([#178](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/178))
+- Update direct dependency to released dependency ([#179](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/179))
+
+
 ## [0.2.12] - 2023-04-24
 
 
