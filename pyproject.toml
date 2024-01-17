@@ -53,6 +53,16 @@ extras = [
     "aix360[default,tsice,tslime,tssaliency]==0.3.0"
 ]
 
+detoxify = [
+    "transformers~=4.36.2",
+    "datasets",
+    "scipy",
+    "torch",
+    "iter-tools",
+    "evaluate",
+    "trl"
+]
+
 [project.urls]
 homepage = "https://github.com/trustyai-explainability/trustyai-explainability-python"
 documentation = "https://trustyai-explainability-python.readthedocs.io/en/latest/"
