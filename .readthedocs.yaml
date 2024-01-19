@@ -26,6 +26,7 @@ build:
 # install the package
 python:
   install:
+    - requirements: docs/requirements.txt
     - method: pip
       path: .
       extra_requirements:
