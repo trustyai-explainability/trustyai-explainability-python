@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2024-02-02
+
+- Add HAP/detoxify module to Python TrustyAI ([#197](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/197)) 
+- Update CI Ubuntu version from 20.04 to 22.04 ([#199](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/199)) 
+
 ## [0.4.0] - 2024-01-15
 
 - feat: Publish using PyPi Trusted Providers (#[183](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/183))

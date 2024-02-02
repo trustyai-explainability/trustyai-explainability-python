@@ -1,6 +1,6 @@
 [project]
 name = "trustyai"
-version = "0.4.0"
+version = "0.5.0"
 description = "Python bindings to the TrustyAI explainability library."
 authors = [{ name = "Rui Vieira", email = "rui@redhat.com" }]
 license = { text = "Apache License Version 2.0" }
@@ -11,7 +11,7 @@ keywords = ["trustyai", "xai", "explainability", "ml"]
 
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Java",
