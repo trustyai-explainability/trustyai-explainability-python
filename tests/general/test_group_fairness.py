@@ -25,6 +25,8 @@ INCOME_DF_BIASED = pd.read_csv(os.path.join(TEST_DIR, "data/income-biased.zip"),
 INCOME_DF_UNBIASED = pd.read_csv(
     os.path.join(TEST_DIR, "data/income-unbiased.zip"), index_col=False)
 
+AIF_DF = pd.read_csv(os.path.join(TEST_DIR, "data/data.csv"))
+
 XGB_MODEL = joblib.load(os.path.join(TEST_DIR, "models/income-xgd-biased.joblib"))
 
 
@@ -82,6 +84,20 @@ def test_statistical_parity_difference_income_numpy():
     assert score == approx(-0.15, abs=0.01)
 
 
+def test_statistical_parity_difference_AIF():
+    """Test Statistical Parity Difference (AIF data)"""
+
+    df = AIF_DF.copy()
+
+    privileged = df[df.sex == 1]
+    unprivileged = df[df.sex == 0]
+    favorable = output("income", dtype="number", value=0)
+    score = statistical_parity_difference(privileged=privileged,
+                                          unprivileged=unprivileged,
+                                          favorable=[favorable])
+    assert score == approx(0.19643287553870947, abs=1e-5)
+
+
 def test_statistical_parity_difference_model():
     """Test Statistical Parity Difference (XGBoost model)"""
 
@@ -131,6 +147,20 @@ def test_disparate_impact_ratio_income_numpy():
                                    favorable=[favorable],
                                    feature_names=['age', 'race', 'gender', 'income'])
     assert score == approx(0.4, abs=0.05)
+
+
+def test_statistical_parity_difference_AIF():
+    """Test Statistical Parity Difference (AIF data)"""
+
+    df = AIF_DF.copy()
+
+    privileged = df[df.sex == 1]
+    unprivileged = df[df.sex == 0]
+    favorable = output("income", dtype="number", value=0)
+    score = statistical_parity_difference(privileged=privileged,
+                                          unprivileged=unprivileged,
+                                          favorable=[favorable])
+    assert score == approx(0.19643287553870947, abs=1e-5)
 
 
 def test_average_odds_difference():
