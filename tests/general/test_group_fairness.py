@@ -149,18 +149,18 @@ def test_disparate_impact_ratio_income_numpy():
     assert score == approx(0.4, abs=0.05)
 
 
-def test_statistical_parity_difference_AIF():
-    """Test Statistical Parity Difference (AIF data)"""
+def test_disparate_impact_ratio_AIF():
+    """Test Disparate Impact Ratio (AIF data)"""
 
     df = AIF_DF.copy()
 
     privileged = df[df.sex == 1]
     unprivileged = df[df.sex == 0]
     favorable = output("income", dtype="number", value=0)
-    score = statistical_parity_difference(privileged=privileged,
-                                          unprivileged=unprivileged,
-                                          favorable=[favorable])
-    assert score == approx(0.19643287553870947, abs=1e-5)
+    score = disparate_impact_ratio(privileged=privileged,
+                                   unprivileged=unprivileged,
+                                   favorable=[favorable])
+    assert score == approx(1.28, abs=1e-2)
 
 
 def test_average_odds_difference():
