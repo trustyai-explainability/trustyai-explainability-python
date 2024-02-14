@@ -63,6 +63,10 @@ detoxify = [
     "trl"
 ]
 
+api = [
+    "kubernetes"
+]
+
 [project.urls]
 homepage = "https://github.com/trustyai-explainability/trustyai-explainability-python"
 documentation = "https://trustyai-explainability-python.readthedocs.io/en/latest/"

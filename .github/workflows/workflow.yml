@@ -28,6 +28,7 @@ jobs:
           pip install .
           pip install ".[dev]"
           pip install ".[extras]"
+          pip install ".[api]"
       - name: Lint
         run: |
           pylint --ignore-imports=yes $(find src/trustyai -type f -name "*.py")
