@@ -14,6 +14,7 @@ from trustyai.explainers import SHAPExplainer
 from trustyai.model import feature, Model
 from trustyai.utils.data_conversions import numpy_to_prediction_object
 from trustyai.utils import TestModels
+from trustyai.visualizations import plot
 
 
 def test_no_variance_one_output():
@@ -64,10 +65,10 @@ def shap_plots(block):
     shap_explainer = SHAPExplainer(background=background)
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
-    explanation.plot(block=block)
-    explanation.plot(block=block, render_bokeh=True)
-    explanation.plot(block=block, output_name='output-0')
-    explanation.plot(block=block, output_name='output-0', render_bokeh=True)
+    plot(explanation, block=block)
+    plot(explanation, block=block, render_bokeh=True)
+    plot(explanation, block=block, output_name='output-0')
+    plot(explanation, block=block, output_name='output-0', render_bokeh=True)
 
 
 @pytest.mark.block_plots
@@ -152,7 +153,7 @@ def test_shap_edit_plot():
     explanation = shap_explainer.explain(inputs=to_explain, outputs=model(to_explain), model=model)
 
     plt.figure(figsize=(32,2))
-    explanation.plot(call_show=False)
+    plot(explanation, call_show=False)
     plt.ylim(0, 123)
     plt.show()
 

@@ -21,6 +21,8 @@ from bokeh.models import (
 from bokeh.plotting import figure
 
 from trustyai.explainers import SHAPExplainer, LimeExplainer
+from trustyai.visualizations.shap import SHAPViz
+from trustyai.visualizations.lime import LimeViz
 from trustyai.utils._visualisation import bold_red_html, bold_green_html, output_html
 from trustyai.utils._tyrus_info_text import LIME_TEXT, SHAP_TEXT, CF_TEXT
 from trustyai.utils.data_conversions import (
@@ -318,8 +320,10 @@ class Tyrus:
     def _get_plots(self):
         """Grab all the plots and combine into one single Panel"""
         cf_figures = self._get_byproduct_cf_plot()
-        lime_figures = self.lime_saliencies._get_bokeh_plot_dict()
-        shap_figures = self.shap_saliencies._get_bokeh_plot_dict()
+        lime_figures = LimeViz()._get_bokeh_plot_dict(explanations=self.lime_saliencies)
+        shap_figures = SHAPViz()._get_bokeh_plot_dict(
+            explanations=self.shap_saliencies,
+        )
         output_names = list(cf_figures.keys())
         tabs = []
         for k in output_names:
