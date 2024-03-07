@@ -10,7 +10,6 @@ from org.kie.trustyai.metrics.language.distance import (
 )
 from opennlp.tools.tokenize import Tokenizer
 import numpy as np
-import matplotlib.pyplot as plt
 from trustyai import _default_initializer  # pylint: disable=unused-import
 
 
@@ -61,36 +60,6 @@ class LevenshteinResult:
             reference=reference,
             hypothesis=hypothesis,
         )
-
-    def plot(self):
-        """Plot the Levenshtein distance matrix"""
-        cmap = plt.cm.viridis
-
-        _, axes = plt.subplots()
-        cax = axes.imshow(self.matrix, cmap=cmap, interpolation="nearest")
-
-        plt.colorbar(cax)
-
-        axes.set_xticks(np.arange(len(self.reference)))
-        axes.set_yticks(np.arange(len(self.hypothesis)))
-        axes.set_xticklabels(self.reference)
-        axes.set_yticklabels(self.hypothesis)
-
-        plt.setp(
-            axes.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
-        )
-
-        nrows, ncols = self.matrix.shape
-        for i in range(nrows):
-            for j in range(ncols):
-                color = (
-                    "white" if self.matrix[i, j] < self.matrix.max() / 2 else "black"
-                )
-                axes.text(
-                    j, i, int(self.matrix[i, j]), ha="center", va="center", color=color
-                )
-
-        plt.show()
 
 
 def levenshtein(

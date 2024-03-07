@@ -9,6 +9,7 @@ from trustyai.explainers import LimeExplainer
 from trustyai.utils import TestModels
 from trustyai.model import feature, Model, simple_prediction
 from trustyai.metrics import ExplainabilityMetrics
+from trustyai.visualizations import plot
 
 from org.kie.trustyai.explainability.local import (
     LocalExplanationException,
@@ -101,10 +102,10 @@ def lime_plots(block):
     outputs = model.predict([features])[0].outputs
 
     explanation = lime_explainer.explain(inputs=features, outputs=outputs, model=model)
-    explanation.plot(block=block)
-    explanation.plot(block=block, render_bokeh=True)
-    explanation.plot(block=block, output_name="sum-but0")
-    explanation.plot(block=block, output_name="sum-but0", render_bokeh=True)
+    plot(explanation, block=block)
+    plot(explanation, block=block, render_bokeh=True)
+    plot(explanation, block=block, output_name="sum-but0")
+    plot(explanation, block=block, output_name="sum-but0", render_bokeh=True)
 
 
 @pytest.mark.block_plots

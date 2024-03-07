@@ -8,6 +8,7 @@ from sklearn.datasets import make_classification
 from trustyai.explainers import PDPExplainer
 from trustyai.model import Model
 from trustyai.utils import TestModels
+from trustyai.visualizations import plot
 
 
 def create_random_df():
@@ -56,8 +57,8 @@ def pdp_plots(block):
     pdp_explainer = PDPExplainer()
     explanation = pdp_explainer.explain(model, data)
 
-    explanation.plot(block=block)
-    explanation.plot(block=block, output_name='output-0')
+    plot(explanation, block=block)
+    plot(explanation, block=block, output_name='output-0')
 
 
 @pytest.mark.block_plots
