@@ -65,7 +65,7 @@ def test_categorical_object_domain_list():
     jdomain = feature_domain(domain)
     assert str(jdomain.getClass().getSimpleName()) == "ObjectFeatureDomain"
     assert jdomain.getCategories().size() == 2
-    assert jdomain.getCategories().containsAll(domain)
+    assert sorted([o.getObject() for o in jdomain.getCategories()]) == sorted(domain)
 
 
 def test_categorical_object_domain_list_2():
@@ -74,7 +74,7 @@ def test_categorical_object_domain_list_2():
     jdomain = feature_domain(domain)
     assert str(jdomain.getClass().getSimpleName()) == "ObjectFeatureDomain"
     assert jdomain.getCategories().size() == 2
-    assert jdomain.getCategories().containsAll(domain)
+    assert sorted([o.getObject() for o in jdomain.getCategories()]) == sorted(domain)
 
 
 def test_empty_domain():
