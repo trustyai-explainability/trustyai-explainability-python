@@ -1,4 +1,5 @@
 """Data Converters between Python and Java"""
+
 # pylint: disable = import-error, line-too-long, trailing-whitespace, unused-import, cyclic-import
 # pylint: disable = consider-using-f-string, invalid-name, wrong-import-order
 import warnings
@@ -7,12 +8,13 @@ from itertools import filterfalse
 
 import trustyai.model
 from org.kie.trustyai.explainability.model import (
-    Dataframe,
     Feature,
     Output,
     PredictionInput,
     PredictionOutput,
 )
+from org.kie.trustyai.explainability.model.dataframe import Dataframe
+
 from org.kie.trustyai.explainability.model.domain import (
     FeatureDomain,
     EmptyFeatureDomain,
