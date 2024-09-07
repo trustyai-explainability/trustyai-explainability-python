@@ -111,7 +111,7 @@ if __SUCCESSFUL_IMPORT:
             expert_models = []
             for expert in experts:
                 # Load TMaRCO models
-                if (expert == "trustyai/gplus" or expert == "trustyai/gminus"):
+                if expert in ["trustyai/gplus", "trustyai/gminus"]:
                     expert = BartForConditionalGeneration.from_pretrained(
                         expert,
                         forced_bos_token_id=self.tokenizer.bos_token_id,
