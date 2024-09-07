@@ -104,7 +104,9 @@ if __SUCCESSFUL_IMPORT:
                     "cuda" if torch.cuda.is_available() else "cpu"
                 )
 
-        def load_models(self, experts: list[str] = None, expert_weights: list = None): # pylint: disable=unsubscriptable-object
+        def load_models(
+            self, experts: list[str] = None, expert_weights: list = None
+        ):  # pylint: disable=unsubscriptable-object
             """Load expert models."""
             if expert_weights is not None:
                 self.expert_weights = expert_weights
@@ -122,14 +124,14 @@ if __SUCCESSFUL_IMPORT:
                     expert = AutoModelForMaskedLM.from_pretrained(
                         expert,
                         forced_bos_token_id=self.tokenizer.bos_token_id,
-                        device_map = "auto"
+                        device_map="auto",
                     )
                 # Load HuggingFace models
                 else:
                     expert = AutoModelForCausalLM.from_pretrained(
                         expert,
                         forced_bos_token_id=self.tokenizer.bos_token_id,
-                        device_map = "auto"
+                        device_map="auto",
                     )
                 expert_models.append(expert)
             self.experts = expert_models
