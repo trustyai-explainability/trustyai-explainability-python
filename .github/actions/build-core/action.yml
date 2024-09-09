@@ -3,6 +3,11 @@ description: Clone and build TrustyAI-Explainability library (shaded in a single
 runs:
   using: "composite"
   steps:
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '17'
     - name: Build explainability-core
       shell: bash
       run: |
