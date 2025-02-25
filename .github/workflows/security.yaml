@@ -8,14 +8,24 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scanner in repo mode
+      - name: Trivy scan
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          scan-type: "fs"
-          ignore-unfixed: true
-          format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'MEDIUM,HIGH,CRITICAL'
+          exit-code: '0'
+          ignore-unfixed: false
+
+      - name: Update Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
