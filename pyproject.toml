@@ -5,7 +5,7 @@ description = "Python bindings to the TrustyAI explainability library."
 authors = [{ name = "Rui Vieira", email = "rui@redhat.com" }]
 license = { text = "Apache License Version 2.0" }
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 
 keywords = ["trustyai", "xai", "explainability", "ml"]
 
