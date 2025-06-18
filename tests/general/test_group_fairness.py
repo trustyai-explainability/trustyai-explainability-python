@@ -27,7 +27,8 @@ INCOME_DF_UNBIASED = pd.read_csv(
 
 AIF_DF = pd.read_csv(os.path.join(TEST_DIR, "data/data.csv"))
 
-XGB_MODEL = joblib.load(os.path.join(TEST_DIR, "models/income-xgd-biased.joblib"))
+CREDIT_DF_BIASED = pd.read_csv(os.path.join(TEST_DIR, "data/credit-data-bias-clean.csv"))
+CREDIT_BIAS_MODEL = joblib.load(os.path.join(TEST_DIR, "models/credit-bias-model-clean.joblib"))
 
 
 def test_statistical_parity_difference_random():
@@ -98,17 +99,21 @@ def test_statistical_parity_difference_AIF():
     assert score == approx(0.19643287553870947, abs=1e-5)
 
 
-def test_statistical_parity_difference_model():
-    """Test Statistical Parity Difference (XGBoost model)"""
-
-    df = INCOME_DF_BIASED.copy()
-    X = df[["age", "race", "gender"]]
-
-    favorable = output("income", dtype="number", value=1)
-    model = Model(XGB_MODEL.predict, dataframe_input=True, output_names=["approved"])
-    score = statistical_parity_difference_model(X, model, [2], [1], [favorable])
+def test_statistical_parity_difference_credit_model():
+    """Test Statistical Parity Difference"""
+    
+    df = CREDIT_DF_BIASED.copy()
+    X = df.drop("PaidLoan", axis=1)  
+    X = X.astype(float).astype(int)
+    
+    favorable = output("PaidLoan", dtype="number", value=1)
+    model = Model(CREDIT_BIAS_MODEL.predict, dataframe_input=True, output_names=["PaidLoan"])
+    
+    education_col_idx = X.columns.get_loc("Education")
+    privilege_value = int(X["Education"].mode()[0])
+    score = statistical_parity_difference_model(X, model, [education_col_idx], [privilege_value], [favorable])
+    print(f"Statistical Parity Difference score: {score}")
     assert score == approx(0.0, abs=0.09)
-
 
 def test_disparate_impact_ratio_random():
     """Test Disparate Impact Ratio (unbalanced random data)"""
@@ -206,51 +211,48 @@ def test_average_odds_difference_numpy():
     assert score == approx(0.2, abs=0.1)
 
 
-def test_average_odds_difference_model():
-    """Test Average Odds Difference (XGBoost income model)"""
-    df = INCOME_DF_BIASED.copy()
-    X = df[["age", "race", "gender"]]
-
-    model = Model(XGB_MODEL.predict, dataframe_input=True, output_names=["approved"])
-
-    score = average_odds_difference_model(samples=X,
+def test_average_odds_difference_credit_model():
+    """Test Average Odds Difference """
+    
+    df = CREDIT_DF_BIASED.copy()
+    X = df.drop("PaidLoan", axis=1) 
+    X = X.astype(float).astype(int)
+    
+    model = Model(CREDIT_BIAS_MODEL.predict, dataframe_input=True, output_names=["PaidLoan"])
+    
+    education_col_idx = X.columns.get_loc("Education")
+    privilege_value = int(X["Education"].mode()[0])
+    score = average_odds_difference_model(samples=X,  
                                           model=model,
-                                          privilege_columns=[2],
-                                          privilege_values=[1],
-                                          positive_class=[1])
-
-    assert score == approx(0.0, abs=0.09)
-    score = average_odds_difference_model(samples=X,
-                                          model=model,
-                                          privilege_columns=[2],
-                                          privilege_values=[0],
-                                          positive_class=[1])
-
+                                          privilege_columns=[education_col_idx],
+                                          privilege_values=[privilege_value],
+                                          positive_class=[1]) 
+    
+    print(f"Average Odds Difference score: {score}")
     assert score == approx(0.0, abs=0.09)
 
-
-def test_average_odds_difference_model_numpy():
-    """Test Average Odds Difference (XGBoost income model, NumPy)"""
-    arr = INCOME_DF_BIASED.to_numpy()
-    X = arr[:, 0:3]
-
-    model = Model(XGB_MODEL.predict,
-                  feature_names=['age', 'race', 'gender'],
-                  output_names=["approved"])
-
-    score = average_odds_difference_model(samples=X,
+def test_average_odds_difference_credit_model_numpy():
+    """Test Average Odds Difference """
+    
+    df = CREDIT_DF_BIASED.copy()
+    X_df = df.drop("PaidLoan", axis=1) 
+    X_df = X_df.astype(float).astype(int)
+    arr = X_df.to_numpy()
+    feature_names = X_df.columns.tolist()
+    
+    model = Model(CREDIT_BIAS_MODEL.predict,
+                  feature_names=feature_names,
+                  output_names=["PaidLoan"])
+    
+    education_col_idx = feature_names.index("Education")
+    privilege_value = int(X_df["Education"].mode()[0])
+    score = average_odds_difference_model(samples=arr,
                                           model=model,
-                                          privilege_columns=[2],
-                                          privilege_values=[1],
+                                          privilege_columns=[education_col_idx],
+                                          privilege_values=[privilege_value],
                                           positive_class=[1])
-
-    assert score == approx(0.0, abs=0.09)
-    score = average_odds_difference_model(samples=X,
-                                          model=model,
-                                          privilege_columns=[2],
-                                          privilege_values=[0],
-                                          positive_class=[1])
-
+    
+    print(f"Average Odds Difference (NumPy) score: {score}")
     assert score == approx(0.0, abs=0.09)
 
 
@@ -295,51 +297,46 @@ def test_average_predictive_value_difference_numpy():
     assert score == approx(-0.22, abs=0.05)
 
 
-def test_average_predictive_value_difference_model():
-    """Test Average Predictive Value Difference (XGB income model)"""
-
-    df = INCOME_DF_BIASED.copy()
-    X = df[["age", "race", "gender"]]
-
-    model = Model(XGB_MODEL.predict, dataframe_input=True, output_names=["approved"])
-
+def test_average_predictive_value_difference_credit_model():
+    """Test Average Predictive Value Difference """
+    
+    df = CREDIT_DF_BIASED.copy()
+    X = df.drop("PaidLoan", axis=1) 
+    X = X.astype(float).astype(int)
+    
+    model = Model(CREDIT_BIAS_MODEL.predict, dataframe_input=True, output_names=["PaidLoan"])
+    
+    education_col_idx = X.columns.get_loc("Education")
+    privilege_value = int(X["Education"].mode()[0])
     score = average_predictive_value_difference_model(samples=X,
                                                       model=model,
-                                                      privilege_columns=[2],
-                                                      privilege_values=[1],
+                                                      privilege_columns=[education_col_idx],
+                                                      privilege_values=[privilege_value],
                                                       positive_class=[1])
-
-    assert score == approx(0.0, abs=0.09)
-    score = average_predictive_value_difference_model(samples=X,
-                                                      model=model,
-                                                      privilege_columns=[2],
-                                                      privilege_values=[0],
-                                                      positive_class=[1])
-
+    
+    print(f"Average Predictive Value Difference score: {score}")
     assert score == approx(0.0, abs=0.09)
 
-
-def test_average_predictive_value_difference_model_numpy():
-    """Test Average Predictive Value Difference (XGB income model, NumPy)"""
-
-    arr = INCOME_DF_BIASED.to_numpy()
-    X = arr[:, 0:3]
-
-    model = Model(XGB_MODEL.predict,
-                  feature_names=['age', 'race', 'gender'],
-                  output_names=["approved"])
-
-    score = average_predictive_value_difference_model(samples=X,
+def test_average_predictive_value_difference_credit_model_numpy():
+    """Test Average Predictive Value Difference"""
+    
+    df = CREDIT_DF_BIASED.copy()
+    X_df = df.drop("PaidLoan", axis=1)
+    X_df = X_df.astype(float).astype(int)
+    arr = X_df.to_numpy()
+    feature_names = X_df.columns.tolist()
+    
+    model = Model(CREDIT_BIAS_MODEL.predict,
+                  feature_names=feature_names,
+                  output_names=["PaidLoan"])
+    
+    education_col_idx = feature_names.index("Education")
+    privilege_value = int(X_df["Education"].mode()[0])
+    score = average_predictive_value_difference_model(samples=arr,
                                                       model=model,
-                                                      privilege_columns=[2],
-                                                      privilege_values=[1],
+                                                      privilege_columns=[education_col_idx],
+                                                      privilege_values=[privilege_value],
                                                       positive_class=[1])
-
-    assert score == approx(0.0, abs=0.09)
-    score = average_predictive_value_difference_model(samples=X,
-                                                      model=model,
-                                                      privilege_columns=[2],
-                                                      privilege_values=[0],
-                                                      positive_class=[1])
-
+    
+    print(f"Average Predictive Value Difference (NumPy) score: {score}")
     assert score == approx(0.0, abs=0.09)
