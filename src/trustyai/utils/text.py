@@ -1,4 +1,5 @@
 """Utility methods for text data handling"""
+
 from typing import List, Callable
 
 from jpype import _jclass

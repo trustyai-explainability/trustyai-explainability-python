@@ -1,4 +1,5 @@
 """Generic class for Visualization results"""
+
 # pylint: disable = import-error, too-few-public-methods, line-too-long, missing-final-newline
 from abc import ABC, abstractmethod
 from typing import Dict

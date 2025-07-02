@@ -1,4 +1,5 @@
-""""Default tokenizers for TrustyAI."""
+""" "Default tokenizers for TrustyAI."""
+
 # pylint: disable = import-error
 
 from org.apache.commons.text import StringTokenizer as _StringTokenizer

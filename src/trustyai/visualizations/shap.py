@@ -1,4 +1,5 @@
 """Visualizations.shap module"""
+
 # pylint: disable = import-error, consider-using-f-string, too-few-public-methods, missing-final-newline
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -100,14 +101,18 @@ class SHAPViz(VisualizationResults):
         prediction = fnull + data_source["saliency"].sum()
 
         data_source["color"] = data_source["saliency"].apply(
-            lambda x: ds["positive_primary_colour"]
-            if x >= 0
-            else ds["negative_primary_colour"]
+            lambda x: (
+                ds["positive_primary_colour"]
+                if x >= 0
+                else ds["negative_primary_colour"]
+            )
         )
         data_source["color_faded"] = data_source["saliency"].apply(
-            lambda x: ds["positive_primary_colour_faded"]
-            if x >= 0
-            else ds["negative_primary_colour_faded"]
+            lambda x: (
+                ds["positive_primary_colour_faded"]
+                if x >= 0
+                else ds["negative_primary_colour_faded"]
+            )
         )
         data_source["index"] = data_source.index
         data_source["saliency_text"] = data_source["saliency"].apply(

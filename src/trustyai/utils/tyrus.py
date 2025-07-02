@@ -1,4 +1,5 @@
 """Tyrus module"""
+
 # pylint: disable = too-few-public-methods, wrong-import-order, protected-access, cell-var-from-loop
 # pylint: disable = too-many-instance-attributes, import-error. too-many-locals
 # pylint: disable = consider-using-f-string
@@ -98,7 +99,7 @@ class Tyrus:
         inputs: OneInputUnionType,
         outputs: OneOutputUnionType,
         background: ManyInputsUnionType,
-        **kwargs
+        **kwargs,
     ):
         r"""Initialize the :class:`Tyrus` TrustyAI assistant and dashboard.
 
