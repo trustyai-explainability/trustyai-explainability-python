@@ -2,6 +2,7 @@
 Wrapper module for TSICEExplainer from aix360.
 Original at https://github.com/Trusted-AI/AIX360/
 """
+
 # pylint: disable=too-many-arguments,import-error
 from typing import Callable, List, Optional, Union
 
@@ -46,7 +47,8 @@ class TSICEResults(ExplanationResults):
 
     def plot_forecast(self, variable):  # pylint: disable=too-many-locals
         """Plots the explanation.
-        Based on https://github.com/Trusted-AI/AIX360/blob/master/examples/tsice/plots.py"""
+        Based on https://github.com/Trusted-AI/AIX360/blob/master/examples/tsice/plots.py
+        """
         forecast_horizon = self.explanation["current_forecast"].shape[0]
         original_ts = pd.DataFrame(
             data={variable: self.explanation["data_x"][variable]}
@@ -161,7 +163,8 @@ class TSICEResults(ExplanationResults):
 
     def plot_impact(self, feature_per_row=2):
         """Plot the impace.
-        Based on https://github.com/Trusted-AI/AIX360/blob/master/examples/tsice/plots.py"""
+        Based on https://github.com/Trusted-AI/AIX360/blob/master/examples/tsice/plots.py
+        """
 
         n_row = int(np.ceil(len(self.explanation["feature_names"]) / feature_per_row))
         feat_values = np.array(self.explanation["feature_values"])

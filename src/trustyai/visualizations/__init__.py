@@ -1,4 +1,5 @@
 """Generates visualization according to explanation type"""
+
 # pylint: disable=import-error, wrong-import-order, protected-access, missing-final-newline
 from typing import Union, Optional
 

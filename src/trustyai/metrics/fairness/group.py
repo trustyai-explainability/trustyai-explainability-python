@@ -1,4 +1,5 @@
 """Group fairness metrics"""
+
 # pylint: disable = import-error
 from typing import List, Optional, Any, Union
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable = invalid-name, line-too-long, use-dict-literal, consider-using-f-string, too-many-nested-blocks, self-assigning-variable
+# pylint: disable = invalid-name, line-too-long, use-dict-literal, consider-using-f-string, too-many-nested-blocks, self-assigning-variable, broad-exception-raised, possibly-used-before-assignment
 """TMaRCo detoxification."""
 import os
 import math

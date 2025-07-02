@@ -1,4 +1,5 @@
 """Generic class for Explanation and Saliency results"""
+
 from abc import ABC, abstractmethod
 
 import pandas as pd
