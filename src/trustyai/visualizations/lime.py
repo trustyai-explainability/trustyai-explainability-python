@@ -30,9 +30,9 @@ class LimeViz(VisualizationResults):
             for feature_importance in (
                 explanations.saliency_map().get(output_name).getPerFeatureImportance()
             ):
-                dictionary[feature_importance.getFeature().name] = (
-                    feature_importance.getScore()
-                )
+                dictionary[
+                    feature_importance.getFeature().name
+                ] = feature_importance.getScore()
 
             colours = [
                 (
