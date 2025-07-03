@@ -242,7 +242,8 @@ class PredictionProviderArrow:
 
     def predict(self, inbound_bytearray):
         """The function called internally by :func:`predictAsync` when communicating
-        between Java and Python. This function should never need to be called manually."""
+        between Java and Python. This function should never need to be called manually.
+        """
         with pa.ipc.open_file(inbound_bytearray) as reader:
             batch = reader.get_batch(0)
         arr = batch.to_pandas()

@@ -381,7 +381,7 @@ def numpy_to_prediction_object(
 
 
 def prediction_object_to_numpy(
-    objects: Union[List[PredictionInput], List[PredictionOutput]]
+    objects: Union[List[PredictionInput], List[PredictionOutput]],
 ) -> np.array:
     """
     Convert a list of TrustyAI
@@ -410,7 +410,7 @@ def prediction_object_to_numpy(
 
 
 def prediction_object_to_pandas(
-    objects: Union[List[PredictionInput], List[PredictionOutput]]
+    objects: Union[List[PredictionInput], List[PredictionOutput]],
 ) -> pd.DataFrame:
     """
     Convert a list of TrustyAI

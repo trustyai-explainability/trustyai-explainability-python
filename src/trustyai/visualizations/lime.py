@@ -1,4 +1,5 @@
 """Visualizations.lime module"""
+
 # pylint: disable = import-error, too-few-public-methods, consider-using-f-string, missing-final-newline
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -34,9 +35,11 @@ class LimeViz(VisualizationResults):
                 ] = feature_importance.getScore()
 
             colours = [
-                ds["negative_primary_colour"]
-                if i < 0
-                else ds["positive_primary_colour"]
+                (
+                    ds["negative_primary_colour"]
+                    if i < 0
+                    else ds["positive_primary_colour"]
+                )
                 for i in dictionary.values()
             ]
             plt.title(f"LIME: Feature Importances to {output_name}")
@@ -65,18 +68,22 @@ class LimeViz(VisualizationResults):
             ]
         )
         lime_data_source["color"] = lime_data_source["saliency"].apply(
-            lambda x: ds["positive_primary_colour"]
-            if x >= 0
-            else ds["negative_primary_colour"]
+            lambda x: (
+                ds["positive_primary_colour"]
+                if x >= 0
+                else ds["negative_primary_colour"]
+            )
         )
         lime_data_source["saliency_colored"] = lime_data_source["saliency"].apply(
             lambda x: (bold_green_html if x >= 0 else bold_red_html)("{:.2f}".format(x))
         )
 
         lime_data_source["color_faded"] = lime_data_source["saliency"].apply(
-            lambda x: ds["positive_primary_colour_faded"]
-            if x >= 0
-            else ds["negative_primary_colour_faded"]
+            lambda x: (
+                ds["positive_primary_colour_faded"]
+                if x >= 0
+                else ds["negative_primary_colour_faded"]
+            )
         )
         source = ColumnDataSource(lime_data_source)
         htool = HoverTool(

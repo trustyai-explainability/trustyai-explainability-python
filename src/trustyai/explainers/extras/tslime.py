@@ -35,7 +35,8 @@ class TSSLIMEResults(ExplanationResults):
 
     def plot(self):
         """Plot TSLime explanation for the time-series instance. Based on
-        https://github.com/Trusted-AI/AIX360/blob/master/examples/tslime/tslime_univariate_demo.ipynb"""
+        https://github.com/Trusted-AI/AIX360/blob/master/examples/tslime/tslime_univariate_demo.ipynb
+        """
         relevant_history = self.explanation["history_weights"].shape[0]
         input_data = self.explanation["input_data"]
         relevant_df = input_data[-relevant_history:]

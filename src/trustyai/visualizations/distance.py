@@ -1,4 +1,5 @@
 """Visualizations.distance module"""
+
 # pylint: disable = import-error, too-few-public-methods, line-too-long, missing-final-newline
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ class DistanceViz:
 
     def plot(self, explanations):
         """Plot the Levenshtein distance matrix"""
-        cmap = plt.cm.viridis
+        cmap = plt.cm.viridis  # pylint: disable=no-member
 
         _, axes = plt.subplots()
         cax = axes.imshow(explanations.matrix, cmap=cmap, interpolation="nearest")

@@ -1,4 +1,5 @@
 """Explainers.countefactual module"""
+
 # pylint: disable = import-error, too-few-public-methods, wrong-import-order, line-too-long,
 # pylint: disable = unused-argument
 from typing import Optional, Union, List
