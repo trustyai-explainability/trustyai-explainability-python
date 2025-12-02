@@ -1,5 +1,6 @@
-JPype1==1.4.1
-matplotlib==3.6.3
-pandas==1.2.5
-pyarrow==14.0.1
+Jpype1==1.5.0
+pyarrow>=20.0.0
+matplotlib~=3.10.3
+pandas>=1.5.3
+numpy>=1.26.4
 jupyter-bokeh~=4.0.5

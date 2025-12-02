@@ -24,10 +24,10 @@ classifiers = [
 
 dependencies = [
     "Jpype1==1.5.0",
-    "pyarrow==20.0.0",
+    "pyarrow>=20.0.0",
     "matplotlib~=3.10.3",
-    "pandas~=1.5.3",
-    "numpy~=1.26.4",
+    "pandas>=1.5.3",
+    "numpy>=1.26.4",
     "jupyter-bokeh~=4.0.5",
 ]
 
@@ -56,7 +56,6 @@ detoxify = [
     "datasets",
     "scipy~=1.12.0",
     "torch~=2.2.1",
-    "iter-tools",
     "evaluate",
     "trl",
 ]
