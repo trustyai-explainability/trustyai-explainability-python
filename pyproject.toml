@@ -24,17 +24,17 @@ classifiers = [
 
 dependencies = [
     "Jpype1==1.5.0",
-    "pyarrow==20.0.0",
+    "pyarrow>=20.0.0",
     "matplotlib~=3.10.3",
-    "pandas~=1.5.3",
-    "numpy~=1.26.4",
+    "pandas>=2.1.0",
+    "numpy>=1.26.4",
     "jupyter-bokeh~=4.0.5",
 ]
 
 [project.optional-dependencies]
 dev = [
     "JPype1==1.5.0",
-    "black~=22.12.0",
+    "black~=25.11",
     "click==8.0.4",
     "joblib~=1.2.0",
     "jupyterlab~=4.4.4",
@@ -56,7 +56,6 @@ detoxify = [
     "datasets",
     "scipy~=1.12.0",
     "torch~=2.2.1",
-    "iter-tools",
     "evaluate",
     "trl",
 ]

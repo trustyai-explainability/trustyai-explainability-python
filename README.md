@@ -14,12 +14,6 @@ Install from PyPi with
 pip install trustyai
 ```
 
-To install additional experimental features, also use
-
-```shell
-pip install trustyai[extras]
-```
-
 ### Local
 
 The minimum dependencies can be installed (from the root directory) with

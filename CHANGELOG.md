@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 This is the first version of Python TrustyAI to include support for external explainability algorithms.
 
 In this release we've included AIX360's `TSICE`, `TSLime` and `TSSaliency` time-series explainers.
-To use these explainers TrustyAI's extra dependencies must be installed with `pip install trustyai[extras]`.
+These explainers rely on the AIX360 dependencies when used.
 
 - Refactor TrustyAI fairness metrics namespaces ([#156](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/156))
 - Upgrade pyarrow dependency ([#159](https://github.com/trustyai-explainability/trustyai-explainability-python/pull/159))
@@ -327,4 +327,3 @@ To use these explainers TrustyAI's extra dependencies must be installed with `pi
 ## [0.0.2] - 2021-08-09
 
 ## [0.0.1] - 2021-07-21
-
