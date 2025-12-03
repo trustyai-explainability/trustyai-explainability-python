@@ -32,7 +32,7 @@ jobs:
           # Note: extras temporarily disabled due to aix360 pandas<2.0.0 conflict
       - name: Lint
         run: |
-          pylint --ignore-imports=yes $(find src/trustyai -type f -name "*.py")
+          pylint --ignore-imports=yes $(find src/trustyai -type f -name "*.py" | grep -v "/extras/")
       - name: Test with pytest
         run: |
           pytest -v -s tests/general

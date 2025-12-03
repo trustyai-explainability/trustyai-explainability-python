@@ -8,6 +8,7 @@ except ImportError:
     # Use sysconfig instead
     import sysconfig
     def get_python_lib():
+        """Fallback implementation of get_python_lib using sysconfig."""
         return sysconfig.get_path('purelib')
 import glob
 import logging
