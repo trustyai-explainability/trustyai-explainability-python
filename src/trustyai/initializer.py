@@ -7,9 +7,12 @@ except ImportError:
     # distutils is deprecated and removed in Python 3.12+
     # Use sysconfig instead
     import sysconfig
+
     def get_python_lib():
         """Fallback implementation of get_python_lib using sysconfig."""
-        return sysconfig.get_path('purelib')
+        return sysconfig.get_path("purelib")
+
+
 import glob
 import logging
 import os
