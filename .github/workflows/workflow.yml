@@ -29,14 +29,14 @@ jobs:
           pip install .
           pip install ".[dev]"
           pip install ".[api]"
-          # Note: extras temporarily disabled due to aix360 pandas<2.0.0 conflict
+          # Extras extra removed; keep AIX360-only deps out of the default install
       - name: Lint
         run: |
           pylint --ignore-imports=yes $(find src/trustyai -type f -name "*.py" | grep -v "/extras/")
       - name: Test with pytest
         run: |
           pytest -v -s tests/general
-          # pytest -v -s tests/extras  # Temporarily disabled due to aix360 pandas<2.0.0 conflict
+          # pytest -v -s tests/extras  # Extras-only deps not installed in CI
           pytest -v -s tests/initialization --forked
       - name: Style
         run: |
