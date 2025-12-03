@@ -25,6 +25,7 @@ jobs:
         uses: ./.github/actions/build-core
       - name: Install TrustyAI Python package
         run: |
+          pip install --upgrade pip
           pip install .
           pip install ".[dev]"
           pip install ".[extras]"
