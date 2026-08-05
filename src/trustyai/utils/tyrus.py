@@ -270,7 +270,10 @@ class Tyrus:
             data_source["Tooltip " + output_names[i]] = data_source[
                 ["Tooltip Raw", output_column_name, "Unchanged"]
             ].apply(
-                lambda x: format_cf_tooltip(x[0], output_column_name, x[1], x[2]), 1
+                lambda x: format_cf_tooltip(
+                    x.iloc[0], output_column_name, x.iloc[1], x.iloc[2]
+                ),
+                1,
             )
 
         self.cf_data_source = data_source
